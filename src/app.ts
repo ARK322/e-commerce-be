@@ -6,6 +6,8 @@ import { authRoutes } from "./modules/auth/auth.routes.js";
 export async function buildApp() {
   const app = Fastify({
     logger: true,
+    // Avvio varsayılan plugin timeout'u 10 sn; Atlas bağlantısı bunu aşabiliyor
+    pluginTimeout: 30_000,
   });
 
   await app.register(dbPlugin);
