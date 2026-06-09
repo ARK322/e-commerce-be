@@ -1,5 +1,6 @@
+import { signAuthToken } from '../../../lib/auth/auth-token';
 import { hashPassword } from '../../../lib/password';
-import { User, Buyer, Seller } from './register.model';
+import { User, Buyer, Seller } from '../../../db/user-models';
 import { RegisterError } from './register.errors';
 import type { RegisterInput } from './schemas';
 
@@ -17,7 +18,13 @@ const createUserWithProfile = async (
   role: 'buyer' | 'seller'
 ) => {
   const hashedPassword = await hashPassword(password);
-  const user = await User.create({ email, password: hashedPassword, role });
+
+  const user = await User.create({
+    email,
+    password: hashedPassword,
+    role,
+    isActive: false,
+  });
 
   try {
     if (role === 'buyer') {
@@ -30,19 +37,14 @@ const createUserWithProfile = async (
     throw new RegisterError(500, 'Kayıt tamamlanamadı, lütfen tekrar deneyin');
   }
 
-  return user;
+  const token = signAuthToken(user._id.toString(), role);
+
+  return { user, token };
 };
 
-export const registerBuyer = async (data: RegisterInput) => {
-  const { email, password } = data;
+export const register = async (data: RegisterInput) => {
+  const { email, password, role } = data;
 
   await ensureEmailAvailable(email);
-  return createUserWithProfile(email, password, 'buyer');
-};
-
-export const registerSeller = async (data: RegisterInput) => {
-  const { email, password } = data;
-
-  await ensureEmailAvailable(email);
-  return createUserWithProfile(email, password, 'seller');
+  return createUserWithProfile(email, password, role);
 };

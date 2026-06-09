@@ -5,6 +5,9 @@ import { passwordSchema } from './password.schema';
 export const baseSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
+  role: z.enum(['buyer', 'seller'], {
+    message: 'Rol buyer veya seller olmalı',
+  }),
 });
 
 export type RegisterInput = z.infer<typeof baseSchema>;

@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyReply } from 'fastify';
 import { validateBody } from '../../../lib/validation/validate-body';
 import { baseSchema, type RegisterInput } from './schemas';
 import { RegisterError, isDuplicateKeyError } from './register.errors';
-import { registerBuyer, registerSeller } from './register.service';
+import { register } from './register.service';
 
 const handleRegisterError = (reply: FastifyReply, error: unknown) => {
   if (error instanceof RegisterError) {
@@ -17,35 +17,19 @@ const handleRegisterError = (reply: FastifyReply, error: unknown) => {
 };
 
 export default async function (fastify: FastifyInstance) {
-  fastify.post(
-    '/buyer',
-    { preHandler: validateBody(baseSchema) },
-    async (req, reply) => {
-      try {
-        const user = await registerBuyer(req.body as RegisterInput);
-        return reply.status(201).send({
-          message: 'Alıcı başarıyla oluşturuldu',
-          userId: user._id,
-        });
-      } catch (error) {
-        return handleRegisterError(reply, error);
-      }
-    }
-  );
+  fastify.post('/', { preHandler: validateBody(baseSchema) }, async (req, reply) => {
+    try {
+      const { user, token } = await register(req.body as RegisterInput);
 
-  fastify.post(
-    '/seller',
-    { preHandler: validateBody(baseSchema) },
-    async (req, reply) => {
-      try {
-        const user = await registerSeller(req.body as RegisterInput);
-        return reply.status(201).send({
-          message: 'Satıcı başarıyla oluşturuldu',
-          userId: user._id,
-        });
-      } catch (error) {
-        return handleRegisterError(reply, error);
-      }
+      return reply.status(201).send({
+        message: 'Kayıt başarılı',
+        userId: user._id,
+        role: user.role,
+        isActive: user.isActive,
+        token,
+      });
+    } catch (error) {
+      return handleRegisterError(reply, error);
     }
-  );
+  });
 }
