@@ -1,10 +1,15 @@
 import jwt from 'jsonwebtoken';
 
-const AUTH_EXPIRES_IN = '1d';
+const TOKEN_EXPIRES = {
+  default: '1d',
+  rememberMe: '30d',
+} as const;
+
+export type UserRole = 'buyer' | 'seller' | 'admin';
 
 export type AuthTokenPayload = {
   userId: string;
-  role: 'buyer' | 'seller';
+  role: UserRole;
 };
 
 const getSecret = () => {
@@ -15,10 +20,16 @@ const getSecret = () => {
   return secret;
 };
 
-export const signAuthToken = (userId: string, role: 'buyer' | 'seller'): string => {
+export const signAuthToken = (
+  userId: string,
+  role: UserRole,
+  rememberMe = false
+): string => {
+  const expiresIn = rememberMe ? TOKEN_EXPIRES.rememberMe : TOKEN_EXPIRES.default;
+
   return jwt.sign({ purpose: 'access', role }, getSecret(), {
     subject: userId,
-    expiresIn: AUTH_EXPIRES_IN,
+    expiresIn,
   });
 };
 
@@ -29,12 +40,16 @@ export const verifyAuthToken = (token: string): AuthTokenPayload => {
     throw new jwt.JsonWebTokenError('Geçersiz token');
   }
 
-  if (payload.role !== 'buyer' && payload.role !== 'seller') {
+  if (
+    payload.role !== 'buyer' &&
+    payload.role !== 'seller' &&
+    payload.role !== 'admin'
+  ) {
     throw new jwt.JsonWebTokenError('Geçersiz token');
   }
 
   return {
     userId: payload.sub,
-    role: payload.role,
+    role: payload.role as UserRole,
   };
 };

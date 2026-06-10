@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
-import { validateBody } from '../../../lib/validation/validate-body';
+import { validateBody } from '../../../lib/common/middleware/validate-body';
 import { baseSchema, type RegisterInput } from './schemas';
 import { RegisterError, isDuplicateKeyError } from './register.errors';
+import { buildAuthUserFields } from '../../../lib/auth/auth-user-response';
 import { register } from './register.service';
 
 const handleRegisterError = (reply: FastifyReply, error: unknown) => {
@@ -20,12 +21,12 @@ export default async function (fastify: FastifyInstance) {
   fastify.post('/', { preHandler: validateBody(baseSchema) }, async (req, reply) => {
     try {
       const { user, token } = await register(req.body as RegisterInput);
+      const statusFields = await buildAuthUserFields(user);
 
       return reply.status(201).send({
         message: 'Kayıt başarılı',
-        userId: user._id,
-        role: user.role,
-        isActive: user.isActive,
+        ...statusFields,
+        isEmailVerified: user.isEmailVerified,
         token,
       });
     } catch (error) {

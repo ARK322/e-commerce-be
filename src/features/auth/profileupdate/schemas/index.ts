@@ -1,2 +1,8 @@
-export { buyerProfileSchema, type BuyerProfileInput } from './buyer-profile.schema';
-export { sellerProfileSchema, type SellerProfileInput } from './seller-profile.schema';
+export {
+  buyerProfileUpdateSchema,
+  type BuyerProfileUpdateInput,
+} from './buyer-profile-update.schema';
+export {
+  sellerProfileUpdateSchema,
+  type SellerProfileUpdateInput,
+} from './seller-profile-update.schema';

@@ -1,6 +1,7 @@
 import { signAuthToken } from '../../../lib/auth/auth-token';
-import { hashPassword } from '../../../lib/password';
-import { User, Buyer, Seller } from '../../../db/user-models';
+import { sendUserVerificationEmail } from '../../../lib/auth/email/send-verification';
+import { hashPassword } from '../../../lib/common/password';
+import { User, Buyer, Seller } from '../../../db';
 import { RegisterError } from './register.errors';
 import type { RegisterInput } from './schemas';
 
@@ -38,6 +39,12 @@ const createUserWithProfile = async (
   }
 
   const token = signAuthToken(user._id.toString(), role);
+
+  try {
+    await sendUserVerificationEmail(user._id.toString(), email);
+  } catch (error) {
+    console.error('Doğrulama e-postası gönderilemedi:', error);
+  }
 
   return { user, token };
 };
