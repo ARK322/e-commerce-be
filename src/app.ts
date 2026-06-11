@@ -1,19 +1,15 @@
 import { connectDB } from './db';
 import { buildApp } from './app/build-app';
 
-const getServerConfig = () => {
-  const host = process.env.HOST;
-  const port = Number(process.env.PORT);
+const getPort = () => {
+  // Eğer process.env.PORT varsa onu sayıya çevir, yoksa lokalde çalışabilmesi için varsayılan 8080 yap
+  const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
-  if (!host) {
-    throw new Error('HOST tanımlanmamış');
+  if (Number.isNaN(port)) {
+    throw new Error('PORT geçersiz bir sayı');
   }
 
-  if (!process.env.PORT || Number.isNaN(port)) {
-    throw new Error('PORT tanımlanmamış veya geçersiz');
-  }
-
-  return { host, port };
+  return port;
 };
 
 const start = async () => {
@@ -22,10 +18,11 @@ const start = async () => {
     console.log('✅ Veritabanı bağlantısı başarılı!');
 
     const app = await buildApp();
-    const { host, port } = getServerConfig();
+    const port = getPort();
 
-    await app.listen({ port, host });
-    console.log(`🚀 Sunucu ${host}:${port} üzerinde çalışıyor`);
+    // Host artık kesinlikle 0.0.0.0, port ise Railway ne verdiyse o.
+    await app.listen({ port, host: '0.0.0.0' });
+    console.log(`🚀 Sunucu 0.0.0.0:${port} üzerinde çalışıyor`);
   } catch (err) {
     console.error('❌ Başlatma hatası:', err);
     process.exit(1);
