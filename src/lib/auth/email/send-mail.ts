@@ -1,4 +1,4 @@
-import { createTransporter, getFrontendUrl, getMailFrom } from './transporter';
+import { resend, getFrontendUrl, getMailFrom } from './transporter';
 
 type SendMailInput = {
   to: string;
@@ -7,14 +7,24 @@ type SendMailInput = {
 };
 
 export const sendMail = async ({ to, subject, html }: SendMailInput) => {
-  const transporter = createTransporter();
+  try {
+    const { data, error } = await resend.emails.send({
+      from: getMailFrom(),
+      to: [to],
+      subject,
+      html,
+    });
 
-  await transporter.sendMail({
-    from: getMailFrom(),
-    to,
-    subject,
-    html,
-  });
+    if (error) {
+      console.error('Mail gönderilemedi:', error);
+      throw new Error(error.message);
+    }
+
+    console.log('Mail gönderildi:', data?.id);
+  } catch (error) {
+    console.error('Mail gönderilirken hata oluştu:', error);
+    throw error;
+  }
 };
 
 export const sendVerificationEmail = async (to: string, token: string) => {
