@@ -79,7 +79,7 @@ describe('updateSellerProfile', () => {
           rejectionReason: null,
         }),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     expect(result.approvalStatus).toBe('pending');
   });

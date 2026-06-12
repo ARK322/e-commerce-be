@@ -66,7 +66,7 @@ describe('updateAdminProfile', () => {
     expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
       { userId: helperId },
       { $set: { firstName: 'Ali' } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   });
 

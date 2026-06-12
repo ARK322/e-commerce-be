@@ -33,7 +33,7 @@ export const createAuthOtp = async (
   await AuthOtp.findOneAndUpdate(
     { userId, purpose },
     { codeHash, expiresAt, attemptCount: 0 },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 
   return code;

@@ -44,7 +44,7 @@ export const updateBuyerProfile = async (userId: string, data: BuyerProfileUpdat
   const updatedBuyer = await Buyer.findOneAndUpdate(
     { userId },
     { $set: { ...data, ...billingUpdate } },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!updatedBuyer) {

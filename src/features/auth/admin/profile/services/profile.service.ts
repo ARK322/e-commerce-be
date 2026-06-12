@@ -52,7 +52,7 @@ export const updateAdminProfile = async (
   const updatedAdmin = await Admin.findOneAndUpdate(
     { userId: targetUserId },
     { $set: data },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!updatedAdmin) {

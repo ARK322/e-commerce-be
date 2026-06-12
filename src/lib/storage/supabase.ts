@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { HttpError } from '../common/errors';
+import { logger } from '../common/logger';
 
 type SupabaseConfig = {
   url: string;
@@ -55,6 +56,10 @@ export const uploadToSellerStorage = async (
   });
 
   if (error) {
+    logger.error(
+      { bucket, objectPath, supabaseError: error.message },
+      'Supabase storage upload failed'
+    );
     throw new HttpError(503, 'Dosya yüklenemedi, lütfen tekrar deneyin');
   }
 

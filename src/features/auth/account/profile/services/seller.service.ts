@@ -27,7 +27,7 @@ export const updateSellerProfile = async (userId: string, data: SellerProfileUpd
         ...(criticalChanged ? { approvalStatus: 'pending', rejectionReason: null } : {}),
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!updatedSeller) {

@@ -41,7 +41,7 @@ describe('createAuthOtp', () => {
         expiresAt: expect.any(Date),
         attemptCount: 0,
       }),
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     const storedHash = mockFindOneAndUpdate.mock.calls[0][1].codeHash;

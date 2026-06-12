@@ -4,6 +4,7 @@ import { uploadToSellerStorage } from '../../../../../lib/storage/supabase';
 import { AuthError } from '../../../shared/errors';
 import {
   isSellerDocumentType,
+  resolveAcceptedMimeType,
   resolveDocumentExtension,
   SELLER_DOCUMENT_FIELD_MAP,
   SELLER_DOCUMENT_RULES,
@@ -32,8 +33,9 @@ export const uploadSellerDocument = async (
 
   const docType: SellerDocumentType = input.docType;
   const rules = SELLER_DOCUMENT_RULES[docType];
+  const mimeType = resolveAcceptedMimeType(docType, input.mimeType, input.buffer);
 
-  if (!rules.mimes.includes(input.mimeType)) {
+  if (!mimeType) {
     throw new AuthError(400, 'Geçersiz dosya türü');
   }
 
@@ -45,13 +47,13 @@ export const uploadSellerDocument = async (
     throw new AuthError(400, 'Dosya boyutu limiti aşıldı');
   }
 
-  const extension = resolveDocumentExtension(input.mimeType, docType);
+  const extension = resolveDocumentExtension(mimeType, docType);
   const objectPath = `${auth.userId}/${docType}-${Date.now()}.${extension}`;
 
   let url: string;
 
   try {
-    url = await uploadToSellerStorage(auth.userId, objectPath, input.buffer, input.mimeType);
+    url = await uploadToSellerStorage(auth.userId, objectPath, input.buffer, mimeType);
   } catch (error) {
     if (error instanceof HttpError) {
       throw new AuthError(error.statusCode, error.message);

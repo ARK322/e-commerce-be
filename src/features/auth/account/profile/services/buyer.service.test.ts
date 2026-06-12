@@ -81,7 +81,7 @@ describe('updateBuyerProfile', () => {
           billingSameAsDelivery: true,
         }),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   });
 });
