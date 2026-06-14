@@ -20,3 +20,22 @@ export type {
   AuthOtpPurpose,
   AuthEmailCooldownPurpose,
 } from '@/db/auth';
+export {
+  Category,
+  Product,
+  Cart,
+  Order,
+  Payment,
+  PRODUCT_CURRENCIES,
+  ORDER_STATUSES,
+  ORDER_CURRENCIES,
+  PAYMENT_STATUSES,
+  PAYMENT_CURRENCIES,
+} from '@/db/ecommerce';
+export type {
+  ProductCurrency,
+  OrderStatus,
+  OrderCurrency,
+  PaymentStatus,
+  PaymentCurrency,
+} from '@/db/ecommerce';
