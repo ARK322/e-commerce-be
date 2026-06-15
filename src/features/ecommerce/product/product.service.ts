@@ -1,6 +1,7 @@
 import { Category, Product } from '@/db';
 import { createUserId } from '@/lib/common/user-id';
 import { EcommerceError } from '@/features/ecommerce/core/errors';
+import { getCategoryDescendantIds } from '@/features/ecommerce/category/category.service';
 import { slugify } from '@/features/ecommerce/category/slugify';
 import type { CreateProductInput } from '@/features/ecommerce/product/create-product.schema';
 import type { ListProductsQuery } from '@/features/ecommerce/product/list-products.schema';
@@ -74,11 +75,12 @@ const getOwnedProduct = async (sellerId: string, productId: string) => {
   return product;
 };
 
-const buildPublicFilter = (query: ListProductsQuery) => {
+const buildPublicFilter = async (query: ListProductsQuery) => {
   const filter: Record<string, unknown> = { isActive: true };
 
   if (query.categoryId) {
-    filter.categoryId = query.categoryId;
+    const categoryIds = await getCategoryDescendantIds(query.categoryId);
+    filter.categoryId = { $in: categoryIds };
   }
 
   if (query.search) {
@@ -89,7 +91,7 @@ const buildPublicFilter = (query: ListProductsQuery) => {
 };
 
 export const listPublicProducts = async (query: ListProductsQuery) => {
-  const filter = buildPublicFilter(query);
+  const filter = await buildPublicFilter(query);
   const skip = (query.page - 1) * query.limit;
 
   const [products, total] = await Promise.all([

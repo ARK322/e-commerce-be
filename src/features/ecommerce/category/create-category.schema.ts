@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { safeString } from '@/lib/common/validation/common-schemas';
+import { safeString, uuidSchema } from '@/lib/common/validation/common-schemas';
 import { slugSchema } from '@/lib/common/validation/slug-schema';
 
 const categoryNameSchema = safeString({
@@ -11,7 +11,7 @@ const categoryNameSchema = safeString({
 export const createCategorySchema = z.object({
   name: categoryNameSchema,
   slug: slugSchema.optional(),
-  sortOrder: z.number().int().min(0).optional(),
+  parentId: uuidSchema.nullable().optional(),
   isActive: z.boolean().optional(),
 });
 

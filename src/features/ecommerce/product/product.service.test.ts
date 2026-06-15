@@ -7,6 +7,11 @@ const mockProductFindById = vi.fn();
 const mockProductCreate = vi.fn();
 const mockProductCountDocuments = vi.fn();
 const mockProductFindByIdAndDelete = vi.fn();
+const mockGetCategoryDescendantIds = vi.fn();
+
+vi.mock('@/features/ecommerce/category/category.service', () => ({
+  getCategoryDescendantIds: (...args: unknown[]) => mockGetCategoryDescendantIds(...args),
+}));
 
 vi.mock('@/db', () => ({
   Category: {
@@ -106,6 +111,7 @@ describe('createProduct', () => {
 describe('listPublicProducts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetCategoryDescendantIds.mockResolvedValue([categoryId, 'child-category-id']);
     mockProductFind.mockReturnValue({
       sort: vi.fn().mockReturnValue({
         skip: vi.fn().mockReturnValue({
@@ -124,6 +130,16 @@ describe('listPublicProducts', () => {
     expect(mockProductFind).toHaveBeenCalledWith({ isActive: true });
     expect(result.products).toHaveLength(1);
     expect(result.pagination.total).toBe(1);
+  });
+
+  it('kategori filtresinde alt kategorileri de dahil eder', async () => {
+    await listPublicProducts({ page: 1, limit: 20, categoryId });
+
+    expect(mockGetCategoryDescendantIds).toHaveBeenCalledWith(categoryId);
+    expect(mockProductFind).toHaveBeenCalledWith({
+      isActive: true,
+      categoryId: { $in: [categoryId, 'child-category-id'] },
+    });
   });
 });
 
