@@ -1,33 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import { SELLER_PERMISSIONS } from '@/features/auth/seller/access/permission-keys';
+import {
+  BIREYSEL_SELLER_PERMISSIONS,
+  SELLER_PERMISSIONS,
+} from '@/features/auth/seller/access/permission-keys';
 import type { SellerAccessContext } from '@/features/auth/core/queries/seller-context';
 import {
   canWriteProducts,
   hasSellerPermission,
 } from '@/features/auth/seller/access/permissions';
 
-const ownerCtx: SellerAccessContext = {
+const bireyselCtx: SellerAccessContext = {
   userId: '550e8400-e29b-41d4-a716-446655440000',
   companyId: '660e8400-e29b-41d4-a716-446655440000',
-  companyName: 'Test',
+  companyName: 'Test Şahıs',
   sellerType: 'bireysel',
   approvalStatus: 'approved',
-  roleId: '770e8400-e29b-41d4-a716-446655440000',
+  roleId: '',
   roleSlug: 'owner',
   roleName: 'Owner',
-  permissions: new Set(Object.values(SELLER_PERMISSIONS)),
+  permissions: new Set(BIREYSEL_SELLER_PERMISSIONS),
   isOwner: true,
+  teamManagementEnabled: false,
   member: { firstName: null, lastName: null, phone: null },
 };
 
+const kurumsalOwnerCtx: SellerAccessContext = {
+  ...bireyselCtx,
+  sellerType: 'kurumsal',
+  teamManagementEnabled: true,
+  permissions: new Set(Object.values(SELLER_PERMISSIONS)),
+  roleId: '770e8400-e29b-41d4-a716-446655440000',
+};
+
 describe('hasSellerPermission', () => {
-  it('owner tüm yetkilere sahiptir', () => {
-    expect(hasSellerPermission(ownerCtx, SELLER_PERMISSIONS.MEMBERS_DELETE)).toBe(true);
+  it('kurumsal owner tüm yetkilere sahiptir', () => {
+    expect(hasSellerPermission(kurumsalOwnerCtx, SELLER_PERMISSIONS.MEMBERS_DELETE)).toBe(true);
   });
 
   it('custom rol sadece atanmış yetkilere sahiptir', () => {
     const limitedCtx: SellerAccessContext = {
-      ...ownerCtx,
+      ...kurumsalOwnerCtx,
       isOwner: false,
       permissions: new Set([SELLER_PERMISSIONS.PRODUCTS_READ]),
     };
@@ -36,8 +48,9 @@ describe('hasSellerPermission', () => {
     expect(hasSellerPermission(limitedCtx, SELLER_PERMISSIONS.PRODUCTS_READ)).toBe(true);
   });
 
-  it('bireysel satıcı owner ekip yetkilerine sahip olabilir', () => {
-    expect(hasSellerPermission(ownerCtx, SELLER_PERMISSIONS.MEMBERS_WRITE)).toBe(true);
-    expect(ownerCtx.sellerType).toBe('bireysel');
+  it('bireysel satıcı ekip yetkilerine sahip değildir', () => {
+    expect(hasSellerPermission(bireyselCtx, SELLER_PERMISSIONS.MEMBERS_WRITE)).toBe(false);
+    expect(hasSellerPermission(bireyselCtx, SELLER_PERMISSIONS.PRODUCTS_WRITE)).toBe(true);
+    expect(bireyselCtx.teamManagementEnabled).toBe(false);
   });
 });

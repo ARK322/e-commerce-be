@@ -1,6 +1,10 @@
 import { Seller } from '@/db';
 import { canReadCompanyProfile, canWriteCompanyProfile } from '@/features/auth/seller/access/permissions';
 import { getSellerContext, type SellerAccessContext } from '@/features/auth/core/queries/seller-context';
+import {
+  bootstrapSellerTeam,
+  cleanupSellerTeam,
+} from '@/features/auth/seller/access/system-roles';
 import { AuthError } from '@/features/auth/core/errors';
 import { isSellerProfileComplete } from '@/features/auth/core/profile/profile-completion';
 import { hasCriticalSellerFieldChanges } from '@/features/auth/core/profile/seller-critical-fields';
@@ -49,6 +53,7 @@ export const updateSellerProfile = async (userId: string, data: SellerProfileUpd
   ) as SellerProfileUpdateInput;
 
   const criticalChanged =
+    ctx.teamManagementEnabled &&
     !ctx.isOwner &&
     seller.approvalStatus === 'approved' &&
     hasCriticalSellerFieldChanges(seller.toObject(), updateData);
@@ -61,6 +66,8 @@ export const updateSellerProfile = async (userId: string, data: SellerProfileUpd
     ctx.isOwner &&
     seller.approvalStatus === 'approved' &&
     hasCriticalSellerFieldChanges(seller.toObject(), updateData);
+
+  const previousSellerType = seller.sellerType;
 
   const updatedSeller = await Seller.findByIdAndUpdate(
     ctx.companyId,
@@ -75,6 +82,14 @@ export const updateSellerProfile = async (userId: string, data: SellerProfileUpd
 
   if (!updatedSeller) {
     throw new AuthError(404, 'Satıcı profili bulunamadı');
+  }
+
+  if (updateData.sellerType === 'kurumsal' && previousSellerType !== 'kurumsal') {
+    await bootstrapSellerTeam(ctx.companyId, userId);
+  }
+
+  if (updateData.sellerType === 'bireysel' && previousSellerType === 'kurumsal') {
+    await cleanupSellerTeam(ctx.companyId);
   }
 
   if (

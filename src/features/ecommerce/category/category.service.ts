@@ -205,7 +205,7 @@ export const deleteCategory = async (categoryId: string) => {
     throw new EcommerceError(409, 'Alt kategori bulunduğu için silinemez');
   }
 
-  const productCount = await Product.countDocuments({ categoryId });
+  const productCount = await Product.countDocuments({ categoryIds: categoryId });
 
   if (productCount > 0) {
     throw new EcommerceError(409, 'Bu kategoride ürün bulunduğu için silinemez');

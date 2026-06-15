@@ -32,14 +32,16 @@ const ownerContext = {
   roleName: 'Owner',
   permissions: new Set(Object.values(SELLER_PERMISSIONS)),
   isOwner: true,
+  teamManagementEnabled: true,
   member: { firstName: null, lastName: null, phone: null },
 };
 
 const completeBireyselSeller = {
   sellerType: 'bireysel',
-  firstName: 'Ali',
-  lastName: 'Veli',
-  phone: '05551234567',
+  authorizedFirstName: 'Ali',
+  authorizedLastName: 'Veli',
+  authorizedPhone: '05551234567',
+  companyPhone: '05559876543',
   companyName: 'Ali Shop',
   taxNumber: '1234567890',
   taxOffice: 'Kadıköy',
@@ -134,7 +136,7 @@ describe('updateSellerProfile', () => {
       toObject: () => ({ approvalStatus: 'draft', ...completeBireyselSeller }),
     });
 
-    const result = await updateSellerProfile(userId, { firstName: 'Ali' });
+    const result = await updateSellerProfile(userId, { authorizedFirstName: 'Ali' });
 
     expect(save).toHaveBeenCalled();
     expect(result.approvalStatus).toBe('pending');

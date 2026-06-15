@@ -5,6 +5,7 @@ import {
   requireSellerContext,
   requireSellerOwner,
   requireSellerPermission,
+  requireKurumsalSeller,
 } from '@/lib/ecommerce/guards/require-approved-seller';
 import { validateBody } from '@/lib/common/http/validate-body';
 import { validateParams } from '@/lib/common/http/validate-params';
@@ -29,7 +30,7 @@ import {
 } from '@/features/auth/seller/members/create-member.schema';
 
 const sellerTeamBase = {
-  preHandler: [requireAuth, requireEmailVerified, requireSellerContext],
+  preHandler: [requireAuth, requireEmailVerified, requireSellerContext, requireKurumsalSeller],
 };
 
 export default async function (fastify: FastifyInstance) {

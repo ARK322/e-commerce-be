@@ -10,7 +10,8 @@ const productSchema = new Schema(
   {
     _id: { type: String, required: true },
     sellerId: { type: String, required: true },
-    categoryId: { type: String, required: true },
+    categoryIds: { type: [String], required: true, default: [] },
+    primaryCategoryId: { type: String, required: true },
     name: { ...stringField, required: true, maxlength: 200 },
     slug: { ...stringField, maxlength: 200, lowercase: true, default: null },
     description: { ...stringField, maxlength: 5000, default: null },
@@ -26,7 +27,8 @@ const productSchema = new Schema(
 );
 
 productSchema.index({ sellerId: 1, createdAt: -1 });
-productSchema.index({ categoryId: 1, isActive: 1 });
+productSchema.index({ categoryIds: 1, isActive: 1 });
+productSchema.index({ primaryCategoryId: 1 });
 productSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
 export const Product = model('Product', productSchema);

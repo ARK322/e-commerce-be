@@ -4,7 +4,7 @@ import type { SellerAccessContext } from '@/features/auth/core/queries/seller-co
 import { AuthError } from '@/features/auth/core/errors';
 
 export const hasSellerPermission = (ctx: SellerAccessContext, permission: SellerPermissionKey) =>
-  ctx.isOwner || ctx.permissions.has(permission);
+  ctx.permissions.has(permission);
 
 export const assertSellerPermission = (
   ctx: SellerAccessContext,

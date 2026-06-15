@@ -3,6 +3,7 @@ import { createUserId } from '@/lib/common/user-id';
 import { EcommerceError } from '@/features/ecommerce/core/errors';
 import { getCategoryDescendantIds } from '@/features/ecommerce/category/category.service';
 import { slugify } from '@/features/ecommerce/category/slugify';
+import { resolveProductCategoryAssignment } from '@/features/ecommerce/product/product-category.schema';
 import type { CreateProductInput } from '@/features/ecommerce/product/create-product.schema';
 import type { ListProductsQuery } from '@/features/ecommerce/product/list-products.schema';
 import type { UpdateProductInput } from '@/features/ecommerce/product/update-product.schema';
@@ -10,7 +11,8 @@ import type { UpdateProductInput } from '@/features/ecommerce/product/update-pro
 type ProductRecord = {
   _id: unknown;
   sellerId: string;
-  categoryId: string;
+  categoryIds: string[];
+  primaryCategoryId: string;
   name: string;
   slug?: string | null;
   description?: string | null;
@@ -26,7 +28,8 @@ type ProductRecord = {
 const toPublicProductResponse = (product: ProductRecord) => ({
   id: String(product._id),
   sellerId: product.sellerId,
-  categoryId: product.categoryId,
+  categoryIds: product.categoryIds,
+  primaryCategoryId: product.primaryCategoryId,
   name: product.name,
   slug: product.slug ?? null,
   description: product.description ?? null,
@@ -57,10 +60,15 @@ const resolveSlug = (name: string, slug?: string | null) => {
   return resolved;
 };
 
-const assertActiveCategory = async (categoryId: string) => {
-  const category = await Category.findOne({ _id: categoryId, isActive: true }).lean();
+const assertActiveCategories = async (categoryIds: string[]) => {
+  const uniqueIds = [...new Set(categoryIds)];
 
-  if (!category) {
+  const activeCount = await Category.countDocuments({
+    _id: { $in: uniqueIds },
+    isActive: true,
+  });
+
+  if (activeCount !== uniqueIds.length) {
     throw new EcommerceError(400, 'Geçersiz kategori');
   }
 };
@@ -79,8 +87,8 @@ const buildPublicFilter = async (query: ListProductsQuery) => {
   const filter: Record<string, unknown> = { isActive: true };
 
   if (query.categoryId) {
-    const categoryIds = await getCategoryDescendantIds(query.categoryId);
-    filter.categoryId = { $in: categoryIds };
+    const expandedCategoryIds = await getCategoryDescendantIds(query.categoryId);
+    filter.categoryIds = { $in: expandedCategoryIds };
   }
 
   if (query.search) {
@@ -127,14 +135,15 @@ export const listSellerProducts = async (sellerId: string) => {
 };
 
 export const createProduct = async (sellerId: string, input: CreateProductInput) => {
-  await assertActiveCategory(input.categoryId);
+  await assertActiveCategories(input.categoryIds);
 
   const slug = resolveSlug(input.name, input.slug);
 
   const product = await Product.create({
     _id: createUserId(),
     sellerId,
-    categoryId: input.categoryId,
+    categoryIds: input.categoryIds,
+    primaryCategoryId: input.primaryCategoryId,
     name: input.name,
     slug,
     description: input.description ?? null,
@@ -154,9 +163,21 @@ export const updateProduct = async (
 ) => {
   const product = await getOwnedProduct(sellerId, productId);
 
-  if (input.categoryId !== undefined) {
-    await assertActiveCategory(input.categoryId);
-    product.categoryId = input.categoryId;
+  if (input.categoryIds !== undefined || input.primaryCategoryId !== undefined) {
+    const assignment = resolveProductCategoryAssignment(
+      {
+        categoryIds: product.categoryIds,
+        primaryCategoryId: product.primaryCategoryId,
+      },
+      {
+        categoryIds: input.categoryIds,
+        primaryCategoryId: input.primaryCategoryId,
+      }
+    );
+
+    await assertActiveCategories(assignment.categoryIds);
+    product.categoryIds = assignment.categoryIds;
+    product.primaryCategoryId = assignment.primaryCategoryId;
   }
 
   if (input.name !== undefined) {

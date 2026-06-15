@@ -28,6 +28,12 @@ export const ASSIGNABLE_SELLER_PERMISSIONS: SellerPermissionKey[] = ALL_SELLER_P
   (permission) => !SELLER_OWNER_ONLY_PERMISSIONS.includes(permission)
 );
 
+/** Şahıs şirketi (bireysel) — ekip/rol yönetimi yok */
+export const BIREYSEL_SELLER_PERMISSIONS: SellerPermissionKey[] = ALL_SELLER_PERMISSIONS.filter(
+  (permission) =>
+    !permission.startsWith('members.') && !permission.startsWith('roles.')
+);
+
 export const SELLER_PERMISSION_LABELS: Record<SellerPermissionKey, string> = {
   [SELLER_PERMISSIONS.PRODUCTS_READ]: 'Ürünleri görüntüle',
   [SELLER_PERMISSIONS.PRODUCTS_WRITE]: 'Ürün yönet',

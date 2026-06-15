@@ -33,7 +33,12 @@ const SELLER_COMMON_REQUIRED = [
   'companyDescription',
 ];
 
-const SELLER_BIREYSEL_REQUIRED = ['firstName', 'lastName', 'phone'];
+const SELLER_BIREYSEL_REQUIRED = [
+  'authorizedFirstName',
+  'authorizedLastName',
+  'authorizedPhone',
+  'companyPhone',
+];
 
 const SELLER_KURUMSAL_REQUIRED = [
   'authorizedFirstName',
@@ -66,7 +71,11 @@ export const isSellerProfileComplete = (seller: ProfileRecord) => {
   }
 
   if (seller.sellerType === 'kurumsal') {
-    return hasRequiredFields(seller, SELLER_KURUMSAL_REQUIRED);
+    if (!hasRequiredFields(seller, SELLER_KURUMSAL_REQUIRED)) {
+      return false;
+    }
+
+    return seller.companyType === 'ltd' || seller.companyType === 'as';
   }
 
   return false;

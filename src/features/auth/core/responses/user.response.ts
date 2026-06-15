@@ -27,6 +27,7 @@ export type SellerAuthFields = {
   companyName: string | null;
   sellerType: 'bireysel' | 'kurumsal' | null;
   approvalStatus: string;
+  teamManagementEnabled: boolean;
   roleId: string;
   roleSlug: string;
   roleName: string;
@@ -71,6 +72,7 @@ export const buildAuthUserFields = async (
         companyName: null,
         sellerType: null,
         approvalStatus: legacySeller?.approvalStatus ?? 'draft',
+        teamManagementEnabled: false,
         roleId: '',
         roleSlug: '',
         roleName: '',
@@ -90,6 +92,7 @@ export const buildAuthUserFields = async (
       companyName: sellerContext.companyName,
       sellerType: sellerContext.sellerType,
       approvalStatus: sellerContext.approvalStatus,
+      teamManagementEnabled: sellerContext.teamManagementEnabled,
       roleId: sellerContext.roleId,
       roleSlug: sellerContext.roleSlug,
       roleName: sellerContext.roleName,

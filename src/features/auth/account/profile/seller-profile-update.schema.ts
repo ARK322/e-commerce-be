@@ -33,7 +33,7 @@ export const sellerProfileUpdateSchema = z
     authorizedLastName: optionalSafeString({ min: 2, max: 100, label: 'Yetkili soyadı' }),
     authorizedPhone: phoneSchema.optional(),
     companyPhone: phoneSchema.optional(),
-    companyType: z.enum(['ltd', 'as', 'diger']).optional(),
+    companyType: z.enum(['ltd', 'as']).optional(),
     companyName: optionalSafeString({ min: 2, max: 200, label: 'Şirket adı' }),
     taxNumber: vknSchema.optional(),
     taxOffice: optionalSafeString({ min: 2, max: 100, label: 'Vergi dairesi' }),

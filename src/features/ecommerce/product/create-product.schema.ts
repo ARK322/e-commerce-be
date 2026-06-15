@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { safeString, safeUrlSchema, uuidSchema } from '@/lib/common/validation/common-schemas';
+import { safeString, safeUrlSchema } from '@/lib/common/validation/common-schemas';
 import { slugSchema } from '@/lib/common/validation/slug-schema';
+import { productCategoryAssignmentSchema } from '@/features/ecommerce/product/product-category.schema';
 
-export const createProductSchema = z.object({
-  categoryId: uuidSchema,
+export const createProductSchema = productCategoryAssignmentSchema.extend({
   name: safeString({
     min: 1,
     max: 200,

@@ -59,10 +59,6 @@ export const requireSellerPermission =
       return reply.status(403).send({ message: 'Satıcı profili bulunamadı' });
     }
 
-    if (request.sellerContext.isOwner) {
-      return;
-    }
-
     const allowed = permissions.some((permission) =>
       hasSellerPermission(request.sellerContext!, permission)
     );
@@ -79,5 +75,17 @@ export const requireSellerOwner = async (request: FastifyRequest, reply: Fastify
 
   if (!request.sellerContext.isOwner) {
     return reply.status(403).send({ message: 'Bu işlem için şirket sahibi yetkisi gerekli' });
+  }
+};
+
+export const requireKurumsalSeller = async (request: FastifyRequest, reply: FastifyReply) => {
+  if (!request.sellerContext) {
+    return reply.status(403).send({ message: 'Satıcı profili bulunamadı' });
+  }
+
+  if (!request.sellerContext.teamManagementEnabled) {
+    return reply
+      .status(403)
+      .send({ message: 'Ekip yönetimi yalnızca kurumsal (Ltd/A.Ş.) satıcılar için geçerlidir' });
   }
 };

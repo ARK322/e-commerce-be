@@ -25,7 +25,7 @@ const sellerSchema = new Schema(
     authorizedLastName: stringField,
     authorizedPhone: { ...stringField, maxlength: 20 },
     companyPhone: { ...stringField, maxlength: 20 },
-    companyType: { type: String, enum: ['ltd', 'as', 'diger'] },
+    companyType: { type: String, enum: ['ltd', 'as'] },
 
     companyName: stringField,
     taxNumber: { ...stringField, maxlength: 10 },

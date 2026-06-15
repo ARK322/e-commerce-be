@@ -14,7 +14,6 @@ import { invalidateAuthOtp } from '@/features/auth/core/otp/otp';
 import { hashPassword } from '@/lib/common/password';
 import { createUserId } from '@/lib/common/user-id';
 import { User, Buyer, Seller } from '@/db';
-import { bootstrapSellerTeam } from '@/features/auth/seller/access/system-roles';
 import { AuthError } from '@/features/auth/core/errors';
 import type { RegisterInput } from '@/features/auth/credentials/register/register.schema';
 
@@ -57,7 +56,6 @@ const createUserWithProfile = async (
       await Buyer.create({ _id: userId });
     } else {
       await Seller.create({ _id: userId });
-      await bootstrapSellerTeam(userId, userId);
     }
   } catch {
     await deleteUnverifiedUser(userId);

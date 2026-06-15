@@ -8,13 +8,11 @@ type SellerSubMerchantProfile = {
   sellerId: string;
   email: string;
   sellerType?: 'bireysel' | 'kurumsal' | null;
-  companyType?: 'ltd' | 'as' | 'diger' | null;
-  firstName?: string | null;
-  lastName?: string | null;
+  companyType?: 'ltd' | 'as' | null;
   authorizedFirstName?: string | null;
   authorizedLastName?: string | null;
-  phone?: string | null;
   companyPhone?: string | null;
+  phone?: string | null;
   companyName?: string | null;
   taxNumber?: string | null;
   taxOffice?: string | null;
@@ -23,11 +21,11 @@ type SellerSubMerchantProfile = {
 };
 
 const resolveContactName = (profile: SellerSubMerchantProfile) => {
-  const firstName = profile.authorizedFirstName ?? profile.firstName;
-  const lastName = profile.authorizedLastName ?? profile.lastName;
+  const firstName = profile.authorizedFirstName;
+  const lastName = profile.authorizedLastName;
 
   if (!firstName || !lastName) {
-    throw new EcommerceError(400, 'Satıcı ad/soyad bilgisi eksik');
+    throw new EcommerceError(400, 'Satıcı yetkili ad/soyad bilgisi eksik');
   }
 
   return { contactName: firstName, contactSurname: lastName };
@@ -56,6 +54,18 @@ const buildSubMerchantRequest = (profile: SellerSubMerchantProfile) => {
     throw new EcommerceError(400, 'Satıcı adres bilgisi eksik');
   }
 
+  if (!profile.companyName?.trim()) {
+    throw new EcommerceError(400, 'Satıcı ticari unvan bilgisi eksik');
+  }
+
+  if (!profile.taxNumber?.trim()) {
+    throw new EcommerceError(400, 'Satıcı vergi numarası eksik');
+  }
+
+  if (!profile.taxOffice?.trim()) {
+    throw new EcommerceError(400, 'Satıcı vergi dairesi eksik');
+  }
+
   const { contactName, contactSurname } = resolveContactName(profile);
   const gsmNumber = resolvePhone(profile);
   const base = {
@@ -67,57 +77,28 @@ const buildSubMerchantRequest = (profile: SellerSubMerchantProfile) => {
     address: profile.companyAddress,
     iban: profile.iban.replace(/\s+/g, '').toUpperCase(),
     currency: Iyzipay.CURRENCY.TRY,
+    taxOffice: profile.taxOffice.trim(),
+    taxNumber: profile.taxNumber.trim(),
+    name: profile.companyName.trim(),
   };
 
   if (profile.sellerType === 'bireysel') {
-    if (!profile.taxNumber?.trim()) {
-      throw new EcommerceError(400, 'Bireysel satıcı için TC kimlik no eksik');
-    }
-
     return {
       ...base,
-      subMerchantType: Iyzipay.SUB_MERCHANT_TYPE.PERSONAL,
+      subMerchantType: Iyzipay.SUB_MERCHANT_TYPE.PRIVATE_COMPANY,
       contactName,
       contactSurname,
-      identityNumber: profile.taxNumber.trim(),
-      name: `${contactName} ${contactSurname}`.trim(),
     };
   }
 
-  if (!profile.companyName?.trim()) {
-    throw new EcommerceError(400, 'Kurumsal satıcı için şirket adı eksik');
-  }
-
-  if (!profile.taxNumber?.trim()) {
-    throw new EcommerceError(400, 'Kurumsal satıcı için vergi no eksik');
-  }
-
-  if (!profile.taxOffice?.trim()) {
-    throw new EcommerceError(400, 'Kurumsal satıcı için vergi dairesi eksik');
-  }
-
-  const isLimitedCompany =
-    profile.companyType === 'ltd' || profile.companyType === 'as';
-
-  if (isLimitedCompany) {
-    return {
-      ...base,
-      subMerchantType: Iyzipay.SUB_MERCHANT_TYPE.LIMITED_OR_JOINT_STOCK_COMPANY,
-      taxOffice: profile.taxOffice.trim(),
-      taxNumber: profile.taxNumber.trim(),
-      legalCompanyTitle: profile.companyName.trim(),
-      name: profile.companyName.trim(),
-    };
+  if (profile.companyType !== 'ltd' && profile.companyType !== 'as') {
+    throw new EcommerceError(400, 'Kurumsal satıcı için şirket tipi (ltd/as) eksik');
   }
 
   return {
     ...base,
-    subMerchantType: Iyzipay.SUB_MERCHANT_TYPE.PRIVATE_COMPANY,
-    contactName,
-    contactSurname,
-    taxOffice: profile.taxOffice.trim(),
-    taxNumber: profile.taxNumber.trim(),
-    name: profile.companyName.trim(),
+    subMerchantType: Iyzipay.SUB_MERCHANT_TYPE.LIMITED_OR_JOINT_STOCK_COMPANY,
+    legalCompanyTitle: profile.companyName.trim(),
   };
 };
 

@@ -49,7 +49,7 @@ export const ensureSellerMember = async (userId: string) => {
 
   const seller = await Seller.findById(userId);
 
-  if (!seller) {
+  if (!seller || seller.sellerType !== 'kurumsal') {
     return null;
   }
 
@@ -61,6 +61,13 @@ export const ensureSellerMember = async (userId: string) => {
     roleId: String(ownerRole._id),
     isOwner: true,
   });
+};
+
+export const cleanupSellerTeam = async (sellerId: string) => {
+  await Promise.all([
+    SellerMember.deleteMany({ sellerId }),
+    SellerRole.deleteMany({ sellerId }),
+  ]);
 };
 
 export const bootstrapSellerTeam = async (sellerId: string, ownerUserId: string) => {

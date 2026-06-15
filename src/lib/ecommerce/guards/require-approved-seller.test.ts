@@ -23,6 +23,7 @@ const approvedContext = {
   roleName: 'Owner',
   permissions: new Set<string>(),
   isOwner: true,
+  teamManagementEnabled: true,
   member: { firstName: null, lastName: null, phone: null },
 };
 

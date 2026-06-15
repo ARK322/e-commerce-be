@@ -58,6 +58,7 @@ describe('buildAuthUserFields', () => {
       roleName: 'Owner',
       permissions: new Set(Object.values(SELLER_PERMISSIONS)),
       isOwner: true,
+      teamManagementEnabled: true,
       member: { firstName: 'Ali', lastName: null, phone: null },
     });
 
@@ -75,6 +76,7 @@ describe('buildAuthUserFields', () => {
       companyName: 'Test A.Ş.',
       sellerType: 'kurumsal',
       approvalStatus: 'approved',
+      teamManagementEnabled: true,
       roleId,
       roleSlug: 'owner',
       roleName: 'Owner',
