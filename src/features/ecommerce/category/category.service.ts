@@ -2,46 +2,61 @@ import { Category, Product } from '@/db';
 import { createUserId } from '@/lib/common/user-id';
 import { EcommerceError } from '@/features/ecommerce/core/errors';
 import {
-  buildCategoryTree,
+  MAX_CHILDREN_PER_NODE,
+  MAX_PARENTS_PER_NODE,
+  buildCategoryForest,
+  collectAncestorPaths,
   collectDescendantIds,
+  collectLeafIdsInSubtree,
   filterCategoriesWithActiveAncestors,
-  isDescendantOf,
-} from '@/features/ecommerce/category/category-tree';
+  uniqueIds,
+  wouldCreateCycle,
+  type CategoryGraphNode,
+} from '@/features/ecommerce/category/category-graph';
 import { slugify } from '@/features/ecommerce/category/slugify';
 import type { CreateCategoryInput } from '@/features/ecommerce/category/create-category.schema';
+import type { LinkCategoryInput } from '@/features/ecommerce/category/link-category.schema';
 import type { UpdateCategoryInput } from '@/features/ecommerce/category/update-category.schema';
 
 type CategoryRecord = {
   _id: unknown;
-  parentId?: string | null;
+  parentIds?: string[];
+  childIds?: string[];
   name: string;
   slug: string;
   isActive: boolean;
+  isLeaf?: boolean;
   createdAt?: Date;
 };
 
-const normalizeParentId = (parentId: string | null | undefined): string | null =>
-  parentId ?? null;
+const normalizeIds = (ids: string[] | undefined) => uniqueIds(ids ?? []);
 
-const toCategoryLink = (category: CategoryRecord) => ({
+const toGraphNode = (category: CategoryRecord): CategoryGraphNode => ({
   id: String(category._id),
-  parentId: normalizeParentId(category.parentId),
+  parentIds: normalizeIds(category.parentIds),
+  childIds: normalizeIds(category.childIds),
+  isActive: category.isActive,
+  isLeaf: category.isLeaf ?? normalizeIds(category.childIds).length === 0,
 });
 
 const toCategoryResponse = (category: CategoryRecord) => ({
   id: String(category._id),
-  parentId: normalizeParentId(category.parentId),
+  parentIds: normalizeIds(category.parentIds),
+  childIds: normalizeIds(category.childIds),
   name: category.name,
   slug: category.slug,
   isActive: category.isActive,
+  isLeaf: category.isLeaf ?? normalizeIds(category.childIds).length === 0,
   createdAt: category.createdAt,
 });
 
 const toPublicCategoryResponse = (category: CategoryRecord) => ({
   id: String(category._id),
-  parentId: normalizeParentId(category.parentId),
+  parentIds: normalizeIds(category.parentIds),
+  childIds: normalizeIds(category.childIds),
   name: category.name,
   slug: category.slug,
+  isLeaf: category.isLeaf ?? normalizeIds(category.childIds).length === 0,
 });
 
 const resolveSlug = (name: string, slug?: string) => {
@@ -54,40 +69,93 @@ const resolveSlug = (name: string, slug?: string) => {
   return resolved;
 };
 
-const loadAllCategoryLinks = async () => {
-  const categories = await Category.find().select('_id parentId isActive').lean();
+const loadAllGraphNodes = async () => {
+  const categories = await Category.find()
+    .select('_id parentIds childIds isActive isLeaf')
+    .lean();
 
-  return categories.map((category) => ({
-    ...toCategoryLink(category),
-    isActive: category.isActive,
-  }));
+  return categories.map((category) => toGraphNode(category));
 };
 
-const assertValidParentId = async (
-  parentId: string | null,
-  categoryId?: string
-) => {
-  if (!parentId) {
+const refreshLeafFlag = async (categoryId: string) => {
+  const category = await Category.findById(categoryId);
+
+  if (!category) {
     return;
   }
 
-  if (categoryId && parentId === categoryId) {
-    throw new EcommerceError(400, 'Kategori kendi alt kategorisi olamaz');
+  category.isLeaf = normalizeIds(category.childIds).length === 0;
+  await category.save();
+};
+
+const assertCategoryExists = async (categoryId: string, label: string) => {
+  const category = await Category.findById(categoryId).select('_id').lean();
+
+  if (!category) {
+    throw new EcommerceError(400, `${label} bulunamadı`);
+  }
+};
+
+const addLink = async (parentId: string, childId: string) => {
+  if (parentId === childId) {
+    throw new EcommerceError(400, 'Kategori kendine bağlanamaz');
   }
 
-  const parent = await Category.findById(parentId).lean();
+  const [parent, child] = await Promise.all([
+    Category.findById(parentId),
+    Category.findById(childId),
+  ]);
 
   if (!parent) {
     throw new EcommerceError(400, 'Üst kategori bulunamadı');
   }
 
-  if (categoryId) {
-    const links = await loadAllCategoryLinks();
-
-    if (isDescendantOf(parentId, categoryId, links)) {
-      throw new EcommerceError(400, 'Kategori kendi alt ağacına taşınamaz');
-    }
+  if (!child) {
+    throw new EcommerceError(400, 'Alt kategori bulunamadı');
   }
+
+  const parentIds = normalizeIds(child.parentIds);
+  const childIds = normalizeIds(parent.childIds);
+
+  if (parentIds.includes(parentId) && childIds.includes(childId)) {
+    return;
+  }
+
+  const graphNodes = await loadAllGraphNodes();
+
+  if (wouldCreateCycle(parentId, childId, graphNodes)) {
+    throw new EcommerceError(400, 'Bu bağlantı döngü oluşturur');
+  }
+
+  if (parentIds.length >= MAX_PARENTS_PER_NODE) {
+    throw new EcommerceError(400, `En fazla ${MAX_PARENTS_PER_NODE} üst kategori bağlanabilir`);
+  }
+
+  if (childIds.length >= MAX_CHILDREN_PER_NODE) {
+    throw new EcommerceError(400, `En fazla ${MAX_CHILDREN_PER_NODE} alt kategori bağlanabilir`);
+  }
+
+  child.parentIds = uniqueIds([...parentIds, parentId]);
+  parent.childIds = uniqueIds([...childIds, childId]);
+  parent.isLeaf = false;
+
+  await Promise.all([parent.save(), child.save(), refreshLeafFlag(childId)]);
+};
+
+const removeLink = async (parentId: string, childId: string) => {
+  const [parent, child] = await Promise.all([
+    Category.findById(parentId),
+    Category.findById(childId),
+  ]);
+
+  if (!parent || !child) {
+    throw new EcommerceError(404, 'Kategori bulunamadı');
+  }
+
+  parent.childIds = normalizeIds(parent.childIds).filter((id) => id !== childId);
+  child.parentIds = normalizeIds(child.parentIds).filter((id) => id !== parentId);
+
+  await Promise.all([parent.save(), child.save(), refreshLeafFlag(parentId), refreshLeafFlag(childId)]);
 };
 
 export const getCategoryDescendantIds = async (categoryId: string) => {
@@ -97,34 +165,52 @@ export const getCategoryDescendantIds = async (categoryId: string) => {
     throw new EcommerceError(404, 'Kategori bulunamadı');
   }
 
-  const links = await loadAllCategoryLinks();
+  const graphNodes = await loadAllGraphNodes();
 
-  return [categoryId, ...collectDescendantIds(categoryId, links)];
+  return [categoryId, ...collectDescendantIds(categoryId, graphNodes)];
+};
+
+export const getCategoryProductFilterIds = async (categoryId: string) => {
+  const category = await Category.findById(categoryId).select('_id').lean();
+
+  if (!category) {
+    throw new EcommerceError(404, 'Kategori bulunamadı');
+  }
+
+  const graphNodes = await loadAllGraphNodes();
+
+  return collectLeafIdsInSubtree(categoryId, graphNodes);
+};
+
+export const getCategoryPaths = async (categoryId: string) => {
+  const category = await Category.findById(categoryId).lean();
+
+  if (!category) {
+    throw new EcommerceError(404, 'Kategori bulunamadı');
+  }
+
+  const graphNodes = await loadAllGraphNodes();
+
+  return collectAncestorPaths(categoryId, graphNodes);
 };
 
 export const listPublicCategories = async () => {
   const categories = await Category.find({ isActive: true }).lean();
-
-  const visibleCategories = filterCategoriesWithActiveAncestors(
-    categories.map((category) => ({
-      ...toCategoryLink(category),
-      isActive: category.isActive,
-    }))
-  );
-
-  const visibleIds = new Set(visibleCategories.map((category) => category.id));
+  const graphNodes = categories.map((category) => toGraphNode(category));
+  const visibleNodes = filterCategoriesWithActiveAncestors(graphNodes);
+  const visibleIds = new Set(visibleNodes.map((node) => node.id));
   const flatCategories = categories
     .filter((category) => visibleIds.has(String(category._id)))
     .map(toPublicCategoryResponse);
 
-  return buildCategoryTree(flatCategories, (category) => category);
+  return buildCategoryForest(flatCategories, (category) => category);
 };
 
 export const listAdminCategories = async () => {
   const categories = await Category.find().lean();
   const flatCategories = categories.map(toCategoryResponse);
 
-  return buildCategoryTree(flatCategories, (category) => category);
+  return buildCategoryForest(flatCategories, (category) => category);
 };
 
 export const getCategoryById = async (categoryId: string) => {
@@ -134,30 +220,41 @@ export const getCategoryById = async (categoryId: string) => {
     throw new EcommerceError(404, 'Kategori bulunamadı');
   }
 
-  const links = await loadAllCategoryLinks();
-  const childCount = links.filter((link) => link.parentId === categoryId).length;
+  const paths = await getCategoryPaths(categoryId);
 
   return {
     ...toCategoryResponse(category),
-    childCount,
+    paths,
   };
 };
 
 export const createCategory = async (input: CreateCategoryInput) => {
   const slug = resolveSlug(input.name, input.slug);
-  const parentId = normalizeParentId(input.parentId);
+  const parentIds = uniqueIds(input.parentIds ?? []);
 
-  await assertValidParentId(parentId);
+  for (const parentId of parentIds) {
+    await assertCategoryExists(parentId, 'Üst kategori');
+  }
+
+  const categoryId = createUserId();
 
   const category = await Category.create({
-    _id: createUserId(),
-    parentId,
+    _id: categoryId,
+    parentIds: [],
+    childIds: [],
     name: input.name,
     slug,
     isActive: input.isActive ?? true,
+    isLeaf: true,
   });
 
-  return toCategoryResponse(category.toObject());
+  for (const parentId of parentIds) {
+    await addLink(parentId, categoryId);
+  }
+
+  const fresh = await Category.findById(categoryId).lean();
+
+  return toCategoryResponse(fresh!);
 };
 
 export const updateCategory = async (categoryId: string, input: UpdateCategoryInput) => {
@@ -165,12 +262,6 @@ export const updateCategory = async (categoryId: string, input: UpdateCategoryIn
 
   if (!category) {
     throw new EcommerceError(404, 'Kategori bulunamadı');
-  }
-
-  if (input.parentId !== undefined) {
-    const parentId = normalizeParentId(input.parentId);
-    await assertValidParentId(parentId, categoryId);
-    category.parentId = parentId;
   }
 
   if (input.name !== undefined) {
@@ -192,6 +283,40 @@ export const updateCategory = async (categoryId: string, input: UpdateCategoryIn
   return toCategoryResponse(category.toObject());
 };
 
+export const linkCategory = async (categoryId: string, input: LinkCategoryInput) => {
+  await assertCategoryExists(categoryId, 'Kategori');
+
+  if (input.parentId) {
+    await addLink(input.parentId, categoryId);
+  }
+
+  if (input.childId) {
+    await addLink(categoryId, input.childId);
+  }
+
+  const category = await Category.findById(categoryId).lean();
+
+  return toCategoryResponse(category!);
+};
+
+export const unlinkCategory = async (categoryId: string, input: LinkCategoryInput) => {
+  if (input.parentId) {
+    await removeLink(input.parentId, categoryId);
+  }
+
+  if (input.childId) {
+    await removeLink(categoryId, input.childId);
+  }
+
+  const category = await Category.findById(categoryId).lean();
+
+  if (!category) {
+    throw new EcommerceError(404, 'Kategori bulunamadı');
+  }
+
+  return toCategoryResponse(category);
+};
+
 export const deleteCategory = async (categoryId: string) => {
   const category = await Category.findById(categoryId);
 
@@ -199,17 +324,35 @@ export const deleteCategory = async (categoryId: string) => {
     throw new EcommerceError(404, 'Kategori bulunamadı');
   }
 
-  const childCount = await Category.countDocuments({ parentId: categoryId });
-
-  if (childCount > 0) {
+  if (normalizeIds(category.childIds).length > 0) {
     throw new EcommerceError(409, 'Alt kategori bulunduğu için silinemez');
   }
 
-  const productCount = await Product.countDocuments({ categoryIds: categoryId });
+  const productCount = await Product.countDocuments({ categoryId });
 
   if (productCount > 0) {
     throw new EcommerceError(409, 'Bu kategoride ürün bulunduğu için silinemez');
   }
 
+  for (const parentId of normalizeIds(category.parentIds)) {
+    await removeLink(parentId, categoryId);
+  }
+
   await Category.findByIdAndDelete(categoryId);
+};
+
+export const assertProductCategory = async (categoryId: string) => {
+  const category = await Category.findById(categoryId)
+    .select('_id isActive isLeaf childIds')
+    .lean();
+
+  if (!category || !category.isActive) {
+    throw new EcommerceError(400, 'Geçersiz kategori');
+  }
+
+  const isLeaf = category.isLeaf ?? normalizeIds(category.childIds).length === 0;
+
+  if (!isLeaf) {
+    throw new EcommerceError(400, 'Ürün yalnızca alt kategoriye eklenebilir');
+  }
 };

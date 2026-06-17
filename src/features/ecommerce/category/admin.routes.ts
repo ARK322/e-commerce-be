@@ -11,6 +11,10 @@ import {
   type CreateCategoryInput,
 } from '@/features/ecommerce/category/create-category.schema';
 import {
+  linkCategorySchema,
+  type LinkCategoryInput,
+} from '@/features/ecommerce/category/link-category.schema';
+import {
   updateCategorySchema,
   type UpdateCategoryInput,
 } from '@/features/ecommerce/category/update-category.schema';
@@ -18,7 +22,9 @@ import {
   createCategory,
   deleteCategory,
   getCategoryById,
+  linkCategory,
   listAdminCategories,
+  unlinkCategory,
   updateCategory,
 } from '@/features/ecommerce/category/category.service';
 
@@ -106,6 +112,54 @@ export default async function categoriesAdminRoutes(fastify: FastifyInstance) {
         return handleRouteError(reply, error, 'Kategori işlemi sırasında bir hata oluştu', {
           duplicateKeyMessage: 'Bu slug zaten kullanılıyor',
         });
+      }
+    }
+  );
+
+  fastify.post(
+    '/:categoryId/links',
+    {
+      preHandler: [
+        ...adminWithCategoryId.preHandler,
+        requirePermission(PERMISSIONS.CATEGORIES_WRITE),
+        validateBody(linkCategorySchema),
+      ],
+    },
+    async (req, reply) => {
+      try {
+        const { categoryId } = req.params as { categoryId: string };
+        const category = await linkCategory(categoryId, req.body as LinkCategoryInput);
+
+        return reply.status(200).send({
+          message: 'Kategori bağlantısı eklendi',
+          category,
+        });
+      } catch (error) {
+        return handleRouteError(reply, error, 'Kategori işlemi sırasında bir hata oluştu');
+      }
+    }
+  );
+
+  fastify.delete(
+    '/:categoryId/links',
+    {
+      preHandler: [
+        ...adminWithCategoryId.preHandler,
+        requirePermission(PERMISSIONS.CATEGORIES_WRITE),
+        validateBody(linkCategorySchema),
+      ],
+    },
+    async (req, reply) => {
+      try {
+        const { categoryId } = req.params as { categoryId: string };
+        const category = await unlinkCategory(categoryId, req.body as LinkCategoryInput);
+
+        return reply.status(200).send({
+          message: 'Kategori bağlantısı kaldırıldı',
+          category,
+        });
+      } catch (error) {
+        return handleRouteError(reply, error, 'Kategori işlemi sırasında bir hata oluştu');
       }
     }
   );

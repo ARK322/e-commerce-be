@@ -4,8 +4,7 @@ import { createProductSchema } from '@/features/ecommerce/product/create-product
 describe('createProductSchema', () => {
   it('images alanı kabul etmez', () => {
     const parsed = createProductSchema.safeParse({
-      categoryIds: ['660e8400-e29b-41d4-a716-446655440001'],
-      primaryCategoryId: '660e8400-e29b-41d4-a716-446655440001',
+      categoryId: '660e8400-e29b-41d4-a716-446655440001',
       name: 'Kulaklık',
       price: 999,
       stock: 5,
@@ -17,8 +16,7 @@ describe('createProductSchema', () => {
 
   it('fotoğraf olmadan ürün oluşturmayı kabul eder', () => {
     const parsed = createProductSchema.safeParse({
-      categoryIds: ['660e8400-e29b-41d4-a716-446655440001'],
-      primaryCategoryId: '660e8400-e29b-41d4-a716-446655440001',
+      categoryId: '660e8400-e29b-41d4-a716-446655440001',
       name: 'Kulaklık',
       price: 999,
       stock: 5,
@@ -27,6 +25,7 @@ describe('createProductSchema', () => {
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data).not.toHaveProperty('images');
+      expect(parsed.data.categoryId).toBe('660e8400-e29b-41d4-a716-446655440001');
     }
   });
 });

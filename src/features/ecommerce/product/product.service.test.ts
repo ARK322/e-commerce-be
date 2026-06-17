@@ -1,17 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockCategoryFindLean = vi.fn();
-const mockCategoryFind = vi.fn();
-const mockProductFind = vi.fn();
-const mockProductFindOne = vi.fn();
-const mockProductFindById = vi.fn();
-const mockProductCreate = vi.fn();
-const mockProductCountDocuments = vi.fn();
-const mockProductFindByIdAndDelete = vi.fn();
-const mockGetCategoryDescendantIds = vi.fn();
+const mockAssertProductCategory = vi.fn();
+const mockGetCategoryProductFilterIds = vi.fn();
 
 vi.mock('@/features/ecommerce/category/category.service', () => ({
-  getCategoryDescendantIds: (...args: unknown[]) => mockGetCategoryDescendantIds(...args),
+  assertProductCategory: (...args: unknown[]) => mockAssertProductCategory(...args),
+  getCategoryProductFilterIds: (...args: unknown[]) => mockGetCategoryProductFilterIds(...args),
 }));
 
 vi.mock('@/features/ecommerce/product/product-images.service', () => ({
@@ -19,10 +13,14 @@ vi.mock('@/features/ecommerce/product/product-images.service', () => ({
   uploadProductImage: vi.fn(),
 }));
 
+const mockProductFind = vi.fn();
+const mockProductFindOne = vi.fn();
+const mockProductFindById = vi.fn();
+const mockProductCreate = vi.fn();
+const mockProductCountDocuments = vi.fn();
+const mockProductFindByIdAndDelete = vi.fn();
+
 vi.mock('@/db', () => ({
-  Category: {
-    find: (...args: unknown[]) => mockCategoryFind(...args),
-  },
   Product: {
     find: (...args: unknown[]) => mockProductFind(...args),
     findOne: (...args: unknown[]) => mockProductFindOne(...args),
@@ -47,26 +45,14 @@ import {
 } from '@/features/ecommerce/product/product.service';
 import { uploadProductImage } from '@/features/ecommerce/product/product-images.service';
 
-const mockActiveCategories = (
-  categories: Array<{ _id: string; parentId: string | null }>
-) => {
-  mockCategoryFind.mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      lean: vi.fn().mockResolvedValue(categories),
-    }),
-  });
-};
-
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 const categoryId = '660e8400-e29b-41d4-a716-446655440001';
-const secondCategoryId = '660e8400-e29b-41d4-a716-446655440002';
 const productId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 
 const productDoc = {
   _id: productId,
   sellerId,
-  categoryIds: [categoryId, secondCategoryId],
-  primaryCategoryId: categoryId,
+  categoryId,
   name: 'Kulaklık',
   slug: 'kulaklik',
   description: null,
@@ -83,19 +69,45 @@ const productDoc = {
 describe('createProduct', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockActiveCategories([{ _id: categoryId, parentId: null }]);
-    mockProductCreate.mockResolvedValue({
-      toObject: () => productDoc,
-    });
+    mockAssertProductCategory.mockResolvedValue(undefined);
+    mockProductCreate.mockImplementation((data) => ({
+      toObject: () => ({
+        ...productDoc,
+        ...data,
+        _id: productId,
+      }),
+    }));
   });
 
-  it('aktif kategori yoksa 400 fırlatır', async () => {
-    mockActiveCategories([]);
+  it('leaf kategori doğrulaması yapar', async () => {
+    await createProduct(sellerId, {
+      categoryId,
+      name: 'Kulaklık',
+      price: 999,
+      stock: 5,
+      minOrderQuantity: 1,
+    });
+
+    expect(mockAssertProductCategory).toHaveBeenCalledWith(categoryId);
+    expect(mockProductCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sellerId,
+        categoryId,
+        name: 'Kulaklık',
+        slug: 'kulakl-k',
+      })
+    );
+  });
+
+  it('geçersiz kategoride 400 fırlatır', async () => {
+    mockAssertProductCategory.mockRejectedValue({
+      statusCode: 400,
+      message: 'Geçersiz kategori',
+    });
 
     await expect(
       createProduct(sellerId, {
-        categoryIds: [categoryId],
-        primaryCategoryId: categoryId,
+        categoryId,
         name: 'Kulaklık',
         price: 999,
         stock: 5,
@@ -107,49 +119,15 @@ describe('createProduct', () => {
     });
   });
 
-  it('birden fazla kategori ile ürün oluşturur', async () => {
-    mockActiveCategories([
-      { _id: categoryId, parentId: null },
-      { _id: secondCategoryId, parentId: categoryId },
-    ]);
-
-    const result = await createProduct(sellerId, {
-      categoryIds: [categoryId, secondCategoryId],
-      primaryCategoryId: categoryId,
-      name: 'Kulaklık',
-      price: 999,
-      stock: 5,
-      minOrderQuantity: 1,
+  it('leaf olmayan kategoride 400 fırlatır', async () => {
+    mockAssertProductCategory.mockRejectedValue({
+      statusCode: 400,
+      message: 'Ürün yalnızca alt kategoriye eklenebilir',
     });
-
-    expect(mockProductCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sellerId,
-        categoryIds: [categoryId, secondCategoryId],
-        primaryCategoryId: categoryId,
-        name: 'Kulaklık',
-        slug: 'kulakl-k',
-      })
-    );
-    expect(result.categoryIds).toEqual([categoryId, secondCategoryId]);
-  });
-
-  it('11 ana kategoriden fazla seçilirse 400 fırlatır', async () => {
-    const rootCategoryIds = Array.from({ length: 11 }, (_, index) =>
-      `770e8400-e29b-41d4-a716-4466554400${String(index).padStart(2, '0')}`
-    );
-
-    mockActiveCategories(
-      rootCategoryIds.map((id) => ({
-        _id: id,
-        parentId: null,
-      }))
-    );
 
     await expect(
       createProduct(sellerId, {
-        categoryIds: rootCategoryIds,
-        primaryCategoryId: rootCategoryIds[0],
+        categoryId,
         name: 'Kulaklık',
         price: 999,
         stock: 5,
@@ -157,7 +135,7 @@ describe('createProduct', () => {
       })
     ).rejects.toMatchObject({
       statusCode: 400,
-      message: 'En fazla 10 ana kategori seçilebilir',
+      message: 'Ürün yalnızca alt kategoriye eklenebilir',
     });
   });
 });
@@ -165,10 +143,14 @@ describe('createProduct', () => {
 describe('createProductWithImages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockActiveCategories([{ _id: categoryId, parentId: null }]);
-    mockProductCreate.mockResolvedValue({
-      toObject: () => productDoc,
-    });
+    mockAssertProductCategory.mockResolvedValue(undefined);
+    mockProductCreate.mockImplementation((data) => ({
+      toObject: () => ({
+        ...productDoc,
+        ...data,
+        _id: productId,
+      }),
+    }));
     mockProductFindById.mockReturnValue({
       sellerId,
       images: [],
@@ -181,8 +163,7 @@ describe('createProductWithImages', () => {
 
   it('görsel yoksa sadece ürün oluşturur', async () => {
     const result = await createProductWithImages(sellerId, {
-      categoryIds: [categoryId],
-      primaryCategoryId: categoryId,
+      categoryId,
       name: 'Kulaklık',
       price: 999,
       stock: 5,
@@ -191,41 +172,14 @@ describe('createProductWithImages', () => {
 
     expect(uploadProductImage).not.toHaveBeenCalled();
     expect(result.id).toBe(productId);
-    expect(result.images).toEqual([]);
-  });
-
-  it('görsel varsa yükler ve ürünü döner', async () => {
-    vi.mocked(uploadProductImage).mockResolvedValue({
-      url: 'https://example.com/image.jpg',
-      product: {
-        ...productDoc,
-        id: productId,
-        images: ['https://example.com/image.jpg'],
-      },
-    });
-
-    const result = await createProductWithImages(
-      sellerId,
-      {
-        categoryIds: [categoryId],
-        primaryCategoryId: categoryId,
-        name: 'Kulaklık',
-        price: 999,
-        stock: 5,
-        minOrderQuantity: 1,
-      },
-      [{ mimeType: 'image/jpeg', buffer: Buffer.from([0xff, 0xd8, 0xff]) }]
-    );
-
-    expect(uploadProductImage).toHaveBeenCalledOnce();
-    expect(result.images).toEqual(['https://example.com/image.jpg']);
+    expect(result.categoryId).toBe(categoryId);
   });
 });
 
 describe('listPublicProducts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetCategoryDescendantIds.mockResolvedValue([categoryId, 'child-category-id']);
+    mockGetCategoryProductFilterIds.mockResolvedValue([categoryId, 'leaf-category-id']);
     mockProductFind.mockReturnValue({
       sort: vi.fn().mockReturnValue({
         skip: vi.fn().mockReturnValue({
@@ -246,29 +200,13 @@ describe('listPublicProducts', () => {
     expect(result.pagination.total).toBe(1);
   });
 
-  it('kategori filtresinde alt kategorileri de dahil eder', async () => {
+  it('kategori filtresinde alt evrendeki leaf ürünlerini döner', async () => {
     await listPublicProducts({ page: 1, limit: 20, categoryId });
 
-    expect(mockGetCategoryDescendantIds).toHaveBeenCalledWith(categoryId);
+    expect(mockGetCategoryProductFilterIds).toHaveBeenCalledWith(categoryId);
     expect(mockProductFind).toHaveBeenCalledWith({
       isActive: true,
-      categoryIds: { $in: [categoryId, 'child-category-id'] },
-    });
-  });
-});
-
-describe('getPublicProductById', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('aktif ürün yoksa 404 fırlatır', async () => {
-    mockProductFindOne.mockReturnValue({
-      lean: vi.fn().mockResolvedValue(null),
-    });
-
-    await expect(getPublicProductById(productId)).rejects.toMatchObject({
-      statusCode: 404,
+      categoryId: { $in: [categoryId, 'leaf-category-id'] },
     });
   });
 });
@@ -276,34 +214,26 @@ describe('getPublicProductById', () => {
 describe('updateProduct', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockActiveCategories([{ _id: categoryId, parentId: null }]);
+    mockAssertProductCategory.mockResolvedValue(undefined);
   });
 
-  it('başka satıcının ürününü güncelleyemez', async () => {
-    mockProductFindById.mockResolvedValue({
+  it('categoryId güncellerken leaf doğrulaması yapar', async () => {
+    const secondCategoryId = '660e8400-e29b-41d4-a716-446655440002';
+    const mutableProduct = {
       ...productDoc,
-      sellerId: 'other-seller',
+      categoryId,
       save: vi.fn(),
-    });
+      toObject() {
+        return { ...productDoc, categoryId: secondCategoryId };
+      },
+    };
 
-    await expect(updateProduct(sellerId, productId, { price: 100 })).rejects.toMatchObject({
-      statusCode: 404,
-    });
-  });
+    mockProductFindById.mockResolvedValue(mutableProduct);
 
-  it('primaryCategoryId categoryIds dışındaysa hata verir', async () => {
-    mockProductFindById.mockResolvedValue({
-      ...productDoc,
-      save: vi.fn(),
-    });
+    await updateProduct(sellerId, productId, { categoryId: secondCategoryId });
 
-    await expect(
-      updateProduct(sellerId, productId, {
-        primaryCategoryId: '770e8400-e29b-41d4-a716-446655440000',
-      })
-    ).rejects.toMatchObject({
-      name: 'ZodError',
-    });
+    expect(mockAssertProductCategory).toHaveBeenCalledWith(secondCategoryId);
+    expect(mutableProduct.categoryId).toBe(secondCategoryId);
   });
 });
 

@@ -4,7 +4,6 @@ const mockCategoryFind = vi.fn();
 const mockCategoryFindById = vi.fn();
 const mockCategoryCreate = vi.fn();
 const mockCategoryFindByIdAndDelete = vi.fn();
-const mockCategoryCountDocuments = vi.fn();
 const mockProductCountDocuments = vi.fn();
 
 vi.mock('@/db', () => ({
@@ -13,7 +12,6 @@ vi.mock('@/db', () => ({
     findById: (...args: unknown[]) => mockCategoryFindById(...args),
     create: (...args: unknown[]) => mockCategoryCreate(...args),
     findByIdAndDelete: (...args: unknown[]) => mockCategoryFindByIdAndDelete(...args),
-    countDocuments: (...args: unknown[]) => mockCategoryCountDocuments(...args),
   },
   Product: {
     countDocuments: (...args: unknown[]) => mockProductCountDocuments(...args),
@@ -25,11 +23,9 @@ vi.mock('@/lib/common/user-id', () => ({
 }));
 
 import {
-  createCategory,
   deleteCategory,
   getCategoryById,
   listPublicCategories,
-  updateCategory,
 } from '@/features/ecommerce/category/category.service';
 
 const categoryId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
@@ -37,19 +33,23 @@ const childCategoryId = '8d9e6679-7425-40de-944b-e07fc1f90ae8';
 
 const rootCategoryDoc = {
   _id: categoryId,
-  parentId: null,
+  parentIds: [],
+  childIds: [childCategoryId],
   name: 'Elektronik',
   slug: 'elektronik',
   isActive: true,
+  isLeaf: false,
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
 };
 
 const childCategoryDoc = {
   _id: childCategoryId,
-  parentId: categoryId,
+  parentIds: [categoryId],
+  childIds: [],
   name: 'Telefon',
   slug: 'telefon',
   isActive: true,
+  isLeaf: true,
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
 };
 
@@ -61,21 +61,25 @@ describe('listPublicCategories', () => {
     });
   });
 
-  it('ağaç yapısında public kategorileri döner', async () => {
+  it('evren ormanında public kategorileri döner', async () => {
     const result = await listPublicCategories();
 
     expect(result).toEqual([
       {
         id: categoryId,
-        parentId: null,
+        parentIds: [],
+        childIds: [childCategoryId],
         name: 'Elektronik',
         slug: 'elektronik',
+        isLeaf: false,
         children: [
           {
             id: childCategoryId,
-            parentId: categoryId,
+            parentIds: [categoryId],
+            childIds: [],
             name: 'Telefon',
             slug: 'telefon',
+            isLeaf: true,
             children: [],
           },
         ],
@@ -90,8 +94,20 @@ describe('getCategoryById', () => {
     mockCategoryFind.mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([
-          { _id: categoryId, parentId: null, isActive: true },
-          { _id: childCategoryId, parentId: categoryId, isActive: true },
+          {
+            _id: categoryId,
+            parentIds: [],
+            childIds: [childCategoryId],
+            isActive: true,
+            isLeaf: false,
+          },
+          {
+            _id: childCategoryId,
+            parentIds: [categoryId],
+            childIds: [],
+            isActive: true,
+            isLeaf: true,
+          },
         ]),
       }),
     });
@@ -108,103 +124,19 @@ describe('getCategoryById', () => {
     });
   });
 
-  it('childCount ile kategori detayı döner', async () => {
+  it('paths ile kategori detayı döner', async () => {
     mockCategoryFindById.mockReturnValue({
-      lean: vi.fn().mockResolvedValue(rootCategoryDoc),
+      lean: vi.fn().mockResolvedValue(childCategoryDoc),
     });
 
-    const result = await getCategoryById(categoryId);
+    const result = await getCategoryById(childCategoryId);
 
     expect(result).toMatchObject({
-      id: categoryId,
-      parentId: null,
-      childCount: 1,
-    });
-  });
-});
-
-describe('createCategory', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockCategoryCreate.mockResolvedValue({
-      toObject: () => rootCategoryDoc,
-    });
-  });
-
-  it('parentId ile alt kategori oluşturur', async () => {
-    mockCategoryFindById.mockReturnValue({
-      lean: vi.fn().mockResolvedValue(rootCategoryDoc),
-    });
-    mockCategoryCreate.mockResolvedValue({
-      toObject: () => childCategoryDoc,
-    });
-
-    const result = await createCategory({
-      name: 'Telefon',
-      parentId: categoryId,
-    });
-
-    expect(mockCategoryCreate).toHaveBeenCalledWith({
-      _id: categoryId,
-      parentId: categoryId,
-      name: 'Telefon',
-      slug: 'telefon',
-      isActive: true,
-    });
-    expect(result.parentId).toBe(categoryId);
-  });
-});
-
-describe('updateCategory', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockCategoryFind.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([{ _id: categoryId, parentId: null, isActive: true }]),
-      }),
-    });
-  });
-
-  it('kategori yoksa 404 fırlatır', async () => {
-    mockCategoryFindById.mockResolvedValue(null);
-
-    await expect(updateCategory(categoryId, { name: 'Yeni ad' })).rejects.toMatchObject({
-      statusCode: 404,
-    });
-  });
-
-  it('kendi altına taşımayı engeller', async () => {
-    mockCategoryFind.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([
-          { _id: categoryId, parentId: null, isActive: true },
-          { _id: childCategoryId, parentId: categoryId, isActive: true },
-        ]),
-      }),
-    });
-
-    mockCategoryFindById.mockImplementation((id: string) => {
-      if (id === categoryId) {
-        return Promise.resolve({
-          ...rootCategoryDoc,
-          save: vi.fn(),
-          toObject: () => rootCategoryDoc,
-        });
-      }
-
-      return {
-        lean: vi.fn().mockResolvedValue({
-          _id: childCategoryId,
-          parentId: categoryId,
-        }),
-      };
-    });
-
-    await expect(
-      updateCategory(categoryId, { parentId: childCategoryId })
-    ).rejects.toMatchObject({
-      statusCode: 400,
-      message: 'Kategori kendi alt ağacına taşınamaz',
+      id: childCategoryId,
+      parentIds: [categoryId],
+      childIds: [],
+      isLeaf: true,
+      paths: [[categoryId, childCategoryId]],
     });
   });
 });
@@ -212,11 +144,15 @@ describe('updateCategory', () => {
 describe('deleteCategory', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCategoryFindById.mockResolvedValue(rootCategoryDoc);
+    mockCategoryFindById.mockResolvedValue({
+      ...rootCategoryDoc,
+      parentIds: [],
+      childIds: [],
+    });
   });
 
   it('alt kategori varsa 409 fırlatır', async () => {
-    mockCategoryCountDocuments.mockResolvedValue(1);
+    mockCategoryFindById.mockResolvedValue(rootCategoryDoc);
 
     await expect(deleteCategory(categoryId)).rejects.toMatchObject({
       statusCode: 409,
@@ -225,7 +161,6 @@ describe('deleteCategory', () => {
   });
 
   it('kategoride ürün varsa 409 fırlatır', async () => {
-    mockCategoryCountDocuments.mockResolvedValue(0);
     mockProductCountDocuments.mockResolvedValue(2);
 
     await expect(deleteCategory(categoryId)).rejects.toMatchObject({
@@ -235,7 +170,6 @@ describe('deleteCategory', () => {
   });
 
   it('ürün ve alt kategori yoksa kategoriyi siler', async () => {
-    mockCategoryCountDocuments.mockResolvedValue(0);
     mockProductCountDocuments.mockResolvedValue(0);
 
     await deleteCategory(categoryId);

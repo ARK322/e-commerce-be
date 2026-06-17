@@ -1,16 +1,14 @@
-import { Category, Product } from '@/db';
+import { Product } from '@/db';
 import { createUserId } from '@/lib/common/user-id';
 import { EcommerceError } from '@/features/ecommerce/core/errors';
-import { getCategoryDescendantIds } from '@/features/ecommerce/category/category.service';
-import { slugify } from '@/features/ecommerce/category/slugify';
 import {
-  MAX_PRODUCT_PRIMARY_CATEGORIES,
-  resolveProductCategoryAssignment,
-} from '@/features/ecommerce/product/product-category.schema';
+  assertProductCategory,
+  getCategoryProductFilterIds,
+} from '@/features/ecommerce/category/category.service';
+import { slugify } from '@/features/ecommerce/category/slugify';
 import {
   toPublicProductResponse,
   toSellerProductResponse,
-  type ProductRecord,
 } from '@/features/ecommerce/product/product-response';
 import { deleteProductImagesFromStorage, uploadProductImage } from '@/features/ecommerce/product/product-images.service';
 import type { ProductImageUpload } from '@/features/ecommerce/product/product-image-types';
@@ -32,30 +30,6 @@ const resolveSlug = (name: string, slug?: string | null) => {
   return resolved;
 };
 
-const assertActiveCategories = async (categoryIds: string[]) => {
-  const uniqueIds = [...new Set(categoryIds)];
-
-  const categories = await Category.find({
-    _id: { $in: uniqueIds },
-    isActive: true,
-  })
-    .select('_id parentId')
-    .lean();
-
-  if (categories.length !== uniqueIds.length) {
-    throw new EcommerceError(400, 'Geçersiz kategori');
-  }
-
-  const primaryCategoryCount = categories.filter((category) => category.parentId == null).length;
-
-  if (primaryCategoryCount > MAX_PRODUCT_PRIMARY_CATEGORIES) {
-    throw new EcommerceError(
-      400,
-      `En fazla ${MAX_PRODUCT_PRIMARY_CATEGORIES} ana kategori seçilebilir`
-    );
-  }
-};
-
 const getOwnedProduct = async (sellerId: string, productId: string) => {
   const product = await Product.findById(productId);
 
@@ -70,8 +44,8 @@ const buildPublicFilter = async (query: ListProductsQuery) => {
   const filter: Record<string, unknown> = { isActive: true };
 
   if (query.categoryId) {
-    const expandedCategoryIds = await getCategoryDescendantIds(query.categoryId);
-    filter.categoryIds = { $in: expandedCategoryIds };
+    const leafCategoryIds = await getCategoryProductFilterIds(query.categoryId);
+    filter.categoryId = { $in: leafCategoryIds };
   }
 
   if (query.search) {
@@ -118,15 +92,14 @@ export const listSellerProducts = async (sellerId: string) => {
 };
 
 export const createProduct = async (sellerId: string, input: CreateProductInput) => {
-  await assertActiveCategories(input.categoryIds);
+  await assertProductCategory(input.categoryId);
 
   const slug = resolveSlug(input.name, input.slug);
 
   const product = await Product.create({
     _id: createUserId(),
     sellerId,
-    categoryIds: input.categoryIds,
-    primaryCategoryId: input.primaryCategoryId,
+    categoryId: input.categoryId,
     name: input.name,
     slug,
     description: input.description ?? null,
@@ -178,21 +151,9 @@ export const updateProduct = async (
 ) => {
   const product = await getOwnedProduct(sellerId, productId);
 
-  if (input.categoryIds !== undefined || input.primaryCategoryId !== undefined) {
-    const assignment = resolveProductCategoryAssignment(
-      {
-        categoryIds: product.categoryIds,
-        primaryCategoryId: product.primaryCategoryId,
-      },
-      {
-        categoryIds: input.categoryIds,
-        primaryCategoryId: input.primaryCategoryId,
-      }
-    );
-
-    await assertActiveCategories(assignment.categoryIds);
-    product.categoryIds = assignment.categoryIds;
-    product.primaryCategoryId = assignment.primaryCategoryId;
+  if (input.categoryId !== undefined) {
+    await assertProductCategory(input.categoryId);
+    product.categoryId = input.categoryId;
   }
 
   if (input.name !== undefined) {

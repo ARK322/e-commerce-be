@@ -62,8 +62,7 @@ describe('uploadProductImage', () => {
       toObject: () => ({
         _id: productId,
         sellerId,
-        categoryIds: ['cat'],
-        primaryCategoryId: 'cat',
+        categoryId: 'cat',
         name: 'Test',
         price: 10,
         currency: 'TRY',
@@ -115,8 +114,7 @@ describe('deleteProductImage', () => {
       toObject: () => ({
         _id: productId,
         sellerId,
-        categoryIds: ['cat'],
-        primaryCategoryId: 'cat',
+        categoryId: 'cat',
         name: 'Test',
         price: 10,
         currency: 'TRY',

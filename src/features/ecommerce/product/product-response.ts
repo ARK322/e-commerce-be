@@ -1,8 +1,7 @@
 export type ProductRecord = {
   _id: unknown;
   sellerId: string;
-  categoryIds: string[];
-  primaryCategoryId: string;
+  categoryId: string;
   name: string;
   slug?: string | null;
   description?: string | null;
@@ -19,8 +18,7 @@ export type ProductRecord = {
 export const toPublicProductResponse = (product: ProductRecord) => ({
   id: String(product._id),
   sellerId: product.sellerId,
-  categoryIds: product.categoryIds,
-  primaryCategoryId: product.primaryCategoryId,
+  categoryId: product.categoryId,
   name: product.name,
   slug: product.slug ?? null,
   description: product.description ?? null,

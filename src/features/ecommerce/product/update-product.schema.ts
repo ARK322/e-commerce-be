@@ -1,16 +1,10 @@
 import { z } from 'zod';
 import { safeString, safeUrlSchema, uuidSchema } from '@/lib/common/validation/common-schemas';
 import { slugSchema } from '@/lib/common/validation/slug-schema';
-import { MAX_PRODUCT_CATEGORIES } from '@/features/ecommerce/product/product-category.schema';
 
 export const updateProductSchema = z
   .object({
-    categoryIds: z
-      .array(uuidSchema)
-      .min(1, 'En az bir kategori seçilmeli')
-      .max(MAX_PRODUCT_CATEGORIES, `En fazla ${MAX_PRODUCT_CATEGORIES} kategori seçilebilir`)
-      .optional(),
-    primaryCategoryId: uuidSchema.optional(),
+    categoryId: uuidSchema.optional(),
     name: safeString({
       min: 1,
       max: 200,
