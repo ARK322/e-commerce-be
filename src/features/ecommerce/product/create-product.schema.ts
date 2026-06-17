@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { safeString, safeUrlSchema } from '@/lib/common/validation/common-schemas';
+import { safeString } from '@/lib/common/validation/common-schemas';
 import { slugSchema } from '@/lib/common/validation/slug-schema';
 import { productCategoryAssignmentSchema } from '@/features/ecommerce/product/product-category.schema';
 
@@ -25,7 +25,6 @@ export const createProductSchema = productCategoryAssignmentSchema.extend({
     .min(1, 'Minimum sipariş adedi en az 1 olmalı')
     .default(1),
   isActive: z.boolean().optional(),
-  images: z.array(safeUrlSchema).max(10, 'En fazla 10 görsel eklenebilir').optional(),
-});
+}).strict();
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;

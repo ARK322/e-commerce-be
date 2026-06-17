@@ -9,7 +9,8 @@ import {
   toSellerProductResponse,
   type ProductRecord,
 } from '@/features/ecommerce/product/product-response';
-import { deleteProductImagesFromStorage } from '@/features/ecommerce/product/product-images.service';
+import { deleteProductImagesFromStorage, uploadProductImage } from '@/features/ecommerce/product/product-images.service';
+import type { ProductImageUpload } from '@/features/ecommerce/product/product-image-types';
 import type { CreateProductInput } from '@/features/ecommerce/product/create-product.schema';
 import type { ListProductsQuery } from '@/features/ecommerce/product/list-products.schema';
 import type { UpdateProductInput } from '@/features/ecommerce/product/update-product.schema';
@@ -119,10 +120,41 @@ export const createProduct = async (sellerId: string, input: CreateProductInput)
     stock: input.stock,
     minOrderQuantity: input.minOrderQuantity,
     isActive: input.isActive ?? true,
-    images: input.images ?? [],
+    images: [],
   });
 
   return toSellerProductResponse(product.toObject());
+};
+
+export const createProductWithImages = async (
+  sellerId: string,
+  input: CreateProductInput,
+  images: ProductImageUpload[] = []
+) => {
+  const product = await createProduct(sellerId, input);
+
+  if (images.length === 0) {
+    return product;
+  }
+
+  try {
+    let latestProduct = product;
+
+    for (const image of images) {
+      const result = await uploadProductImage(
+        sellerId,
+        product.id,
+        image.mimeType,
+        image.buffer
+      );
+      latestProduct = result.product;
+    }
+
+    return latestProduct;
+  } catch (error) {
+    await deleteProduct(sellerId, product.id);
+    throw error;
+  }
 };
 
 export const updateProduct = async (

@@ -13,10 +13,6 @@ import { productIdParamSchema } from '@/lib/common/validation/param-schemas';
 import { handleRouteError } from '@/lib/common/http/handle-route-error';
 import { SELLER_PERMISSIONS } from '@/features/auth/seller/access/permission-keys';
 import {
-  createProductSchema,
-  type CreateProductInput,
-} from '@/features/ecommerce/product/create-product.schema';
-import {
   updateProductSchema,
   type UpdateProductInput,
 } from '@/features/ecommerce/product/update-product.schema';
@@ -24,8 +20,9 @@ import {
   listProductsQuerySchema,
   type ListProductsQuery,
 } from '@/features/ecommerce/product/list-products.schema';
+import { parseCreateProductRequest } from '@/features/ecommerce/product/parse-create-product-request';
 import {
-  createProduct,
+  createProductWithImages,
   deleteProduct,
   getPublicProductById,
   listPublicProducts,
@@ -40,7 +37,7 @@ import {
   deleteProductImageSchema,
   type DeleteProductImageInput,
 } from '@/features/ecommerce/product/delete-product-image.schema';
-import { MAX_PRODUCT_IMAGE_BYTES } from '@/features/ecommerce/product/product-image-types';
+import { MAX_PRODUCT_IMAGE_BYTES, MAX_PRODUCT_IMAGES } from '@/features/ecommerce/product/product-image-types';
 
 const sellerApproved = {
   preHandler: [requireAuth, requireEmailVerified, requireApprovedSeller],
@@ -71,7 +68,7 @@ export default async function productRoutes(fastify: FastifyInstance) {
   await fastify.register(multipart, {
     limits: {
       fileSize: MAX_PRODUCT_IMAGE_BYTES,
-      files: 1,
+      files: MAX_PRODUCT_IMAGES,
     },
   });
 
@@ -111,27 +108,25 @@ export default async function productRoutes(fastify: FastifyInstance) {
     }
   );
 
-  fastify.post(
-    '/',
-    { preHandler: [...sellerWrite.preHandler, validateBody(createProductSchema)] },
-    async (req, reply) => {
-      try {
-        const product = await createProduct(
-          req.sellerContext!.companyId,
-          req.body as CreateProductInput
-        );
+  fastify.post('/', sellerWrite, async (req, reply) => {
+    try {
+      const { input, images } = await parseCreateProductRequest(req);
+      const product = await createProductWithImages(
+        req.sellerContext!.companyId,
+        input,
+        images
+      );
 
-        return reply.status(201).send({
-          message: 'Ürün oluşturuldu',
-          product,
-        });
-      } catch (error) {
-        return handleRouteError(reply, error, 'Ürün işlemi sırasında bir hata oluştu', {
-          duplicateKeyMessage: 'Bu slug zaten kullanılıyor',
-        });
-      }
+      return reply.status(201).send({
+        message: images.length > 0 ? 'Ürün ve görseller oluşturuldu' : 'Ürün oluşturuldu',
+        product,
+      });
+    } catch (error) {
+      return handleRouteError(reply, error, 'Ürün işlemi sırasında bir hata oluştu', {
+        duplicateKeyMessage: 'Bu slug zaten kullanılıyor',
+      });
     }
-  );
+  });
 
   fastify.patch(
     '/:productId',

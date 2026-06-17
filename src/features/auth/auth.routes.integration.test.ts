@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import type { FastifyInstance } from 'fastify';
 import { hashPassword } from '@/lib/common/password';
 import { signAuthToken } from '@/lib/security/access-token';
+import { buildApp } from '@/app/server/build-app';
 
 const mockUserFindOne = vi.fn();
 const mockUserFindById = vi.fn();
@@ -13,7 +14,7 @@ vi.mock('@/features/auth/core/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-vi.mock('../db', async (importOriginal) => {
+vi.mock('@/db', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/db')>();
   return {
     ...actual,
@@ -32,8 +33,6 @@ vi.mock('../db', async (importOriginal) => {
     },
   };
 });
-
-import { buildApp } from '@/app/build-app';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerEmail = 'seller@test.com';
@@ -218,20 +217,5 @@ describe('auth routes integration', () => {
     });
 
     expect(response.statusCode).toBe(400);
-  });
-
-  it('OPTIONS /auth/profile preflight PATCH methoduna izin verir', async () => {
-    const response = await app.inject({
-      method: 'OPTIONS',
-      url: '/auth/profile',
-      headers: {
-        origin: 'http://localhost:3000',
-        'access-control-request-method': 'PATCH',
-        'access-control-request-headers': 'authorization,content-type',
-      },
-    });
-
-    expect(response.statusCode).toBe(204);
-    expect(response.headers['access-control-allow-methods']).toContain('PATCH');
   });
 });

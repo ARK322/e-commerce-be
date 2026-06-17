@@ -1,8 +1,8 @@
 import { connectDB } from '@/db';
-import { buildApp } from '@/app/build-app';
+import { buildApp } from '@/app/server/build-app';
 import { logger } from '@/lib/common/logger';
 
-const getPort = () => {
+export const getPort = (): number => {
   const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
   if (Number.isNaN(port)) {
@@ -12,7 +12,7 @@ const getPort = () => {
   return port;
 };
 
-const start = async () => {
+export const start = async (): Promise<void> => {
   try {
     await connectDB();
     logger.info('MongoDB bağlantısı başarılı');
@@ -28,4 +28,6 @@ const start = async () => {
   }
 };
 
-start();
+if (require.main === module) {
+  void start();
+}

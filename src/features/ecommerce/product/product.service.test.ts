@@ -15,6 +15,7 @@ vi.mock('@/features/ecommerce/category/category.service', () => ({
 
 vi.mock('@/features/ecommerce/product/product-images.service', () => ({
   deleteProductImagesFromStorage: vi.fn().mockResolvedValue(undefined),
+  uploadProductImage: vi.fn(),
 }));
 
 vi.mock('@/db', () => ({
@@ -37,11 +38,13 @@ vi.mock('@/lib/common/user-id', () => ({
 
 import {
   createProduct,
+  createProductWithImages,
   deleteProduct,
   getPublicProductById,
   listPublicProducts,
   updateProduct,
 } from '@/features/ecommerce/product/product.service';
+import { uploadProductImage } from '@/features/ecommerce/product/product-images.service';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 const categoryId = '660e8400-e29b-41d4-a716-446655440001';
@@ -85,6 +88,7 @@ describe('createProduct', () => {
         name: 'Kulaklık',
         price: 999,
         stock: 5,
+        minOrderQuantity: 1,
       })
     ).rejects.toMatchObject({
       statusCode: 400,
@@ -101,6 +105,7 @@ describe('createProduct', () => {
       name: 'Kulaklık',
       price: 999,
       stock: 5,
+      minOrderQuantity: 1,
     });
 
     expect(mockProductCreate).toHaveBeenCalledWith(
@@ -113,6 +118,66 @@ describe('createProduct', () => {
       })
     );
     expect(result.categoryIds).toEqual([categoryId, secondCategoryId]);
+  });
+});
+
+describe('createProductWithImages', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCategoryCountDocuments.mockResolvedValue(1);
+    mockProductCreate.mockResolvedValue({
+      toObject: () => productDoc,
+    });
+    mockProductFindById.mockReturnValue({
+      sellerId,
+      images: [],
+      updatedAt: new Date(),
+      save: vi.fn(),
+      toObject: () => productDoc,
+    });
+    mockProductFindByIdAndDelete.mockResolvedValue(productDoc);
+  });
+
+  it('görsel yoksa sadece ürün oluşturur', async () => {
+    const result = await createProductWithImages(sellerId, {
+      categoryIds: [categoryId],
+      primaryCategoryId: categoryId,
+      name: 'Kulaklık',
+      price: 999,
+      stock: 5,
+      minOrderQuantity: 1,
+    });
+
+    expect(uploadProductImage).not.toHaveBeenCalled();
+    expect(result.id).toBe(productId);
+    expect(result.images).toEqual([]);
+  });
+
+  it('görsel varsa yükler ve ürünü döner', async () => {
+    vi.mocked(uploadProductImage).mockResolvedValue({
+      url: 'https://example.com/image.jpg',
+      product: {
+        ...productDoc,
+        id: productId,
+        images: ['https://example.com/image.jpg'],
+      },
+    });
+
+    const result = await createProductWithImages(
+      sellerId,
+      {
+        categoryIds: [categoryId],
+        primaryCategoryId: categoryId,
+        name: 'Kulaklık',
+        price: 999,
+        stock: 5,
+        minOrderQuantity: 1,
+      },
+      [{ mimeType: 'image/jpeg', buffer: Buffer.from([0xff, 0xd8, 0xff]) }]
+    );
+
+    expect(uploadProductImage).toHaveBeenCalledOnce();
+    expect(result.images).toEqual(['https://example.com/image.jpg']);
   });
 });
 

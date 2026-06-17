@@ -2,6 +2,11 @@ export const MAX_PRODUCT_IMAGES = 10;
 export const MAX_PRODUCT_IMAGE_BYTES = 2 * 1024 * 1024;
 export const PRODUCT_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 
+export type ProductImageUpload = {
+  mimeType: string;
+  buffer: Buffer;
+};
+
 export const buildProductImageObjectPath = (
   sellerId: string,
   productId: string,

@@ -2,7 +2,7 @@ import fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import { HttpError } from '@/lib/common/errors';
-import { corsOriginHandler } from '@/app/cors-config';
+import { corsOriginHandler } from '@/app/config/cors-config';
 import { registerRoutes } from '@/app/routes/register-routes';
 
 export const buildApp = async (): Promise<FastifyInstance> => {
