@@ -5,7 +5,7 @@ import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { validateQuery } from '@/middleware/validation/validate-query';
 import { userIdParamSchema } from '@/internal/validation/param-schemas';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
 import { listSellersQuerySchema, type ListSellersQuery } from '@/features/auth/admin/sellers/list-sellers.schema';
 import { rejectSellerSchema, type RejectSellerInput } from '@/features/auth/admin/sellers/reject-seller.schema';

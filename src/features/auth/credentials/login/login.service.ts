@@ -1,4 +1,4 @@
-import { signAuthToken } from '@/plugins/jwt/access-token';
+import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { comparePassword } from '@/internal/security';
 import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';

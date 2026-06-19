@@ -28,11 +28,11 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/features/auth/account/profile/seller.service', () => ({
+vi.mock('@/internal/auth/profile/seller', () => ({
   updateSellerProfile: (...args: unknown[]) => mockUpdateSellerProfile(...args),
 }));
 
-import { uploadSellerDocument } from '@/features/auth/account/profile/documents.service';
+import { uploadSellerDocument } from '@/internal/auth/profile/documents';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const pdfBuffer = Buffer.from('%PDF-1.4 test');

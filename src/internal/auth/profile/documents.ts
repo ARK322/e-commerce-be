@@ -1,4 +1,4 @@
-import type { AuthTokenPayload } from '@/plugins/jwt/access-token';
+import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
 import { HttpError } from '@/internal/errors';
 import {
   deleteFromSellerStorage,
@@ -19,7 +19,7 @@ import {
   type SellerDocumentType,
 } from '@/internal/auth/profile/seller-document-types';
 import type { SellerProfileUpdateInput } from '@/features/auth/account/profile/profile.schema';
-import { updateSellerProfile } from '@/features/auth/account/profile/seller.service';
+import { updateSellerProfile } from '@/internal/auth/profile/seller';
 
 export type UploadSellerDocumentInput = {
   docType: string;

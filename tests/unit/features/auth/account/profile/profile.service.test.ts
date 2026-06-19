@@ -18,11 +18,11 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/features/auth/account/profile/buyer.service', () => ({
+vi.mock('@/internal/auth/profile/buyer', () => ({
   updateBuyerProfile: (...args: unknown[]) => mockUpdateBuyerProfile(...args),
 }));
 
-vi.mock('@/features/auth/account/profile/seller.service', () => ({
+vi.mock('@/internal/auth/profile/seller', () => ({
   updateSellerProfile: (...args: unknown[]) => mockUpdateSellerProfile(...args),
 }));
 

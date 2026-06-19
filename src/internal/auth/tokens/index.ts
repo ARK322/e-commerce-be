@@ -3,17 +3,17 @@ export {
   verifyAuthToken,
   type AuthTokenPayload,
   type UserRole,
-} from '@/plugins/jwt/access-token';
+} from '@/internal/auth/tokens/access-token';
 export {
   signEmailVerificationToken,
   verifyEmailVerificationToken,
   signPasswordResetToken,
   verifyPasswordResetToken,
-} from '@/plugins/jwt/email-token';
-export { isTokenRevoked, revokeToken } from '@/plugins/jwt/session/revoke-token';
+} from '@/internal/auth/tokens/email-token';
+export { isTokenRevoked, revokeToken } from '@/internal/auth/tokens/revoke-token';
 export {
   isTokenIssuedBefore,
   revokeAllSessions,
   PASSWORD_CHANGED_MESSAGE,
   SESSIONS_REVOKED_MESSAGE,
-} from '@/plugins/jwt/session/invalidate-all';
+} from '@/internal/auth/tokens/invalidate-all';

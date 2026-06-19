@@ -3,11 +3,11 @@ import { adminOnly } from '@/middleware/presets/admin-route-guards';
 import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { userIdParamSchema } from '@/internal/validation/param-schemas';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 import {
   adminProfileUpdateSchema,
   type AdminProfileUpdateInput,
-} from '@/features/auth/admin/profile/admin-profile-fields.schema';
+} from '@/features/auth/admin/profile/profile.schema';
 import { getAdminProfile, updateAdminProfile } from '@/features/auth/admin/profile/profile.service';
 
 export default async function (fastify: FastifyInstance) {

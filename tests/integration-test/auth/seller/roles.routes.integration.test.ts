@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import type { FastifyInstance } from 'fastify';
 import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
 import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { signAuthToken } from '@/plugins/jwt/access-token';
+import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListSellerRoles = vi.fn();

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { signAuthToken, type UserRole } from '@/plugins/jwt/access-token';
-import { verifyEmailVerificationToken } from '@/plugins/jwt/email-token';
+import { signAuthToken, type UserRole } from '@/internal/auth/tokens/access-token';
+import { verifyEmailVerificationToken } from '@/internal/auth/tokens/email-token';
 import { invalidateAuthOtp, OtpError, verifyAuthOtp } from '@/internal/auth/otp/otp';
 import { deleteUnverifiedUser } from '@/internal/auth/register/unverified-user';
 import { User } from '@/integrations/mongo';

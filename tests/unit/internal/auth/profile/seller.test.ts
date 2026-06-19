@@ -16,7 +16,7 @@ vi.mock('@/internal/auth/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-import { updateSellerProfile } from '@/features/auth/account/profile/seller.service';
+import { updateSellerProfile } from '@/internal/auth/profile/seller';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const companyId = '550e8400-e29b-41d4-a716-446655440000';

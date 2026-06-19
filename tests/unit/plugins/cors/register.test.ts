@@ -46,11 +46,47 @@ describe('getAllowedOrigins', () => {
 });
 
 describe('corsOriginHandler', () => {
+  const originalEnv = process.env;
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   it('origin header yoksa izin verir', () => {
     const callback = vi.fn();
 
     corsOriginHandler(undefined, callback);
 
     expect(callback).toHaveBeenCalledWith(null, true);
+  });
+
+  it('izinli origin kabul edilir', () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'production',
+      FRONTEND_URL: 'https://app.example.com',
+      CORS_ORIGINS: undefined,
+    };
+
+    const callback = vi.fn();
+
+    corsOriginHandler('https://app.example.com', callback);
+
+    expect(callback).toHaveBeenCalledWith(null, true);
+  });
+
+  it('izinli olmayan origin Error fırlatmaz', () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'production',
+      FRONTEND_URL: 'https://app.example.com',
+      CORS_ORIGINS: undefined,
+    };
+
+    const callback = vi.fn();
+
+    corsOriginHandler('https://evil.example.com', callback);
+
+    expect(callback).toHaveBeenCalledWith(null, false);
   });
 });

@@ -4,7 +4,7 @@ import {
   EmailCooldownError,
   markPasswordResetEmailSent,
 } from '@/internal/auth/mail/cooldown';
-import { signPasswordResetToken } from '@/plugins/jwt/email-token';
+import { signPasswordResetToken } from '@/internal/auth/tokens/email-token';
 import { sendPasswordResetEmail } from '@/integrations/resend/send';
 import { createAuthOtp, invalidateAuthOtp } from '@/internal/auth/otp/otp';
 import { User } from '@/integrations/mongo';

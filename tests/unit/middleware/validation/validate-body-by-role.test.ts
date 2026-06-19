@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { buyerProfileUpdateSchema } from '@/features/auth/account/profile/buyer-profile-update.schema';
-import { sellerProfileUpdateSchema } from '@/features/auth/account/profile/seller-profile-update.schema';
+import { buyerProfileUpdateSchema } from '@/features/auth/account/profile/profile.schema';
+import { sellerProfileUpdateSchema } from '@/features/auth/account/profile/profile.schema';
 import { validateBodyByRole } from '@/middleware/validation/validate-body-by-role';
 
 const validateProfileUpdate = validateBodyByRole({

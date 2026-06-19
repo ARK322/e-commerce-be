@@ -4,7 +4,7 @@ import { requireOwner } from '@/middleware/auth/require-admin';
 import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { userIdParamSchema } from '@/internal/validation/param-schemas';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 import { createAdmin, deleteAdmin, getAdminByUserId, listAdmins, updateAdmin } from '@/features/auth/admin/admins/admins.service';
 import { createAdminSchema, type CreateAdminInput } from '@/features/auth/admin/admins/create-admin.schema';
 import { updateAdminSchema, type UpdateAdminInput } from '@/features/auth/admin/admins/update-admin.schema';

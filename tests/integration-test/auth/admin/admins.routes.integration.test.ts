@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { signAuthToken } from '@/plugins/jwt/access-token';
+import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListAdmins = vi.fn();

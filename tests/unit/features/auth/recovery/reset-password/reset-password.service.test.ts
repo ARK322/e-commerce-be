@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { signPasswordResetToken } from '@/plugins/jwt/email-token';
+import { signPasswordResetToken } from '@/internal/auth/tokens/email-token';
 
 const mockFindOne = vi.fn();
 const mockFindById = vi.fn();

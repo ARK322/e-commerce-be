@@ -3,7 +3,7 @@ import {
   AUTH_ADMIN_RATE_LIMIT,
   AUTH_PUBLIC_RATE_LIMIT,
   AUTH_SELLER_RATE_LIMIT,
-} from '@/plugins/rate-limit/presets';
+} from '@/middleware/presets/rate-limit';
 import { registerScopedRateLimit } from '@/plugins/rate-limit/register-scoped';
 import registerRoutes from '@/features/auth/credentials/register/register.routes';
 import loginRoutes from '@/features/auth/credentials/login/login.routes';

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { signAuthToken } from '@/plugins/jwt/access-token';
+import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockChangePassword = vi.fn();

@@ -2,13 +2,16 @@ import { FastifyInstance } from 'fastify';
 import { registerProfileDocumentMultipart } from '@/plugins/multipart/profile';
 import { requireAuth } from '@/middleware/auth/require-auth';
 import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
-import { buyerProfileUpdateSchema } from '@/features/auth/account/profile/buyer-profile-update.schema';
-import { sellerProfileUpdateSchema } from '@/features/auth/account/profile/seller-profile-update.schema';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
+import {
+  buyerProfileUpdateSchema,
+  sellerProfileUpdateSchema,
+  type BuyerProfileUpdateInput,
+  type SellerProfileUpdateInput,
+} from '@/features/auth/account/profile/profile.schema';
 import { getProfile, updateProfile } from '@/features/auth/account/profile/profile.service';
-import type { BuyerProfileUpdateInput, SellerProfileUpdateInput } from '@/features/auth/account/profile/profile.schema';
 import { validateBodyByRole } from '@/middleware/validation/validate-body-by-role';
-import documentsRoutes from '@/features/auth/account/profile/documents.routes';
+import documentsRoutes from '@/features/auth/account/profile/documents/documents.routes';
 
 const validateProfileUpdate = validateBodyByRole({
   schemas: {

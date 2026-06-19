@@ -1,4 +1,4 @@
-import type { AuthTokenPayload } from '@/plugins/jwt/access-token';
+import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
 import { hashPassword, comparePassword } from '@/internal/security';
 import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';

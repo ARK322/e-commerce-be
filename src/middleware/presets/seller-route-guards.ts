@@ -1,10 +1,10 @@
 import { requireAuth } from '@/middleware/auth/require-auth';
 import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
 import {
+  requireApprovedSeller,
   requireKurumsalSeller,
-  requireSellerContext,
 } from '@/middleware/ecommerce/require-approved-seller';
 
 export const sellerTeamBase = {
-  preHandler: [requireAuth, requireEmailVerified, requireSellerContext, requireKurumsalSeller],
+  preHandler: [requireAuth, requireEmailVerified, requireApprovedSeller, requireKurumsalSeller],
 };

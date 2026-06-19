@@ -2,9 +2,9 @@ import { FastifyInstance, FastifyReply } from 'fastify';
 import { Payment } from '@/integrations/mongo';
 import { env } from '@/config/env';
 import { validateBody } from '@/middleware/validation/validate-body';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 import { logger } from '@/internal/logging';
-import { disabledRouteRateLimit } from '@/plugins/rate-limit/presets';
+import { disabledRouteRateLimit } from '@/middleware/presets/rate-limit';
 import { orderIdParamSchema } from '@/internal/validation/param-schemas';
 import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-guards';
 import {

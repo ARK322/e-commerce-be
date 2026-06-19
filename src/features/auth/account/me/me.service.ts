@@ -1,4 +1,4 @@
-import type { AuthTokenPayload } from '@/plugins/jwt/access-token';
+import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
 import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
 import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';

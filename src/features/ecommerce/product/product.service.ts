@@ -10,7 +10,7 @@ import {
   toPublicProductResponse,
   toSellerProductResponse,
 } from '@/internal/ecommerce/product/product-response';
-import { deleteProductImagesFromStorage, uploadProductImage } from '@/features/ecommerce/product/product-images.service';
+import { deleteProductImagesFromStorage, uploadProductImage } from '@/internal/ecommerce/product/product-images';
 import type { ProductImageUpload } from '@/internal/ecommerce/product/product-image-types';
 import type { CreateProductInput } from '@/features/ecommerce/product/create-product.schema';
 import type { ListProductsQuery } from '@/features/ecommerce/product/list-products.schema';

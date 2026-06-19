@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { verifyPasswordResetToken } from '@/plugins/jwt/email-token';
+import { verifyPasswordResetToken } from '@/internal/auth/tokens/email-token';
 import { invalidateAuthOtp, OtpError, verifyAuthOtp } from '@/internal/auth/otp/otp';
 import { hashPassword } from '@/internal/security';
 import { User } from '@/integrations/mongo';

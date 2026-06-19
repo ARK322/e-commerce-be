@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { validateBody } from '@/middleware/validation/validate-body';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 import { productIdParamSchema } from '@/internal/validation/param-schemas';
 import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-guards';
 import {

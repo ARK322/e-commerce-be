@@ -9,7 +9,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/plugins/jwt/session/revoke-token', () => ({
+vi.mock('@/internal/auth/tokens/revoke-token', () => ({
   revokeToken: (...args: unknown[]) => mockRevokeToken(...args),
 }));
 

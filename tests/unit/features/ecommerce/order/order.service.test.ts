@@ -32,7 +32,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/features/ecommerce/payment/payment-split.service', () => ({
+vi.mock('@/internal/ecommerce/payment/payment-split', () => ({
   approvePaymentSplitsForOrder: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -44,7 +44,7 @@ import {
   createOrderFromCart,
   updateOrderStatus,
 } from '@/features/ecommerce/order/order.service';
-import { approvePaymentSplitsForOrder } from '@/features/ecommerce/payment/payment-split.service';
+import { approvePaymentSplitsForOrder } from '@/internal/ecommerce/payment/payment-split';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerId = '660e8400-e29b-41d4-a716-446655440001';

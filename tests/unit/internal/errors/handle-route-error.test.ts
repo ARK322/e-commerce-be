@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { FastifyReply } from 'fastify';
 import { AuthError } from '@/internal/auth/errors';
 import { EcommerceError } from '@/internal/ecommerce/errors';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 
 const createReply = () => {
   const reply = {

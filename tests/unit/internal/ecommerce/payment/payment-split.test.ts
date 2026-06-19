@@ -25,7 +25,7 @@ vi.mock('@/integrations/iyzico/approve-payment-item', () => ({
 
 vi.stubEnv('PLATFORM_COMMISSION_RATE', '0.10');
 
-import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/features/ecommerce/payment/payment-split.service';
+import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/internal/ecommerce/payment/payment-split';
 import { EcommerceError } from '@/internal/ecommerce/errors';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';

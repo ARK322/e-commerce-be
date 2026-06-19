@@ -3,8 +3,8 @@ import { sellerTeamBase } from '@/middleware/presets/seller-route-guards';
 import { requireAuth } from '@/middleware/auth/require-auth';
 import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
 import {
+  requireApprovedSeller,
   requireKurumsalSeller,
-  requireSellerContext,
 } from '@/middleware/ecommerce/require-approved-seller';
 
 describe('sellerTeamBase', () => {
@@ -12,7 +12,7 @@ describe('sellerTeamBase', () => {
     expect(sellerTeamBase.preHandler).toEqual([
       requireAuth,
       requireEmailVerified,
-      requireSellerContext,
+      requireApprovedSeller,
       requireKurumsalSeller,
     ]);
   });

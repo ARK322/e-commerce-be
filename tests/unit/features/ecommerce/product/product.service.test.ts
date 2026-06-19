@@ -8,7 +8,7 @@ vi.mock('@/features/ecommerce/category/category.service', () => ({
   getCategoryProductFilterIds: (...args: unknown[]) => mockGetCategoryProductFilterIds(...args),
 }));
 
-vi.mock('@/features/ecommerce/product/product-images.service', () => ({
+vi.mock('@/internal/ecommerce/product/product-images', () => ({
   deleteProductImagesFromStorage: vi.fn().mockResolvedValue(undefined),
   uploadProductImage: vi.fn(),
 }));
@@ -43,7 +43,7 @@ import {
   listPublicProducts,
   updateProduct,
 } from '@/features/ecommerce/product/product.service';
-import { uploadProductImage } from '@/features/ecommerce/product/product-images.service';
+import { uploadProductImage } from '@/internal/ecommerce/product/product-images';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 const categoryId = '660e8400-e29b-41d4-a716-446655440001';

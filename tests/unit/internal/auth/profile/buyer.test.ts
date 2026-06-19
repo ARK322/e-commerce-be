@@ -14,7 +14,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-import { updateBuyerProfile } from '@/features/auth/account/profile/buyer.service';
+import { updateBuyerProfile } from '@/internal/auth/profile/buyer';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

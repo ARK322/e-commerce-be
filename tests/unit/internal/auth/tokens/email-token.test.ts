@@ -5,7 +5,7 @@ import {
   signPasswordResetToken,
   verifyEmailVerificationToken,
   verifyPasswordResetToken,
-} from '@/plugins/jwt/email-token';
+} from '@/internal/auth/tokens/email-token';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

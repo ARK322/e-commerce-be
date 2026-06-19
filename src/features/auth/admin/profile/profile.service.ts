@@ -4,7 +4,7 @@ import { formatAdminResponse } from '@/internal/auth/responses/admin.response';
 import { Admin, User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
 import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import type { AdminProfileUpdateInput } from '@/features/auth/admin/profile/admin-profile-fields.schema';
+import type { AdminProfileUpdateInput } from '@/features/auth/admin/profile/profile.schema';
 
 const findAdminWithUser = async (targetUserId: string) => {
   const admin = await Admin.findById(targetUserId);

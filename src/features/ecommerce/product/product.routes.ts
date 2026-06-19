@@ -10,7 +10,7 @@ import {
   type ProductImageUpload,
 } from '@/internal/ecommerce/product/product-image-types';
 import { registerProductMultipart } from '@/plugins/multipart/product';
-import { ECOMMERCE_SELLER_WRITE_RATE_LIMIT } from '@/plugins/rate-limit/presets';
+import { ECOMMERCE_SELLER_WRITE_RATE_LIMIT } from '@/middleware/presets/rate-limit';
 import { registerScopedRateLimit } from '@/plugins/rate-limit/register-scoped';
 import { requireAuth } from '@/middleware/auth/require-auth';
 import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
@@ -22,7 +22,7 @@ import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { validateQuery } from '@/middleware/validation/validate-query';
 import { productIdParamSchema } from '@/internal/validation/param-schemas';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
 import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
 import {
   updateProductSchema,
@@ -43,7 +43,7 @@ import {
 import {
   deleteProductImage,
   uploadProductImage,
-} from '@/features/ecommerce/product/product-images.service';
+} from '@/internal/ecommerce/product/product-images';
 import {
   deleteProductImageSchema,
   type DeleteProductImageInput,

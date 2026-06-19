@@ -8,7 +8,7 @@ import type { CreatePaymentInput } from '@/features/ecommerce/payment/create-pay
 import {
   buildPaymentSplitsForOrder,
   syncPaymentSplitTransactionIds,
-} from '@/features/ecommerce/payment/payment-split.service';
+} from '@/internal/ecommerce/payment/payment-split';
 
 type PaymentRecord = {
   _id: unknown;

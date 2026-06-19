@@ -18,7 +18,7 @@ vi.mock('@/internal/auth/otp/otp', () => ({
   invalidateAuthOtp: (...args: unknown[]) => mockInvalidateAuthOtp(...args),
 }));
 
-vi.mock('@/plugins/jwt/email-token', () => ({
+vi.mock('@/internal/auth/tokens/email-token', () => ({
   signPasswordResetToken: vi.fn().mockReturnValue('reset-token'),
 }));
 

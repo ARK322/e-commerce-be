@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { signEmailVerificationToken } from '@/plugins/jwt/email-token';
+import { signEmailVerificationToken } from '@/internal/auth/tokens/email-token';
 import { AuthError } from '@/internal/auth/errors';
 
 const mockFindOne = vi.fn();

@@ -11,7 +11,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-import { isTokenRevoked, revokeToken } from '@/plugins/jwt/session/revoke-token';
+import { isTokenRevoked, revokeToken } from '@/internal/auth/tokens/revoke-token';
 
 describe('revoke-token', () => {
   beforeEach(() => {

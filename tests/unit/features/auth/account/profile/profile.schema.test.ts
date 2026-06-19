@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buyerProfileUpdateSchema } from '@/features/auth/account/profile/buyer-profile-update.schema';
+import { buyerProfileUpdateSchema } from '@/features/auth/account/profile/profile.schema';
 
 describe('buyerProfileUpdateSchema', () => {
   it('boş gövde reddedilir', () => {

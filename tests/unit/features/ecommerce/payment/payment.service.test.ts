@@ -13,7 +13,7 @@ vi.mock('@/integrations/iyzico/initialize-checkout', () => ({
   initializeIyzicoCheckout: (...args: unknown[]) => mockInitializeIyzicoCheckout(...args),
 }));
 
-vi.mock('@/features/ecommerce/payment/payment-split.service', () => ({
+vi.mock('@/internal/ecommerce/payment/payment-split', () => ({
   buildPaymentSplitsForOrder: (...args: unknown[]) => mockBuildPaymentSplitsForOrder(...args),
   syncPaymentSplitTransactionIds: vi.fn(),
 }));

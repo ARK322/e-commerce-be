@@ -3,7 +3,7 @@ import {
   isTokenIssuedBefore,
   PASSWORD_CHANGED_MESSAGE,
   SESSIONS_REVOKED_MESSAGE,
-} from '@/plugins/jwt/session/invalidate-all';
+} from '@/internal/auth/tokens/invalidate-all';
 
 describe('isTokenIssuedBefore', () => {
   it('invalidationPoint yoksa oturumu geçerli sayar', () => {

@@ -3,7 +3,7 @@ import { createUserId } from '@/internal/ids';
 import { EcommerceError } from '@/internal/ecommerce/errors';
 import { clearCart } from '@/features/ecommerce/cart/cart.service';
 import { assertCartItemQuantity } from '@/internal/ecommerce/product/product-order-quantity';
-import { approvePaymentSplitsForOrder } from '@/features/ecommerce/payment/payment-split.service';
+import { approvePaymentSplitsForOrder } from '@/internal/ecommerce/payment/payment-split';
 import type { UpdateOrderStatusInput } from '@/features/ecommerce/order/update-order-status.schema';
 
 type OrderItemRecord = {

@@ -16,7 +16,7 @@ export const corsOriginHandler = (
     return;
   }
 
-  callback(new Error('CORS: origin izinli değil'), false);
+  callback(null, false);
 };
 
 export const registerCors = async (app: FastifyInstance): Promise<void> => {

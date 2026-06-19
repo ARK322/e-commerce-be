@@ -1,13 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { signAuthToken } from '@/plugins/jwt/access-token';
+import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockUploadSellerDocument = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/auth/account/profile/documents.service', () => ({
+vi.mock('@/internal/auth/profile/documents', () => ({
   uploadSellerDocument: (...args: unknown[]) => mockUploadSellerDocument(...args),
 }));
 

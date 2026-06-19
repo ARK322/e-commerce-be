@@ -1,9 +1,9 @@
-import type { AuthTokenPayload } from '@/plugins/jwt/access-token';
+import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
 import { User, Buyer, Seller } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
 import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
-import { updateBuyerProfile } from '@/features/auth/account/profile/buyer.service';
-import { updateSellerProfile } from '@/features/auth/account/profile/seller.service';
+import { updateBuyerProfile } from '@/internal/auth/profile/buyer';
+import { updateSellerProfile } from '@/internal/auth/profile/seller';
 import type { BuyerProfileUpdateInput, SellerProfileUpdateInput } from '@/features/auth/account/profile/profile.schema';
 
 export const getProfile = async (auth: AuthTokenPayload) => {

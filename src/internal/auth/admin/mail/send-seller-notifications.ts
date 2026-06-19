@@ -3,7 +3,7 @@ import { getFrontendUrl } from '@/integrations/resend/transporter';
 import {
   buildSellerApprovedEmailHtml,
   buildSellerRejectedEmailHtml,
-} from '@/internal/auth/admin/mail/templates';
+} from '@/integrations/resend/seller-templates';
 
 export const sendSellerApprovedEmail = async (
   to: string,

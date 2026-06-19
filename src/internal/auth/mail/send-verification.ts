@@ -1,4 +1,4 @@
-import { signEmailVerificationToken } from '@/plugins/jwt/email-token';
+import { signEmailVerificationToken } from '@/internal/auth/tokens/email-token';
 import { createAuthOtp } from '@/internal/auth/otp/otp';
 import { sendVerificationEmail } from '@/integrations/resend/send';
 

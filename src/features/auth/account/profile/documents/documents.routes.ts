@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { requireAuth } from '@/middleware/auth/require-auth';
 import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
-import { handleRouteError } from '@/plugins/http/handle-route-error';
-import { uploadSellerDocument } from '@/features/auth/account/profile/documents.service';
+import { handleRouteError } from '@/internal/errors/handle-route-error';
+import { uploadSellerDocument } from '@/internal/auth/profile/documents';
 
 export default async function documentsRoutes(fastify: FastifyInstance) {
   fastify.post(

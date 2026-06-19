@@ -1,5 +1,5 @@
-import { revokeToken } from '@/plugins/jwt/session/revoke-token';
-import { revokeAllSessions } from '@/plugins/jwt/session/invalidate-all';
+import { revokeToken } from '@/internal/auth/tokens/revoke-token';
+import { revokeAllSessions } from '@/internal/auth/tokens/invalidate-all';
 
 export const logout = async (token: string) => {
   await revokeToken(token);

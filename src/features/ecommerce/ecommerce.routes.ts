@@ -3,14 +3,14 @@ import {
   ECOMMERCE_ADMIN_RATE_LIMIT,
   ECOMMERCE_BUYER_RATE_LIMIT,
   ECOMMERCE_PUBLIC_RATE_LIMIT,
-} from '@/plugins/rate-limit/presets';
+} from '@/middleware/presets/rate-limit';
 import { registerScopedRateLimit } from '@/plugins/rate-limit/register-scoped';
 import productRoutes from '@/features/ecommerce/product/product.routes';
 import cartRoutes from '@/features/ecommerce/cart/cart.routes';
 import orderRoutes from '@/features/ecommerce/order/order.routes';
 import paymentRoutes from '@/features/ecommerce/payment/payment.routes';
 import categoryRoutes from '@/features/ecommerce/category/category.routes';
-import categoriesAdminRoutes from '@/features/ecommerce/category/admin.routes';
+import categoriesAdminRoutes from '@/features/ecommerce/category/admin/admin.routes';
 
 export default async function ecommerceRoutes(fastify: FastifyInstance) {
   await fastify.register(async (publicScope) => {
