@@ -2,26 +2,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
 import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
 
-const mockUserFindById = vi.fn();
+const mockUserFindByIdLean = vi.fn();
 const mockSellerFindById = vi.fn();
-const mockSellerFindOneAndUpdate = vi.fn();
+const mockApproveSellerIfPending = vi.fn();
+const mockSaveSellerDocument = vi.fn();
 const mockSendApproved = vi.fn();
 const mockSendRejected = vi.fn();
 
-const chainFindById = (value: unknown) => ({
-  select: vi.fn().mockReturnValue({
-    lean: vi.fn().mockResolvedValue(value),
-  }),
-});
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUserByIdLean: (...args: unknown[]) => mockUserFindByIdLean(...args),
+}));
 
-vi.mock('@/integrations/mongo', () => ({
-  User: {
-    findById: (...args: unknown[]) => mockUserFindById(...args),
-  },
-  Seller: {
-    findById: (...args: unknown[]) => mockSellerFindById(...args),
-    findOneAndUpdate: (...args: unknown[]) => mockSellerFindOneAndUpdate(...args),
-  },
+vi.mock('@/repositories/sellers/seller.repository', () => ({
+  findSellerById: (...args: unknown[]) => mockSellerFindById(...args),
+  approveSellerIfPending: (...args: unknown[]) => mockApproveSellerIfPending(...args),
+  saveSellerDocument: (...args: unknown[]) => mockSaveSellerDocument(...args),
 }));
 
 vi.mock('@/integrations/iyzico/create-submerchant', () => ({
@@ -83,7 +78,7 @@ const completeSellerProfile = {
   companyType: 'ltd' as const,
 };
 
-const mockPendingSeller = (save: ReturnType<typeof vi.fn>) => ({
+const mockPendingSeller = () => ({
   _id: userId,
   approvalStatus: 'pending',
   rejectionReason: null,
@@ -95,46 +90,42 @@ const mockPendingSeller = (save: ReturnType<typeof vi.fn>) => ({
     approvalStatus: 'pending',
     ...completeSellerProfile,
   }),
-  save,
 });
 
 describe('sellers.service bildirimleri', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUserFindById.mockReturnValue(
-      chainFindById({
-        role: 'seller',
-        email: 'seller@example.com',
-        isEmailVerified: true,
-      })
-    );
+    mockUserFindByIdLean.mockResolvedValue({
+      role: 'seller',
+      email: 'seller@example.com',
+      isEmailVerified: true,
+    });
     mockSendApproved.mockResolvedValue(undefined);
     mockSendRejected.mockResolvedValue(undefined);
-    mockSellerFindOneAndUpdate.mockResolvedValue({
+    mockApproveSellerIfPending.mockResolvedValue({
       _id: userId,
       approvalStatus: 'approved',
       companyName: 'Test A.Ş.',
     });
+    mockSaveSellerDocument.mockResolvedValue(undefined);
   });
 
   it('onay sonrası satıcıya mail gönderir', async () => {
-    const save = vi.fn();
-    mockSellerFindById.mockResolvedValue(mockPendingSeller(save));
+    mockSellerFindById.mockResolvedValue(mockPendingSeller());
 
     await approveSeller(ownerCtx, userId);
 
-    expect(mockSellerFindOneAndUpdate).toHaveBeenCalled();
+    expect(mockApproveSellerIfPending).toHaveBeenCalled();
     expect(createIyzicoSubMerchant).toHaveBeenCalled();
     expect(mockSendApproved).toHaveBeenCalledWith('seller@example.com', 'Test A.Ş.');
   });
 
   it('red sonrası sebeple birlikte mail gönderir', async () => {
-    const save = vi.fn();
-    mockSellerFindById.mockResolvedValue(mockPendingSeller(save));
+    mockSellerFindById.mockResolvedValue(mockPendingSeller());
 
     await rejectSeller(ownerCtx, userId, 'Vergi levhası okunamıyor');
 
-    expect(save).toHaveBeenCalled();
+    expect(mockSaveSellerDocument).toHaveBeenCalled();
     expect(mockSendRejected).toHaveBeenCalledWith(
       'seller@example.com',
       'Vergi levhası okunamıyor',
@@ -143,8 +134,7 @@ describe('sellers.service bildirimleri', () => {
   });
 
   it('mail gönderilemese bile onay işlemi tamamlanır', async () => {
-    const save = vi.fn();
-    mockSellerFindById.mockResolvedValue(mockPendingSeller(save));
+    mockSellerFindById.mockResolvedValue(mockPendingSeller());
     mockSendApproved.mockRejectedValue(new Error('Resend hatası'));
 
     const result = await approveSeller(ownerCtx, userId);
@@ -170,26 +160,23 @@ describe('sellers.service bildirimleri', () => {
 describe('syncSellerIyzicoSubMerchant', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUserFindById.mockReturnValue(
-      chainFindById({
-        role: 'seller',
-        email: 'seller@example.com',
-      })
-    );
+    mockUserFindByIdLean.mockResolvedValue({
+      role: 'seller',
+      email: 'seller@example.com',
+    });
+    mockSaveSellerDocument.mockResolvedValue(undefined);
   });
 
   it('DBden onaylı ama keysiz satıcı için Iyzico kaydı oluşturur', async () => {
-    const save = vi.fn();
     mockSellerFindById.mockResolvedValue({
-      ...mockPendingSeller(save),
+      ...mockPendingSeller(),
       approvalStatus: 'approved',
-      save,
     });
 
     const result = await syncSellerIyzicoSubMerchant(ownerCtx, userId);
 
     expect(createIyzicoSubMerchant).toHaveBeenCalled();
-    expect(save).toHaveBeenCalled();
+    expect(mockSaveSellerDocument).toHaveBeenCalled();
     expect(result).toMatchObject({
       created: true,
       iyzicoSubMerchantRegistered: true,
@@ -197,18 +184,16 @@ describe('syncSellerIyzicoSubMerchant', () => {
   });
 
   it('key zaten varsa yeniden oluşturmaz', async () => {
-    const save = vi.fn();
     mockSellerFindById.mockResolvedValue({
-      ...mockPendingSeller(save),
+      ...mockPendingSeller(),
       approvalStatus: 'approved',
       iyzicoSubMerchantKey: 'existing-key',
-      save,
     });
 
     const result = await syncSellerIyzicoSubMerchant(ownerCtx, userId);
 
     expect(createIyzicoSubMerchant).not.toHaveBeenCalled();
-    expect(save).not.toHaveBeenCalled();
+    expect(mockSaveSellerDocument).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       created: false,
       iyzicoSubMerchantRegistered: true,
@@ -216,7 +201,7 @@ describe('syncSellerIyzicoSubMerchant', () => {
   });
 
   it('onaylı olmayan satıcı için 400 fırlatır', async () => {
-    mockSellerFindById.mockResolvedValue(mockPendingSeller(vi.fn()));
+    mockSellerFindById.mockResolvedValue(mockPendingSeller());
 
     await expect(syncSellerIyzicoSubMerchant(ownerCtx, userId)).rejects.toMatchObject({
       statusCode: 400,

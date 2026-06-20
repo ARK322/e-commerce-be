@@ -1,13 +1,15 @@
 import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
-import { User, Buyer, Seller } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
 import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
 import { updateBuyerProfile } from '@/internal/auth/profile/buyer';
 import { updateSellerProfile } from '@/internal/auth/profile/seller';
+import { findUserById } from '@/repositories/auth/user.repository';
+import { findBuyerByIdLean } from '@/repositories/buyers/buyer.repository';
+import { findSellerByIdLean } from '@/repositories/sellers/seller.repository';
 import type { BuyerProfileUpdateInput, SellerProfileUpdateInput } from '@/features/buyers/profile/profile.schema';
 
 export const getProfile = async (auth: AuthTokenPayload) => {
-  const user = await User.findById(auth.userId).select('email role isActive isEmailVerified');
+  const user = await findUserById(auth.userId);
 
   if (!user) {
     throw new AuthError(404, 'Kullanıcı bulunamadı');
@@ -20,7 +22,7 @@ export const getProfile = async (auth: AuthTokenPayload) => {
   const statusFields = await buildAuthUserFields(user);
 
   if (auth.role === 'buyer') {
-    const profile = await Buyer.findById(auth.userId).lean();
+    const profile = await findBuyerByIdLean(auth.userId);
 
     if (!profile) {
       throw new AuthError(404, 'Alıcı profili bulunamadı');
@@ -34,9 +36,9 @@ export const getProfile = async (auth: AuthTokenPayload) => {
   }
 
   if (auth.role === 'seller') {
-    const profile = await Seller.findById(
-      'companyId' in statusFields ? statusFields.companyId : auth.userId
-    ).lean();
+    const profile = await findSellerByIdLean(
+      'companyId' in statusFields ? String(statusFields.companyId) : auth.userId
+    );
 
     if (!profile) {
       throw new AuthError(404, 'Satıcı profili bulunamadı');

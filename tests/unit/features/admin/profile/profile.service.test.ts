@@ -4,21 +4,16 @@ import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
 
 const mockAdminFindById = vi.fn();
 const mockUserFindById = vi.fn();
-const mockFindByIdAndUpdate = vi.fn();
+const mockUpdateAdminById = vi.fn();
 const mockGetRoleSummariesByIds = vi.fn();
 
-const chainFindById = (value: unknown) => ({
-  select: vi.fn().mockResolvedValue(value),
-});
+vi.mock('@/repositories/auth/admin.repository', () => ({
+  findAdminById: (...args: unknown[]) => mockAdminFindById(...args),
+  updateAdminById: (...args: unknown[]) => mockUpdateAdminById(...args),
+}));
 
-vi.mock('@/integrations/mongo', () => ({
-  Admin: {
-    findById: (...args: unknown[]) => mockAdminFindById(...args),
-    findByIdAndUpdate: (...args: unknown[]) => mockFindByIdAndUpdate(...args),
-  },
-  User: {
-    findById: (...args: unknown[]) => mockUserFindById(...args),
-  },
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUserById: (...args: unknown[]) => mockUserFindById(...args),
 }));
 
 vi.mock('@/internal/auth/access/admin/role-queries', () => ({
@@ -68,8 +63,8 @@ describe('updateAdminProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAdminFindById.mockResolvedValue(limitedAdmin);
-    mockUserFindById.mockReturnValue(chainFindById(limitedUser));
-    mockFindByIdAndUpdate.mockResolvedValue({
+    mockUserFindById.mockResolvedValue(limitedUser);
+    mockUpdateAdminById.mockResolvedValue({
       ...limitedAdmin,
       firstName: 'Ali',
       lastName: 'Veli',
@@ -91,13 +86,13 @@ describe('updateAdminProfile', () => {
     });
 
     expect(result.profile.firstName).toBe('Ali');
-    expect(mockFindByIdAndUpdate).toHaveBeenCalled();
+    expect(mockUpdateAdminById).toHaveBeenCalled();
   });
 
   it('owner başka admin profilini güncelleyebilir', async () => {
     await updateAdminProfile(ownerCtx, ownerId, limitedId, { firstName: 'Ali' });
 
-    expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
+    expect(mockUpdateAdminById).toHaveBeenCalledWith(
       limitedId,
       { $set: { firstName: 'Ali' } },
       { returnDocument: 'after' }
@@ -111,6 +106,6 @@ describe('updateAdminProfile', () => {
       statusCode: 403,
     });
 
-    expect(mockFindByIdAndUpdate).not.toHaveBeenCalled();
+    expect(mockUpdateAdminById).not.toHaveBeenCalled();
   });
 });

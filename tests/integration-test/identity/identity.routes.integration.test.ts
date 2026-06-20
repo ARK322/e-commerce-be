@@ -40,6 +40,14 @@ const userId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerEmail = 'seller@test.com';
 const sellerPassword = 'Test1234!';
 
+const makeUserQuery = (user: Record<string, unknown>) => {
+  const query = Promise.resolve(user) as Promise<Record<string, unknown>> & {
+    select: ReturnType<typeof vi.fn>;
+  };
+  query.select = vi.fn().mockResolvedValue(user);
+  return query;
+};
+
 const mockSellerProfile = (approvalStatus: 'draft' | 'approved' = 'draft') => {
   mockSellerFindById.mockReturnValue({
     select: vi.fn().mockReturnValue({
@@ -49,16 +57,16 @@ const mockSellerProfile = (approvalStatus: 'draft' | 'approved' = 'draft') => {
 };
 
 const mockAuthenticatedUser = () => {
-  mockUserFindById.mockReturnValue({
-    select: vi.fn().mockResolvedValue({
-      _id: userId,
-      email: sellerEmail,
-      role: 'seller',
-      isEmailVerified: true,
-      passwordChangedAt: null,
-      sessionsRevokedAt: null,
-    }),
-  });
+  const user = {
+    _id: userId,
+    email: sellerEmail,
+    role: 'seller',
+    isEmailVerified: true,
+    passwordChangedAt: null,
+    sessionsRevokedAt: null,
+  };
+
+  mockUserFindById.mockReturnValue(makeUserQuery(user));
 };
 
 describe('auth routes integration', () => {

@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockUserFindById = vi.fn();
-const mockBuyerFindById = vi.fn();
-const mockSellerFindById = vi.fn();
+const mockBuyerFindByIdLean = vi.fn();
+const mockSellerFindByIdLean = vi.fn();
 const mockUpdateBuyerProfile = vi.fn();
 const mockUpdateSellerProfile = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
-  User: {
-    findById: (...args: unknown[]) => mockUserFindById(...args),
-  },
-  Buyer: {
-    findById: (...args: unknown[]) => mockBuyerFindById(...args),
-  },
-  Seller: {
-    findById: (...args: unknown[]) => mockSellerFindById(...args),
-  },
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUserById: (...args: unknown[]) => mockUserFindById(...args),
+}));
+
+vi.mock('@/repositories/buyers/buyer.repository', () => ({
+  findBuyerByIdLean: (...args: unknown[]) => mockBuyerFindByIdLean(...args),
+}));
+
+vi.mock('@/repositories/sellers/seller.repository', () => ({
+  findSellerByIdLean: (...args: unknown[]) => mockSellerFindByIdLean(...args),
 }));
 
 vi.mock('@/internal/auth/profile/buyer', () => ({
@@ -50,28 +50,18 @@ import { getProfile, updateProfile } from '@/features/buyers/profile/profile.ser
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 
-const chainSelect = (value: unknown) => ({
-  select: vi.fn().mockResolvedValue(value),
-});
-
-const chainLean = (value: unknown) => ({
-  lean: vi.fn().mockResolvedValue(value),
-});
-
 describe('getProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('admin 403 alır', async () => {
-    mockUserFindById.mockReturnValue(
-      chainSelect({
-        email: 'admin@example.com',
-        role: 'admin',
-        isActive: true,
-        isEmailVerified: true,
-      })
-    );
+    mockUserFindById.mockResolvedValue({
+      email: 'admin@example.com',
+      role: 'admin',
+      isActive: true,
+      isEmailVerified: true,
+    });
 
     await expect(getProfile({ userId, role: 'admin' })).rejects.toMatchObject({
       statusCode: 403,
@@ -80,16 +70,14 @@ describe('getProfile', () => {
   });
 
   it('buyer profilini döner', async () => {
-    mockUserFindById.mockReturnValue(
-      chainSelect({
-        _id: userId,
-        email: 'buyer@example.com',
-        role: 'buyer',
-        isActive: false,
-        isEmailVerified: true,
-      })
-    );
-    mockBuyerFindById.mockReturnValue(chainLean({ _id: userId, firstName: 'Ali' }));
+    mockUserFindById.mockResolvedValue({
+      _id: userId,
+      email: 'buyer@example.com',
+      role: 'buyer',
+      isActive: false,
+      isEmailVerified: true,
+    });
+    mockBuyerFindByIdLean.mockResolvedValue({ _id: userId, firstName: 'Ali' });
 
     const result = await getProfile({ userId, role: 'buyer' });
 
@@ -103,20 +91,16 @@ describe('getProfile', () => {
   });
 
   it('seller profilinde approvalStatus döner', async () => {
-    mockUserFindById.mockReturnValue(
-      chainSelect({
-        email: 'seller@example.com',
-        role: 'seller',
-        isEmailVerified: true,
-      })
-    );
-    mockSellerFindById.mockReturnValue(
-      chainLean({
-        _id: userId,
-        approvalStatus: 'pending',
-        rejectionReason: null,
-      })
-    );
+    mockUserFindById.mockResolvedValue({
+      email: 'seller@example.com',
+      role: 'seller',
+      isEmailVerified: true,
+    });
+    mockSellerFindByIdLean.mockResolvedValue({
+      _id: userId,
+      approvalStatus: 'pending',
+      rejectionReason: null,
+    });
 
     const result = await getProfile({ userId, role: 'seller' });
 

@@ -5,7 +5,19 @@ import {
 } from '@/internal/auth/admin/mail/send-seller-notifications';
 import { isSellerProfileComplete } from '@/internal/auth/profile/profile-completion';
 import { createLogger } from '@/internal/common/logging';
-import { Seller, User, type SellerApprovalStatus } from '@/integrations/mongo';
+import type { SellerApprovalStatus } from '@/integrations/mongo';
+import {
+  approveSellerIfPending,
+  findSellerById,
+  findSellerByIdLean,
+  listSellersLean,
+  saveSellerDocument,
+} from '@/repositories/sellers/seller.repository';
+import {
+  findUserById,
+  findUserByIdLean,
+  findUsersByIdsLean,
+} from '@/repositories/auth/user.repository';
 import { AuthError } from '@/internal/auth/errors';
 import { HttpError } from '@/internal/common/errors';
 import { createIyzicoSubMerchant } from '@/integrations/iyzico/create-submerchant';
@@ -84,14 +96,13 @@ export const listSellers = async (ctx: AdminAccessContext, status?: SellerApprov
 
   const filter = status ? { approvalStatus: status } : {};
 
-  const sellers = await Seller.find(filter)
-    .sort({ _id: -1 })
-    .lean();
+  const sellers = await listSellersLean(filter);
 
   const userIds = sellers.map((seller) => seller._id);
-  const users = await User.find({ _id: { $in: userIds } })
-    .select('email isEmailVerified createdAt')
-    .lean();
+  const users = await findUsersByIdsLean(
+    userIds.map(String),
+    'email isEmailVerified createdAt'
+  );
 
   const usersById = new Map(users.map((user) => [String(user._id), user]));
 
@@ -118,13 +129,13 @@ export const listSellers = async (ctx: AdminAccessContext, status?: SellerApprov
 export const getSellerByUserId = async (ctx: AdminAccessContext, userId: string) => {
   assertCanReadSellers(ctx);
 
-  const user = await User.findById(userId).select('email role isEmailVerified createdAt').lean();
+  const user = await findUserByIdLean(userId, 'email role isEmailVerified createdAt');
 
   if (!user || user.role !== 'seller') {
     throw new AuthError(404, 'Satıcı bulunamadı');
   }
 
-  const profile = await Seller.findById(userId).lean();
+  const profile = await findSellerByIdLean(userId);
 
   if (!profile) {
     throw new AuthError(404, 'Satıcı profili bulunamadı');
@@ -148,13 +159,13 @@ export const rejectSeller = async (
 ) => {
   assertCanManageSellerApproval(ctx);
 
-  const user = await User.findById(userId).select('role email').lean();
+  const user = await findUserByIdLean(userId, 'role email');
 
   if (!user || user.role !== 'seller') {
     throw new AuthError(404, 'Satıcı bulunamadı');
   }
 
-  const seller = await Seller.findById(userId);
+  const seller = await findSellerById(userId);
 
   if (!seller) {
     throw new AuthError(404, 'Satıcı profili bulunamadı');
@@ -166,7 +177,7 @@ export const rejectSeller = async (
 
   seller.approvalStatus = 'rejected';
   seller.rejectionReason = reason;
-  await seller.save();
+  await saveSellerDocument(seller);
 
   try {
     await sendSellerRejectedEmail(user.email, reason, seller.companyName);
@@ -184,7 +195,7 @@ export const rejectSeller = async (
 export const approveSeller = async (ctx: AdminAccessContext, userId: string) => {
   assertCanManageSellerApproval(ctx);
 
-  const user = await User.findById(userId).select('role email isEmailVerified').lean();
+  const user = await findUserByIdLean(userId, 'role email isEmailVerified');
 
   if (!user || user.role !== 'seller') {
     throw new AuthError(404, 'Satıcı bulunamadı');
@@ -194,7 +205,7 @@ export const approveSeller = async (ctx: AdminAccessContext, userId: string) => 
     throw new AuthError(400, 'Satıcı e-postası doğrulanmadan onaylanamaz');
   }
 
-  const seller = await Seller.findById(userId);
+  const seller = await findSellerById(userId);
 
   if (!seller) {
     throw new AuthError(404, 'Satıcı profili bulunamadı');
@@ -210,17 +221,11 @@ export const approveSeller = async (ctx: AdminAccessContext, userId: string) => 
 
   const subMerchantKey = await registerSellerIyzicoSubMerchant(seller, user.email, userId);
 
-  const updated = await Seller.findOneAndUpdate(
-    { _id: userId, approvalStatus: 'pending' },
-    {
-      $set: {
-        approvalStatus: 'approved',
-        rejectionReason: null,
-        iyzicoSubMerchantKey: subMerchantKey,
-      },
-    },
-    { returnDocument: 'after' }
-  );
+  const updated = await approveSellerIfPending(userId, {
+    approvalStatus: 'approved',
+    rejectionReason: null,
+    iyzicoSubMerchantKey: subMerchantKey,
+  });
 
   if (!updated) {
     throw new AuthError(409, 'Satıcı onayı başka bir işlem tarafından tamamlandı');
@@ -241,13 +246,13 @@ export const approveSeller = async (ctx: AdminAccessContext, userId: string) => 
 export const syncSellerIyzicoSubMerchant = async (ctx: AdminAccessContext, userId: string) => {
   assertCanManageSellerApproval(ctx);
 
-  const user = await User.findById(userId).select('role email').lean();
+  const user = await findUserByIdLean(userId, 'role email');
 
   if (!user || user.role !== 'seller') {
     throw new AuthError(404, 'Satıcı bulunamadı');
   }
 
-  const seller = await Seller.findById(userId);
+  const seller = await findSellerById(userId);
 
   if (!seller) {
     throw new AuthError(404, 'Satıcı profili bulunamadı');
@@ -270,7 +275,7 @@ export const syncSellerIyzicoSubMerchant = async (ctx: AdminAccessContext, userI
     user.email,
     userId
   );
-  await seller.save();
+  await saveSellerDocument(seller);
 
   return {
     userId: seller._id,

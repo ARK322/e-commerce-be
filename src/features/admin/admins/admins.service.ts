@@ -15,20 +15,33 @@ import {
 import { formatAdminResponse } from '@/internal/auth/responses/admin.response';
 import { hashPassword } from '@/internal/common/security';
 import { createUserId } from '@/internal/common/ids';
-import { Admin, User } from '@/integrations/mongo';
+import {
+  createAdmin as createAdminRecord,
+  deleteAdminById,
+  findAdminById,
+  listAdminsLean,
+  saveAdminDocument,
+} from '@/repositories/auth/admin.repository';
+import {
+  createUser,
+  deleteUserById,
+  findUserByEmail,
+  findUserById,
+  findUsersByIdsLean,
+} from '@/repositories/auth/user.repository';
 import { AuthError, isDuplicateKeyError } from '@/internal/auth/errors';
 import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
 import type { CreateAdminInput } from '@/features/admin/admins/create-admin.schema';
 import type { UpdateAdminInput } from '@/features/admin/admins/update-admin.schema';
 
 const findAdminRecord = async (targetUserId: string) => {
-  const targetAdmin = await Admin.findById(targetUserId);
+  const targetAdmin = await findAdminById(targetUserId);
 
   if (!targetAdmin) {
     throw new AuthError(404, 'Admin bulunamadı');
   }
 
-  const targetUser = await User.findById(targetUserId).select('email role isEmailVerified createdAt');
+  const targetUser = await findUserById(targetUserId);
 
   if (!targetUser || targetUser.role !== 'admin') {
     throw new AuthError(404, 'Admin bulunamadı');
@@ -82,7 +95,7 @@ export const updateAdmin = async (
   }
 
   targetAdmin.roleId = data.roleId;
-  await targetAdmin.save();
+  await saveAdminDocument(targetAdmin);
 
   const rolesById = await getRoleSummariesByIds([data.roleId]);
 
@@ -92,12 +105,13 @@ export const updateAdmin = async (
 export const listAdmins = async (ctx: AdminAccessContext) => {
   assertPermission(ctx, PERMISSIONS.ADMINS_READ, 'Admin listesini görüntüleme yetkin yok');
 
-  const admins = await Admin.find().sort({ createdAt: -1 }).lean();
+  const admins = await listAdminsLean();
   const userIds = admins.map((admin) => admin._id);
   const roleIds = admins.map((admin) => String(admin.roleId));
-  const users = await User.find({ _id: { $in: userIds } })
-    .select('email isEmailVerified createdAt')
-    .lean();
+  const users = await findUsersByIdsLean(
+    userIds.map(String),
+    'email isEmailVerified createdAt'
+  );
   const rolesById = await getRoleSummariesByIds(roleIds);
 
   const usersById = new Map(users.map((user) => [String(user._id), user]));
@@ -115,7 +129,7 @@ export const createAdmin = async (ctx: AdminAccessContext, data: CreateAdminInpu
 
   await assertAssignableRoleId(data.roleId);
 
-  const existing = await User.findOne({ email: data.email.toLowerCase() });
+  const existing = await findUserByEmail(data.email);
 
   if (existing) {
     throw new AuthError(409, 'Bu e-posta adresi zaten kayıtlı');
@@ -125,7 +139,7 @@ export const createAdmin = async (ctx: AdminAccessContext, data: CreateAdminInpu
   const userId = createUserId();
 
   try {
-    const user = await User.create({
+    const user = await createUser({
       _id: userId,
       email: data.email,
       password: hashedPassword,
@@ -134,7 +148,7 @@ export const createAdmin = async (ctx: AdminAccessContext, data: CreateAdminInpu
       isEmailVerified: true,
     });
 
-    const admin = await Admin.create({
+    const admin = await createAdminRecord({
       _id: userId,
       roleId: data.roleId,
       createdBy: ctx.userId,
@@ -160,13 +174,13 @@ export const deleteAdmin = async (ctx: AdminAccessContext, targetUserId: string)
     throw new AuthError(403, 'Admin silme yetkisi sadece owner\'da');
   }
 
-  const targetAdmin = await Admin.findById(targetUserId);
+  const targetAdmin = await findAdminById(targetUserId);
 
   if (!targetAdmin) {
     throw new AuthError(404, 'Admin bulunamadı');
   }
 
-  const targetUser = await User.findById(targetUserId).select('role');
+  const targetUser = await findUserById(targetUserId);
 
   if (!targetUser || targetUser.role !== 'admin') {
     throw new AuthError(404, 'Admin bulunamadı');
@@ -180,8 +194,8 @@ export const deleteAdmin = async (ctx: AdminAccessContext, targetUserId: string)
     }
   }
 
-  await Admin.findByIdAndDelete(targetUserId);
-  await User.findByIdAndDelete(targetUserId);
+  await deleteAdminById(targetUserId);
+  await deleteUserById(targetUserId);
 
   return { userId: targetUserId };
 };

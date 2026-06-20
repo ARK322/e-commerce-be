@@ -3,13 +3,17 @@ import { signAuthToken, type UserRole } from '@/internal/auth/tokens/access-toke
 import { verifyEmailVerificationToken } from '@/internal/auth/tokens/email-token';
 import { invalidateAuthOtp, OtpError, verifyAuthOtp } from '@/internal/auth/otp/otp';
 import { deleteUnverifiedUser } from '@/internal/auth/register/unverified-user';
-import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
 import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
+import {
+  findUserByEmail,
+  findUserById,
+  saveUserDocument,
+} from '@/repositories/auth/user.repository';
 import type { VerifyEmailInput } from '@/features/identity/verify-email/verify-email.schema';
 
 const markEmailVerified = async (userId: string) => {
-  const user = await User.findById(userId);
+  const user = await findUserById(userId);
 
   if (!user) {
     throw new AuthError(404, 'Kullanıcı bulunamadı');
@@ -26,7 +30,7 @@ const markEmailVerified = async (userId: string) => {
 
   user.isEmailVerified = true;
   user.verificationExpiresAt = null;
-  await user.save();
+  await saveUserDocument(user);
   await invalidateAuthOtp(userId, 'email_verify');
 
   return user;
@@ -49,7 +53,7 @@ const verifyEmailByToken = async (token: string) => {
 };
 
 const verifyEmailByCode = async (email: string, code: string) => {
-  const user = await User.findOne({ email: email.toLowerCase() });
+  const user = await findUserByEmail(email);
 
   if (!user) {
     throw new AuthError(400, 'Geçersiz doğrulama kodu veya e-posta');

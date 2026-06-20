@@ -10,7 +10,20 @@ import {
   canReadAdminRoles,
   canWriteAdminRoles,
 } from '@/internal/auth/access/admin/permissions';
-import { Admin, AdminRole, SYSTEM_OWNER_ROLE_SLUG } from '@/integrations/mongo';
+import { SYSTEM_OWNER_ROLE_SLUG } from '@/integrations/mongo';
+import {
+  countAdminsByRoleId,
+} from '@/repositories/auth/admin.repository';
+import {
+  createAdminRole as createAdminRoleRecord,
+  deleteAdminRoleById,
+  findAdminRoleById,
+  findAdminRoleByIdLean,
+  findAdminRoleBySlugLean,
+  listAdminRolesLean,
+  listAssignableAdminRolesLean,
+  saveAdminRoleDocument,
+} from '@/repositories/auth/admin-role.repository';
 import { AuthError, isDuplicateKeyError } from '@/internal/auth/errors';
 import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
 import { createUserId } from '@/internal/common/ids';
@@ -49,7 +62,7 @@ export const listAdminRoles = async (ctx: AdminAccessContext) => {
     throw new AuthError(403, 'Rol listesini görüntüleme yetkin yok');
   }
 
-  const roles = await AdminRole.find().sort({ isSystem: -1, name: 1 }).lean();
+  const roles = await listAdminRolesLean();
   return roles.map(formatRoleResponse);
 };
 
@@ -58,7 +71,7 @@ export const getAdminRoleById = async (ctx: AdminAccessContext, roleId: string) 
     throw new AuthError(403, 'Rol görüntüleme yetkin yok');
   }
 
-  const role = await AdminRole.findById(roleId).lean();
+  const role = await findAdminRoleByIdLean(roleId);
 
   if (!role) {
     throw new AuthError(404, 'Rol bulunamadı');
@@ -79,14 +92,14 @@ export const createAdminRole = async (
     throw new AuthError(400, 'Bu slug sistem rolü için ayrılmış');
   }
 
-  const existingSlug = await AdminRole.findOne({ slug: data.slug }).lean();
+  const existingSlug = await findAdminRoleBySlugLean(data.slug);
 
   if (existingSlug) {
     throw new AuthError(409, 'Bu slug zaten kullanılıyor');
   }
 
   try {
-    const role = await AdminRole.create({
+    const role = await createAdminRoleRecord({
       _id: createUserId(),
       name: data.name,
       slug: data.slug,
@@ -115,7 +128,7 @@ export const updateAdminRole = async (
     throw new AuthError(403, 'Rol güncelleme yetkisi sadece owner\'da');
   }
 
-  const role = await AdminRole.findById(roleId);
+  const role = await findAdminRoleById(roleId);
 
   if (!role) {
     throw new AuthError(404, 'Rol bulunamadı');
@@ -137,7 +150,7 @@ export const updateAdminRole = async (
     role.permissions = data.permissions;
   }
 
-  await role.save();
+  await saveAdminRoleDocument(role);
 
   return formatRoleResponse(role);
 };
@@ -147,7 +160,7 @@ export const deleteAdminRole = async (ctx: AdminAccessContext, roleId: string) =
     throw new AuthError(403, 'Rol silme yetkisi sadece owner\'da');
   }
 
-  const role = await AdminRole.findById(roleId);
+  const role = await findAdminRoleById(roleId);
 
   if (!role) {
     throw new AuthError(404, 'Rol bulunamadı');
@@ -157,13 +170,13 @@ export const deleteAdminRole = async (ctx: AdminAccessContext, roleId: string) =
     throw new AuthError(400, 'Sistem rolü silinemez');
   }
 
-  const assignedCount = await Admin.countDocuments({ roleId });
+  const assignedCount = await countAdminsByRoleId(roleId);
 
   if (assignedCount > 0) {
     throw new AuthError(400, 'Bu role atanmış adminler var, rol silinemez');
   }
 
-  await AdminRole.findByIdAndDelete(roleId);
+  await deleteAdminRoleById(roleId);
 
   return { roleId };
 };
@@ -179,10 +192,7 @@ export {
 export const listAssignableRoles = async (ctx: AdminAccessContext) => {
   assertIsOwner(ctx, 'Rol listesini görüntüleme yetkisi sadece owner\'da');
 
-  const roles = await AdminRole.find({ slug: { $ne: SYSTEM_OWNER_ROLE_SLUG } })
-    .sort({ name: 1 })
-    .select('name slug description permissions isSystem')
-    .lean();
+  const roles = await listAssignableAdminRolesLean(SYSTEM_OWNER_ROLE_SLUG);
 
   return roles.map(formatRoleResponse);
 };

@@ -1,14 +1,17 @@
 import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
 import { hashPassword, comparePassword } from '@/internal/common/security';
-import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
+import {
+  findUserById,
+  updateUserById,
+} from '@/repositories/auth/user.repository';
 import type { ChangePasswordInput } from '@/features/identity/change-password/change-password.schema';
 
 export const changePassword = async (
   auth: AuthTokenPayload,
   data: ChangePasswordInput
 ) => {
-  const user = await User.findById(auth.userId);
+  const user = await findUserById(auth.userId);
 
   if (!user) {
     throw new AuthError(404, 'Kullanıcı bulunamadı');
@@ -21,8 +24,10 @@ export const changePassword = async (
   }
 
   const hashedPassword = await hashPassword(data.newPassword);
-  await User.findByIdAndUpdate(auth.userId, {
-    password: hashedPassword,
-    passwordChangedAt: new Date(),
+  await updateUserById(auth.userId, {
+    $set: {
+      password: hashedPassword,
+      passwordChangedAt: new Date(),
+    },
   });
 };

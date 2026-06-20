@@ -1,11 +1,18 @@
-import { Product } from '@/integrations/mongo';
 import type { FastifyRequest } from 'fastify';
 import { createUserId } from '@/internal/common/ids';
 import { CommerceError } from '@/internal/common/errors/commerce-error';
 import {
-  assertProductCategory,
-  getCategoryProductFilterIds,
-} from '@/features/catalog/categories/category.service';
+  countProducts,
+  createProduct as createProductRecord,
+  deleteProductById,
+  findProductById,
+  findPublicActiveProductLean,
+  listProductsLean,
+  listSellerProductsLean,
+  saveProductDocument,
+} from '@/repositories/catalog/product.repository';
+import { assertProductCategory } from '@/internal/catalog/category/product-category-validation';
+import { getCategoryProductFilterIds } from '@/internal/catalog/category/product-category-filters';
 import { escapeRegex } from '@/internal/common/validation/escape-regex';
 import { slugify } from '@/internal/catalog/category/slugify';
 import { getPublicVisibleCategoryIds, isCategoryPubliclyVisible } from '@/internal/catalog/category/visible-categories';
@@ -42,7 +49,7 @@ const resolveSlug = (name: string, slug?: string | null) => {
 };
 
 const getOwnedProduct = async (sellerId: string, productId: string) => {
-  const product = await Product.findById(productId);
+  const product = await findProductById(productId);
 
   if (!product || product.sellerId !== sellerId) {
     throw new CommerceError(404, 'Ürün bulunamadı');
@@ -95,8 +102,8 @@ const listPublicProductsUncached = async (query: ListProductsQuery) => {
   const skip = (query.page - 1) * query.limit;
 
   const [products, total] = await Promise.all([
-    Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(query.limit).lean(),
-    Product.countDocuments(filter),
+    listProductsLean(filter, { skip, limit: query.limit }),
+    countProducts(filter),
   ]);
 
   return {
@@ -129,11 +136,7 @@ export const getPublicProductById = async (productId: string) => {
 };
 
 const getPublicProductByIdUncached = async (productId: string) => {
-  const product = await Product.findOne({
-    _id: productId,
-    isActive: true,
-    categoryId: { $ne: null },
-  }).lean();
+  const product = await findPublicActiveProductLean(productId);
 
   if (!product || !product.categoryId) {
     throw new CommerceError(404, 'Ürün bulunamadı');
@@ -149,7 +152,7 @@ const getPublicProductByIdUncached = async (productId: string) => {
 };
 
 export const listSellerProducts = async (sellerId: string) => {
-  const products = await Product.find({ sellerId }).sort({ createdAt: -1 }).lean();
+  const products = await listSellerProductsLean(sellerId);
 
   return products.map(toSellerProductResponse);
 };
@@ -159,7 +162,7 @@ export const createProduct = async (sellerId: string, input: CreateProductInput)
 
   const slug = resolveSlug(input.name, input.slug);
 
-  const product = await Product.create({
+  const product = await createProductRecord({
     _id: createUserId(),
     sellerId,
     categoryId: input.categoryId,
@@ -279,7 +282,7 @@ export const updateProduct = async (
   }
 
   product.updatedAt = new Date();
-  await product.save();
+  await saveProductDocument(product);
 
   invalidateCatalogProductCache();
 
@@ -289,7 +292,7 @@ export const updateProduct = async (
 export const deleteProduct = async (sellerId: string, productId: string) => {
   const product = await getOwnedProduct(sellerId, productId);
   await deleteProductImagesFromStorage(product.images);
-  await Product.findByIdAndDelete(product._id);
+  await deleteProductById(String(product._id));
 
   invalidateCatalogProductCache();
 };

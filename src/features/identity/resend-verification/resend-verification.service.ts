@@ -6,13 +6,13 @@ import {
 } from '@/internal/auth/mail/cooldown';
 import { sendUserVerificationEmail } from '@/internal/auth/mail/send-verification';
 import { invalidateAuthOtp } from '@/internal/auth/otp/otp';
-import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
+import { findUserByEmail } from '@/repositories/auth/user.repository';
 
 const log = createLogger({ module: 'resend-verification' });
 
 export const resendVerificationEmail = async (email: string) => {
-  const user = await User.findOne({ email: email.toLowerCase() });
+  const user = await findUserByEmail(email);
 
   if (!user || user.isEmailVerified) {
     return;

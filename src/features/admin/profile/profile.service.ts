@@ -1,19 +1,23 @@
 import { canUpdateAdminProfile, canViewAdmin } from '@/internal/auth/access/admin/permissions';
 import { getRoleSummariesByIds } from '@/internal/auth/access/admin/role-queries';
 import { formatAdminResponse } from '@/internal/auth/responses/admin.response';
-import { Admin, User } from '@/integrations/mongo';
+import {
+  findAdminById,
+  updateAdminById,
+} from '@/repositories/auth/admin.repository';
+import { findUserById } from '@/repositories/auth/user.repository';
 import { AuthError } from '@/internal/auth/errors';
 import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
 import type { AdminProfileUpdateInput } from '@/features/admin/profile/profile.schema';
 
 const findAdminWithUser = async (targetUserId: string) => {
-  const admin = await Admin.findById(targetUserId);
+  const admin = await findAdminById(targetUserId);
 
   if (!admin) {
     throw new AuthError(404, 'Admin bulunamadı');
   }
 
-  const user = await User.findById(targetUserId).select('email role isEmailVerified createdAt');
+  const user = await findUserById(targetUserId);
 
   if (!user || user.role !== 'admin') {
     throw new AuthError(404, 'Admin bulunamadı');
@@ -53,7 +57,7 @@ export const updateAdminProfile = async (
 
   await findAdminWithUser(targetUserId);
 
-  const updatedAdmin = await Admin.findByIdAndUpdate(
+  const updatedAdmin = await updateAdminById(
     targetUserId,
     { $set: data },
     { returnDocument: 'after' }
@@ -63,7 +67,7 @@ export const updateAdminProfile = async (
     throw new AuthError(404, 'Admin bulunamadı');
   }
 
-  const user = await User.findById(targetUserId).select('email isEmailVerified createdAt');
+  const user = await findUserById(targetUserId);
 
   if (!user) {
     throw new AuthError(404, 'Admin bulunamadı');

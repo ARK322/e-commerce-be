@@ -12,8 +12,11 @@ vi.mock('@/internal/catalog/category/visible-categories', () => ({
   invalidateVisibleCategoryIdsCache: vi.fn(),
 }));
 
-vi.mock('@/features/catalog/categories/category.service', () => ({
+vi.mock('@/internal/catalog/category/product-category-validation', () => ({
   assertProductCategory: (...args: unknown[]) => mockAssertProductCategory(...args),
+}));
+
+vi.mock('@/internal/catalog/category/product-category-filters', () => ({
   getCategoryProductFilterIds: (...args: unknown[]) => mockGetCategoryProductFilterIds(...args),
 }));
 

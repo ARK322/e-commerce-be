@@ -8,12 +8,10 @@ const mockVerifyAuthOtp = vi.fn();
 const mockInvalidateAuthOtp = vi.fn();
 const mockHashPassword = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
-  User: {
-    findOne: (...args: unknown[]) => mockFindOne(...args),
-    findById: (...args: unknown[]) => mockFindById(...args),
-    findByIdAndUpdate: (...args: unknown[]) => mockFindByIdAndUpdate(...args),
-  },
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUserByEmail: (...args: unknown[]) => mockFindOne(...args),
+  findUserById: (...args: unknown[]) => mockFindById(...args),
+  updateUserById: (...args: unknown[]) => mockFindByIdAndUpdate(...args),
 }));
 
 vi.mock('@/internal/auth/otp/otp', async () => {
@@ -64,8 +62,10 @@ describe('resetPassword', () => {
       expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
         userId,
         expect.objectContaining({
-          password: 'hashed-new-password',
-          passwordChangedAt: expect.any(Date),
+          $set: expect.objectContaining({
+            password: 'hashed-new-password',
+            passwordChangedAt: expect.any(Date),
+          }),
         })
       );
       expect(mockInvalidateAuthOtp).toHaveBeenCalledWith(userId, 'password_reset');
@@ -93,7 +93,7 @@ describe('resetPassword', () => {
         newPassword,
       });
 
-      expect(mockFindOne).toHaveBeenCalledWith({ email: 'user@example.com' });
+      expect(mockFindOne).toHaveBeenCalledWith('user@example.com');
       expect(mockVerifyAuthOtp).toHaveBeenCalledWith(
         userId,
         'password_reset',

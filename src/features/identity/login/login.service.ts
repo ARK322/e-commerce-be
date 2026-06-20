@@ -1,9 +1,12 @@
 import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { comparePassword } from '@/internal/common/security';
-import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
 import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
 import { LOGIN_LOCKOUT_MS, LOGIN_MAX_FAILED_ATTEMPTS } from '@/config/constants';
+import {
+  findUserByEmail,
+  updateUserById,
+} from '@/repositories/auth/user.repository';
 import type { LoginInput } from '@/features/identity/login/login.schema';
 
 const LOCKOUT_MESSAGE =
@@ -19,11 +22,11 @@ const recordFailedLogin = async (userId: string, currentAttempts: number) => {
     update.loginBlockedUntil = new Date(Date.now() + LOGIN_LOCKOUT_MS);
   }
 
-  await User.findByIdAndUpdate(userId, { $set: update });
+  await updateUserById(userId, { $set: update });
 };
 
 const resetLoginAttempts = async (userId: string) => {
-  await User.findByIdAndUpdate(userId, {
+  await updateUserById(userId, {
     $set: {
       failedLoginAttempts: 0,
       loginBlockedUntil: null,
@@ -32,7 +35,7 @@ const resetLoginAttempts = async (userId: string) => {
 };
 
 export const login = async (data: LoginInput) => {
-  const user = await User.findOne({ email: data.email.toLowerCase() });
+  const user = await findUserByEmail(data.email);
 
   if (!user) {
     throw new AuthError(401, 'E-posta veya şifre hatalı');

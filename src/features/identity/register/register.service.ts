@@ -13,15 +13,17 @@ import {
 import { invalidateAuthOtp } from '@/internal/auth/otp/otp';
 import { hashPassword } from '@/internal/common/security';
 import { createUserId } from '@/internal/common/ids';
-import { User, Buyer, Seller } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
 import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
+import { createUser, findUserByEmail } from '@/repositories/auth/user.repository';
+import { createBuyerProfile } from '@/repositories/buyers/buyer.repository';
+import { createSellerProfile } from '@/repositories/sellers/seller.repository';
 import type { RegisterInput } from '@/features/identity/register/register.schema';
 
 const log = createLogger({ module: 'register' });
 
 const resolveEmailForRegister = async (email: string) => {
-  const existing = await User.findOne({ email: email.toLowerCase() });
+  const existing = await findUserByEmail(email);
 
   if (!existing) {
     return;
@@ -45,7 +47,7 @@ const createUserWithProfile = async (
   const hashedPassword = await hashPassword(password);
   const userId = createUserId();
 
-  const user = await User.create({
+  const user = await createUser({
     _id: userId,
     email,
     password: hashedPassword,
@@ -57,9 +59,9 @@ const createUserWithProfile = async (
 
   try {
     if (role === 'buyer') {
-      await Buyer.create({ _id: userId });
+      await createBuyerProfile(userId);
     } else {
-      await Seller.create({ _id: userId });
+      await createSellerProfile(userId);
     }
   } catch {
     await deleteUnverifiedUser(userId);

@@ -7,13 +7,13 @@ import {
 import { signPasswordResetToken } from '@/internal/auth/tokens/email-token';
 import { sendPasswordResetEmail } from '@/integrations/resend/send';
 import { createAuthOtp, invalidateAuthOtp } from '@/internal/auth/otp/otp';
-import { User } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
+import { findUserByEmail } from '@/repositories/auth/user.repository';
 
 const log = createLogger({ module: 'forgot-password' });
 
 export const forgotPassword = async (email: string) => {
-  const user = await User.findOne({ email: email.toLowerCase() });
+  const user = await findUserByEmail(email);
 
   if (!user) {
     return;

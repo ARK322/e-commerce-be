@@ -10,16 +10,20 @@ const mockAssertAssignableRoleId = vi.fn();
 const mockCountOwnerAdmins = vi.fn();
 const mockIsOwnerRoleId = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
-  Admin: {
-    findById: (...args: unknown[]) => mockAdminFindById(...args),
-    countDocuments: (...args: unknown[]) => mockCountDocuments(...args),
-    find: vi.fn(),
-  },
-  User: {
-    findById: (...args: unknown[]) => mockUserFindById(...args),
-    find: vi.fn(),
-  },
+vi.mock('@/repositories/auth/admin.repository', () => ({
+  findAdminById: (...args: unknown[]) => mockAdminFindById(...args),
+  countDocuments: (...args: unknown[]) => mockCountDocuments(...args),
+  listAdminsLean: vi.fn(),
+  saveAdminDocument: vi.fn(async (admin: { save?: () => Promise<unknown> }) => {
+    if (admin.save) {
+      await admin.save();
+    }
+  }),
+}));
+
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUserById: (...args: unknown[]) => mockUserFindById(...args),
+  findUsersByIdsLean: vi.fn(),
 }));
 
 vi.mock('@/internal/auth/access/admin/role-queries', () => ({
@@ -28,10 +32,6 @@ vi.mock('@/internal/auth/access/admin/role-queries', () => ({
   countOwnerAdmins: (...args: unknown[]) => mockCountOwnerAdmins(...args),
   isOwnerRoleId: (...args: unknown[]) => mockIsOwnerRoleId(...args),
 }));
-
-const chainFindById = (value: unknown) => ({
-  select: vi.fn().mockResolvedValue(value),
-});
 
 import { getAdminByUserId, listAdmins, updateAdmin } from '@/features/admin/admins/admins.service';
 
@@ -77,7 +77,7 @@ describe('getAdminByUserId', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAdminFindById.mockResolvedValue(limitedAdmin);
-    mockUserFindById.mockReturnValue(chainFindById(limitedUser));
+    mockUserFindById.mockResolvedValue(limitedUser);
     mockGetRoleSummariesByIds.mockResolvedValue(
       new Map([
         [
@@ -107,7 +107,7 @@ describe('updateAdmin', () => {
       ...limitedAdmin,
       save: vi.fn().mockResolvedValue(undefined),
     });
-    mockUserFindById.mockReturnValue(chainFindById(limitedUser));
+    mockUserFindById.mockResolvedValue(limitedUser);
     mockAssertAssignableRoleId.mockResolvedValue({
       _id: limitedRoleId,
       slug: 'limited',
