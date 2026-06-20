@@ -16,7 +16,8 @@ import {
 import { deleteProductImagesFromStorage, uploadProductImage, deleteProductImage } from '@/internal/catalog/product/product-images';
 import type { ProductImageUpload } from '@/internal/catalog/product/product-image-types';
 import { parseCreateProductRequest } from '@/internal/catalog/product/parse-create-product-request';
-import { catalogCacheKeys, catalogCacheTtl } from '@/internal/common/cache/catalog-keys';
+import { catalogCacheKeys } from '@/internal/common/cache/catalog-keys';
+import { catalogCacheConfig } from '@/internal/common/cache/catalog-cache-config';
 import { invalidateCatalogProductCache } from '@/internal/common/cache/catalog-cache';
 import { memoryCache } from '@/internal/common/cache/memory-cache';
 import {
@@ -72,6 +73,10 @@ const buildPublicFilter = async (query: ListProductsQuery) => {
 };
 
 export const listPublicProducts = async (query: ListProductsQuery) => {
+  if (!catalogCacheConfig.enabled) {
+    return listPublicProductsUncached(query);
+  }
+
   const cacheKey = catalogCacheKeys.productsList(query);
   const cached = memoryCache.get<Awaited<ReturnType<typeof listPublicProductsUncached>>>(cacheKey);
 
@@ -80,7 +85,7 @@ export const listPublicProducts = async (query: ListProductsQuery) => {
   }
 
   const result = await listPublicProductsUncached(query);
-  memoryCache.set(cacheKey, result, { ttlMs: catalogCacheTtl.productsListMs });
+  memoryCache.set(cacheKey, result, { ttlMs: catalogCacheConfig.productsListTtlMs });
 
   return result;
 };
@@ -106,6 +111,10 @@ const listPublicProductsUncached = async (query: ListProductsQuery) => {
 };
 
 export const getPublicProductById = async (productId: string) => {
+  if (!catalogCacheConfig.enabled) {
+    return getPublicProductByIdUncached(productId);
+  }
+
   const cacheKey = catalogCacheKeys.productDetail(productId);
   const cached = memoryCache.get<Awaited<ReturnType<typeof getPublicProductByIdUncached>>>(cacheKey);
 
@@ -114,7 +123,7 @@ export const getPublicProductById = async (productId: string) => {
   }
 
   const product = await getPublicProductByIdUncached(productId);
-  memoryCache.set(cacheKey, product, { ttlMs: catalogCacheTtl.productDetailMs });
+  memoryCache.set(cacheKey, product, { ttlMs: catalogCacheConfig.productDetailTtlMs });
 
   return product;
 };

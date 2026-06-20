@@ -4,10 +4,12 @@ import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-key
 import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
 import { signAuthToken } from '@/internal/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
+import { TEST_JWT_SECRET } from '../../../helpers/jwt-secret';
 
 const mockCreateOrderFromCart = vi.fn();
 const mockListSellerOrders = vi.fn();
 const mockUpdateOrderStatus = vi.fn();
+const mockCancelBuyerPendingOrder = vi.fn();
 const mockGetSellerContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
@@ -19,6 +21,7 @@ vi.mock('@/features/buyers/orders/order.service', () => ({
   listSellerOrders: (...args: unknown[]) => mockListSellerOrders(...args),
   getSellerOrderById: vi.fn(),
   updateOrderStatus: (...args: unknown[]) => mockUpdateOrderStatus(...args),
+  cancelBuyerPendingOrder: (...args: unknown[]) => mockCancelBuyerPendingOrder(...args),
 }));
 
 vi.mock('@/internal/auth/queries/seller-context', () => ({
@@ -105,7 +108,7 @@ describe('order routes integration', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
-    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-secret';
+    process.env.JWT_SECRET = process.env.JWT_SECRET ?? TEST_JWT_SECRET;
     app = await buildApp();
   });
 
@@ -202,5 +205,24 @@ describe('order routes integration', () => {
       message: 'Sipariş durumu güncellendi',
       order: { status: 'shipped' },
     });
+  });
+
+  it('POST /orders/:orderId/cancel bekleyen siparişi iptal eder', async () => {
+    const token = signAuthToken(buyerId, 'buyer');
+    mockActiveBuyer();
+    mockCancelBuyerPendingOrder.mockResolvedValue({ id: orderId, status: 'cancelled' });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/orders/${orderId}/cancel`,
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      message: 'Sipariş iptal edildi',
+      order: { id: orderId, status: 'cancelled' },
+    });
+    expect(mockCancelBuyerPendingOrder).toHaveBeenCalledWith(buyerId, orderId);
   });
 });

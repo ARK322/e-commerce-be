@@ -31,6 +31,18 @@ describe('env', () => {
 
     expect(env.allowedOrigins).toEqual(['https://a.test', 'https://b.test']);
   });
+
+  it('CATALOG_CACHE_ENABLED varsayılan true', () => {
+    delete process.env.CATALOG_CACHE_ENABLED;
+
+    expect(env.catalogCacheEnabled).toBe(true);
+  });
+
+  it('CATALOG_CACHE_ENABLED=false parse edilir', () => {
+    vi.stubEnv('CATALOG_CACHE_ENABLED', 'false');
+
+    expect(env.catalogCacheEnabled).toBe(false);
+  });
 });
 
 describe('validateEnvAtStartup', () => {

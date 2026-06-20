@@ -35,7 +35,7 @@ export const requireAuth = async (request: FastifyRequest, reply: FastifyReply) 
 
     const decoded = jwt.decode(token) as jwt.JwtPayload | null;
     const user = await User.findById(request.auth.userId).select(
-      'passwordChangedAt sessionsRevokedAt role'
+      'passwordChangedAt sessionsRevokedAt role isActive'
     );
 
     if (!user) {
@@ -44,6 +44,10 @@ export const requireAuth = async (request: FastifyRequest, reply: FastifyReply) 
 
     if (user.role !== request.auth.role) {
       return reply.status(401).send({ message: 'Oturum geçersiz, tekrar giriş yapın' });
+    }
+
+    if ((user.role === 'admin' || user.role === 'seller') && user.isActive === false) {
+      return reply.status(403).send({ message: 'Hesap aktif değil' });
     }
 
     if (isTokenIssuedBefore(decoded?.iat, user?.passwordChangedAt ?? null)) {

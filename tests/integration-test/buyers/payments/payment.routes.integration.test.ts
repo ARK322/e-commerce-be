@@ -37,7 +37,7 @@ describe('payment routes integration', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
-    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-secret';
+    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-jwt-secret-with-32-chars-minimum';
     app = await buildApp();
   });
 
@@ -104,6 +104,23 @@ describe('payment routes integration', () => {
 
     expect(response.statusCode).toBe(302);
     expect(response.headers.location).toContain(`/orders/${orderId}?payment=success`);
+    expect(mockHandlePaymentCallback).toHaveBeenCalledWith(
+      expect.objectContaining({ token: 'checkout-token-123' })
+    );
+  });
+
+  it('POST /payments/callback servis hatasında failed redirect döner', async () => {
+    mockHandlePaymentCallback.mockResolvedValue('http://localhost:3000/checkout?payment=failed');
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/payments/callback',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      payload: 'token=invalid-token',
+    });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toContain('payment=failed');
   });
 
   it('POST /payments buyer ile ödeme başlatır', async () => {

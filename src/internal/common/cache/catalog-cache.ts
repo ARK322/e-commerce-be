@@ -10,5 +10,14 @@ export const invalidateCatalogCache = (): void => {
 
 export const invalidateCatalogProductCache = (): void => {
   memoryCache.deleteByPrefix(catalogCacheKeys.productsPrefix());
-  invalidateVisibleCategoryIdsCache();
+};
+
+export const invalidateCatalogProductDetail = (productId: string): void => {
+  memoryCache.delete(catalogCacheKeys.productDetail(productId));
+};
+
+export const invalidateCatalogProductStock = (productIds: string[]): void => {
+  for (const productId of productIds) {
+    invalidateCatalogProductDetail(productId);
+  }
 };

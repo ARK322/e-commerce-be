@@ -6,6 +6,7 @@ import { buildApp } from '@/app/app';
 
 const mockUserFindOne = vi.fn();
 const mockUserFindById = vi.fn();
+const mockUserFindByIdAndUpdate = vi.fn();
 const mockSellerFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 const mockGetSellerContext = vi.fn();
@@ -22,6 +23,7 @@ vi.mock('@/integrations/mongo', async (importOriginal) => {
       ...actual.User,
       findOne: (...args: unknown[]) => mockUserFindOne(...args),
       findById: (...args: unknown[]) => mockUserFindById(...args),
+      findByIdAndUpdate: (...args: unknown[]) => mockUserFindByIdAndUpdate(...args),
     },
     Seller: {
       ...actual.Seller,
@@ -64,7 +66,7 @@ describe('auth routes integration', () => {
   let sellerPasswordHash = '';
 
   beforeAll(async () => {
-    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-secret';
+    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-jwt-secret-with-32-chars-minimum';
     sellerPasswordHash = await hashPassword(sellerPassword);
     app = await buildApp();
   });
@@ -77,6 +79,7 @@ describe('auth routes integration', () => {
     vi.clearAllMocks();
     mockRevokedTokenExists.mockResolvedValue(null);
     mockGetSellerContext.mockResolvedValue(null);
+    mockUserFindByIdAndUpdate.mockResolvedValue({});
   });
 
   it('GET /auth/me token olmadan 401 döner', async () => {

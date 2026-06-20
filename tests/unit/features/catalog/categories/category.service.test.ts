@@ -5,7 +5,9 @@ const mockCategoryFind = vi.fn();
 const mockCategoryFindById = vi.fn();
 const mockCategoryCreate = vi.fn();
 const mockCategoryFindByIdAndDelete = vi.fn();
+const mockCategoryUpdateMany = vi.fn();
 const mockProductCountDocuments = vi.fn();
+const mockProductUpdateMany = vi.fn();
 
 vi.mock('@/integrations/mongo', () => ({
   Category: {
@@ -13,9 +15,11 @@ vi.mock('@/integrations/mongo', () => ({
     findById: (...args: unknown[]) => mockCategoryFindById(...args),
     create: (...args: unknown[]) => mockCategoryCreate(...args),
     findByIdAndDelete: (...args: unknown[]) => mockCategoryFindByIdAndDelete(...args),
+    updateMany: (...args: unknown[]) => mockCategoryUpdateMany(...args),
   },
   Product: {
     countDocuments: (...args: unknown[]) => mockProductCountDocuments(...args),
+    updateMany: (...args: unknown[]) => mockProductUpdateMany(...args),
   },
 }));
 
@@ -27,6 +31,7 @@ import {
   deleteCategory,
   getCategoryById,
   listPublicCategories,
+  updateCategory,
 } from '@/features/catalog/categories/category.service';
 
 const categoryId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
@@ -184,5 +189,41 @@ describe('deleteCategory', () => {
     await deleteCategory(categoryId);
 
     expect(mockCategoryFindByIdAndDelete).toHaveBeenCalledWith(categoryId);
+  });
+});
+
+describe('updateCategory', () => {
+  beforeEach(() => {
+    clearMemoryCache();
+    vi.clearAllMocks();
+    mockCategoryFind.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([rootCategoryDoc, childCategoryDoc]),
+      }),
+    });
+    mockCategoryUpdateMany.mockResolvedValue({ modifiedCount: 2 });
+    mockProductUpdateMany.mockResolvedValue({ modifiedCount: 3 });
+  });
+
+  it('isActive false yapınca alt kategorileri ve ürünleri pasifleştirir', async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    mockCategoryFindById.mockResolvedValue({
+      ...rootCategoryDoc,
+      isActive: true,
+      save,
+      toObject: () => rootCategoryDoc,
+    });
+
+    await updateCategory(categoryId, { isActive: false });
+
+    expect(mockCategoryUpdateMany).toHaveBeenCalledWith(
+      { _id: { $in: [categoryId, childCategoryId] } },
+      { $set: { isActive: false } }
+    );
+    expect(mockProductUpdateMany).toHaveBeenCalledWith(
+      { categoryId: { $in: [categoryId, childCategoryId] } },
+      { $set: { isActive: false } }
+    );
+    expect(save).toHaveBeenCalled();
   });
 });

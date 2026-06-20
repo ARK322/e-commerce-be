@@ -14,7 +14,8 @@ import {
   type CategoryGraphNode,
 } from '@/internal/catalog/category/category-graph';
 import { slugify } from '@/internal/catalog/category/slugify';
-import { catalogCacheKeys, catalogCacheTtl } from '@/internal/common/cache/catalog-keys';
+import { catalogCacheKeys } from '@/internal/common/cache/catalog-keys';
+import { catalogCacheConfig } from '@/internal/common/cache/catalog-cache-config';
 import { invalidateCatalogCache } from '@/internal/common/cache/catalog-cache';
 import { memoryCache } from '@/internal/common/cache/memory-cache';
 import type {
@@ -232,6 +233,10 @@ const listPublicCategoriesUncached = async () => {
 };
 
 export const listPublicCategories = async () => {
+  if (!catalogCacheConfig.enabled) {
+    return listPublicCategoriesUncached();
+  }
+
   const cacheKey = catalogCacheKeys.publicCategories();
   const cached = memoryCache.get<Awaited<ReturnType<typeof listPublicCategoriesUncached>>>(cacheKey);
 
@@ -240,7 +245,7 @@ export const listPublicCategories = async () => {
   }
 
   const categories = await listPublicCategoriesUncached();
-  memoryCache.set(cacheKey, categories, { ttlMs: catalogCacheTtl.categoriesMs });
+  memoryCache.set(cacheKey, categories, { ttlMs: catalogCacheConfig.categoriesTtlMs });
 
   return categories;
 };
@@ -315,7 +320,22 @@ export const updateCategory = async (categoryId: string, input: UpdateCategoryIn
     category.slug = resolveSlug(input.name);
   }
 
-  if (input.isActive !== undefined) {
+  if (input.isActive === false && category.isActive !== false) {
+    const graphNodes = await loadAllGraphNodes();
+    const descendants = collectDescendantIds(categoryId, graphNodes);
+    const categoryIdsToDeactivate = [categoryId, ...descendants];
+
+    await Category.updateMany(
+      { _id: { $in: categoryIdsToDeactivate } },
+      { $set: { isActive: false } }
+    );
+    await Product.updateMany(
+      { categoryId: { $in: categoryIdsToDeactivate } },
+      { $set: { isActive: false } }
+    );
+
+    category.isActive = false;
+  } else if (input.isActive !== undefined) {
     category.isActive = input.isActive;
   }
 

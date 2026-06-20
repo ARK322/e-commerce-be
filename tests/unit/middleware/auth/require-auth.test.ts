@@ -48,7 +48,7 @@ const createRequest = (token = 'valid-token') =>
 describe('requireAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.JWT_SECRET = 'test-secret';
+    process.env.JWT_SECRET = 'test-secret-with-at-least-32-characters-long';
     mockIsTokenRevoked.mockResolvedValue(false);
     mockVerifyAuthToken.mockReturnValue({ userId, role: 'seller' });
   });
@@ -67,6 +67,7 @@ describe('requireAuth', () => {
     mockUserFindById.mockReturnValue({
       select: vi.fn().mockResolvedValue({
         role: 'buyer',
+        isActive: true,
         passwordChangedAt: null,
         sessionsRevokedAt: null,
       }),
@@ -99,6 +100,7 @@ describe('requireAuth', () => {
     mockUserFindById.mockReturnValue({
       select: vi.fn().mockResolvedValue({
         role: 'seller',
+        isActive: true,
         passwordChangedAt: null,
         sessionsRevokedAt: null,
       }),
@@ -111,5 +113,25 @@ describe('requireAuth', () => {
 
     expect(request.auth).toEqual({ userId, role: 'seller' });
     expect(reply.body).toBeUndefined();
+  });
+
+  it('pasif admin/seller hesabı 403 döner', async () => {
+    mockVerifyAuthToken.mockReturnValue({ userId, role: 'admin' });
+    mockUserFindById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        role: 'admin',
+        isActive: false,
+        passwordChangedAt: null,
+        sessionsRevokedAt: null,
+      }),
+    });
+
+    const request = createRequest();
+    const reply = createReply();
+
+    await requireAuth(request, reply);
+
+    expect(reply.statusCode).toBe(403);
+    expect(reply.body).toEqual({ message: 'Hesap aktif değil' });
   });
 });

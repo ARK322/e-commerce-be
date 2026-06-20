@@ -134,7 +134,26 @@ Endpoint schemas compose internal primitives; they do not live in `middleware/`.
 
 ## Caching
 
-Catalog list endpoints use `internal/common/cache` (in-memory). Cache invalidation runs from category/product write services. Redis is not used.
+Public catalog reads use **in-process memory cache** (`internal/common/cache`). There is **no Redis** in this project.
+
+| Layer | What | Default TTL |
+|-------|------|-------------|
+| `memoryCache` | Category tree, product list/detail | 3–5 min |
+| `visible-category-ids` key | Active category ID set for product filters | 60 s |
+| HTTP `Cache-Control` | Browser/CDN cache on public GET routes | 30–60 s |
+
+**Invalidation**
+
+- Category admin writes → `invalidateCatalogCache()` (categories + products + visible IDs).
+- Product seller writes → `invalidateCatalogProductCache()` (all product keys).
+- Stock decrement on payment → `invalidateCatalogProductDetail()` per product only (list caches expire via TTL).
+
+**Deployment constraint:** memory cache is **per process**. Run **one backend instance** unless you disable cache (`CATALOG_CACHE_ENABLED=false`) or accept short TTL staleness across instances. For multi-instance scale later, introduce a `CacheProvider` abstraction and plug in Redis without changing feature services.
+
+**Env toggles**
+
+- `CATALOG_CACHE_ENABLED` — `true` (default) / `false`
+- `CATALOG_CATEGORIES_CACHE_TTL_MS`, `CATALOG_PRODUCTS_LIST_CACHE_TTL_MS`, `CATALOG_PRODUCT_DETAIL_CACHE_TTL_MS`, `CATALOG_VISIBLE_CATEGORIES_CACHE_TTL_MS`
 
 ## Testing
 

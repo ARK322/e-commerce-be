@@ -25,6 +25,8 @@ const userSchema = new Schema(
     verificationExpiresAt: { type: Date, default: null },
     verificationEmailSentAt: { type: Date, default: null },
     passwordResetEmailSentAt: { type: Date, default: null },
+    failedLoginAttempts: { type: Number, default: 0 },
+    loginBlockedUntil: { type: Date, default: null },
     createdAt: { type: Date, default: Date.now },
   },
   { strict: true }

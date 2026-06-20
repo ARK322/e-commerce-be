@@ -1,6 +1,10 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 import {
+  DEFAULT_CATALOG_CATEGORIES_CACHE_TTL_MS,
+  DEFAULT_CATALOG_PRODUCT_DETAIL_CACHE_TTL_MS,
+  DEFAULT_CATALOG_PRODUCTS_LIST_CACHE_TTL_MS,
+  DEFAULT_CATALOG_VISIBLE_CATEGORIES_CACHE_TTL_MS,
   DEFAULT_DEV_CORS_ORIGINS,
   DEFAULT_FRONTEND_URL,
   DEFAULT_LOG_LEVEL,
@@ -61,6 +65,38 @@ const requireNonEmpty = (value: string | undefined, key: string): string => {
   }
 
   return trimmed;
+};
+
+const parsePositiveMs = (raw: string | undefined, fallback: number): number => {
+  if (!raw?.trim()) {
+    return fallback;
+  }
+
+  const value = Number(raw);
+
+  if (!Number.isFinite(value) || value < 0) {
+    return fallback;
+  }
+
+  return value;
+};
+
+const parseBooleanEnv = (raw: string | undefined, fallback: boolean): boolean => {
+  if (!raw?.trim()) {
+    return fallback;
+  }
+
+  const normalized = raw.trim().toLowerCase();
+
+  if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+    return true;
+  }
+
+  if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+    return false;
+  }
+
+  return fallback;
 };
 
 /**
@@ -199,6 +235,38 @@ export const env = {
 
   get pendingOrderExpiryIntervalMs(): number {
     return DEFAULT_PENDING_ORDER_EXPIRY_INTERVAL_MS;
+  },
+
+  get catalogCacheEnabled(): boolean {
+    return parseBooleanEnv(process.env.CATALOG_CACHE_ENABLED, true);
+  },
+
+  get catalogCategoriesCacheTtlMs(): number {
+    return parsePositiveMs(
+      process.env.CATALOG_CATEGORIES_CACHE_TTL_MS,
+      DEFAULT_CATALOG_CATEGORIES_CACHE_TTL_MS
+    );
+  },
+
+  get catalogProductsListCacheTtlMs(): number {
+    return parsePositiveMs(
+      process.env.CATALOG_PRODUCTS_LIST_CACHE_TTL_MS,
+      DEFAULT_CATALOG_PRODUCTS_LIST_CACHE_TTL_MS
+    );
+  },
+
+  get catalogProductDetailCacheTtlMs(): number {
+    return parsePositiveMs(
+      process.env.CATALOG_PRODUCT_DETAIL_CACHE_TTL_MS,
+      DEFAULT_CATALOG_PRODUCT_DETAIL_CACHE_TTL_MS
+    );
+  },
+
+  get catalogVisibleCategoriesCacheTtlMs(): number {
+    return parsePositiveMs(
+      process.env.CATALOG_VISIBLE_CATEGORIES_CACHE_TTL_MS,
+      DEFAULT_CATALOG_VISIBLE_CATEGORIES_CACHE_TTL_MS
+    );
   },
 
   resolveIyzicoUri(apiKey: string): string {

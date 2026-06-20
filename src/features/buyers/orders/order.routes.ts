@@ -17,6 +17,7 @@ import {
   type UpdateOrderStatusInput,
 } from '@/features/buyers/orders/update-order-status.schema';
 import {
+  cancelBuyerPendingOrder,
   createOrderFromCart,
   getBuyerOrderById,
   getSellerOrderById,
@@ -110,6 +111,20 @@ export default async function orderRoutes(fastify: FastifyInstance) {
       const { orderId } = req.params as { orderId: string };
       const order = await getBuyerOrderById(req.auth!.userId, orderId);
       return reply.status(200).send({ order });
+    } catch (error) {
+      return handleRouteError(reply, error, 'Sipariş işlemi sırasında bir hata oluştu');
+    }
+  });
+
+  fastify.post('/:orderId/cancel', buyerWithOrderId, async (req, reply) => {
+    try {
+      const { orderId } = req.params as { orderId: string };
+      const order = await cancelBuyerPendingOrder(req.auth!.userId, orderId);
+
+      return reply.status(200).send({
+        message: 'Sipariş iptal edildi',
+        order,
+      });
     } catch (error) {
       return handleRouteError(reply, error, 'Sipariş işlemi sırasında bir hata oluştu');
     }

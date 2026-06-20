@@ -264,12 +264,16 @@ describe('updateOrderStatus', () => {
     expect(orderDoc.items[0].fulfillmentStatus).toBe('shipped');
   });
 
-  it('delivered yapınca yalnızca ilgili satıcının split onayı çağrılır', async () => {
+  it('delivered yapınca split onayı kaydetmeden önce çağrılır', async () => {
+    let saveCalled = false;
+
     const orderDoc = {
       _id: orderId,
       status: 'shipped',
       items: [{ sellerId, fulfillmentStatus: 'shipped' }],
-      save: vi.fn().mockResolvedValue(undefined),
+      save: vi.fn().mockImplementation(async () => {
+        saveCalled = true;
+      }),
       toObject: () => ({
         _id: orderId,
         buyerId,
@@ -282,11 +286,43 @@ describe('updateOrderStatus', () => {
     };
 
     mockOrderFindOne.mockResolvedValue(orderDoc);
+    vi.mocked(approvePaymentSplitsForSeller).mockImplementation(async () => {
+      expect(saveCalled).toBe(false);
+    });
 
     const result = await updateOrderStatus(sellerId, orderId, { status: 'delivered' });
 
     expect(result.status).toBe('delivered');
     expect(approvePaymentSplitsForSeller).toHaveBeenCalledWith(orderId, sellerId);
+    expect(orderDoc.save).toHaveBeenCalled();
+  });
+
+  it('split onayı başarısız olursa sipariş kaydedilmez', async () => {
+    const orderDoc = {
+      _id: orderId,
+      status: 'shipped',
+      items: [{ sellerId, fulfillmentStatus: 'shipped' }],
+      save: vi.fn().mockResolvedValue(undefined),
+      toObject: () => ({
+        _id: orderId,
+        buyerId,
+        items: [{ sellerId, fulfillmentStatus: 'shipped' }],
+        totalAmount: 1998,
+        currency: 'TRY',
+        status: 'shipped',
+        shippingAddress: buyerProfile,
+      }),
+    };
+
+    mockOrderFindOne.mockResolvedValue(orderDoc);
+    vi.mocked(approvePaymentSplitsForSeller).mockRejectedValue(new Error('iyzico down'));
+
+    await expect(
+      updateOrderStatus(sellerId, orderId, { status: 'delivered' })
+    ).rejects.toThrow('iyzico down');
+
+    expect(orderDoc.save).not.toHaveBeenCalled();
+    expect(orderDoc.items[0].fulfillmentStatus).toBe('shipped');
   });
 
   it('geçersiz geçişte 400 fırlatır', async () => {

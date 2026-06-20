@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { Product } from '@/integrations/mongo';
 import { CommerceError } from '@/internal/common/errors/commerce-error';
-import { invalidateCatalogProductCache } from '@/internal/common/cache/catalog-cache';
+import { invalidateCatalogProductStock } from '@/internal/common/cache/catalog-cache';
 
 export type StockDecrement = {
   productId: string;
@@ -31,5 +31,5 @@ export const decrementStockForOrderItems = async (
     }
   }
 
-  invalidateCatalogProductCache();
+  invalidateCatalogProductStock(items.map((item) => item.productId));
 };

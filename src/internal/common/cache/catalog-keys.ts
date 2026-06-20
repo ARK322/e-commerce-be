@@ -23,12 +23,7 @@ export const catalogCacheKeys = {
     return `${PREFIX}products:list:${parts.join('&')}`;
   },
   productDetail: (productId: string) => `${PREFIX}products:detail:${productId}`,
+  visibleCategoryIds: () => `${PREFIX}visible-category-ids`,
   categoriesPrefix: () => `${PREFIX}categories:`,
   productsPrefix: () => `${PREFIX}products:`,
-} as const;
-
-export const catalogCacheTtl = {
-  categoriesMs: 5 * 60_000,
-  productsListMs: 3 * 60_000,
-  productDetailMs: 3 * 60_000,
 } as const;

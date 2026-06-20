@@ -166,6 +166,7 @@ describe('register', () => {
       })
     ).rejects.toMatchObject({
       statusCode: 409,
+      message: 'Kayıt işlemi tamamlanamadı. Giriş yapmayı veya şifre sıfırlamayı deneyin.',
     });
   });
 });

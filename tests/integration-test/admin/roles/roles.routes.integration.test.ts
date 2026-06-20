@@ -72,7 +72,7 @@ describe('admin roles routes integration', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
-    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-secret';
+    process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'integration-test-jwt-secret-with-32-chars-minimum';
     app = await buildApp();
   });
 

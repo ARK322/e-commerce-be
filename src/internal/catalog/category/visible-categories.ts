@@ -3,6 +3,9 @@ import {
   filterCategoriesWithActiveAncestors,
   type CategoryGraphNode,
 } from '@/internal/catalog/category/category-graph';
+import { catalogCacheConfig } from '@/internal/common/cache/catalog-cache-config';
+import { catalogCacheKeys } from '@/internal/common/cache/catalog-keys';
+import { memoryCache } from '@/internal/common/cache/memory-cache';
 
 const toGraphNode = (category: {
   _id: unknown;
@@ -18,29 +21,37 @@ const toGraphNode = (category: {
   isLeaf: category.isLeaf,
 });
 
-let cachedVisibleIds: { ids: Set<string>; expiresAt: number } | null = null;
-const CACHE_TTL_MS = 60_000;
-
-export const getPublicVisibleCategoryIds = async (): Promise<Set<string>> => {
-  if (cachedVisibleIds && cachedVisibleIds.expiresAt > Date.now()) {
-    return cachedVisibleIds.ids;
-  }
-
+const loadVisibleCategoryIds = async (): Promise<Set<string>> => {
   const categories = await Category.find()
     .select('_id parentIds childIds isActive isLeaf')
     .lean();
 
   const nodes = categories.map(toGraphNode);
   const visible = filterCategoriesWithActiveAncestors(nodes);
-  const ids = new Set(visible.map((node) => node.id));
 
-  cachedVisibleIds = { ids, expiresAt: Date.now() + CACHE_TTL_MS };
+  return new Set(visible.map((node) => node.id));
+};
+
+export const getPublicVisibleCategoryIds = async (): Promise<Set<string>> => {
+  if (!catalogCacheConfig.enabled) {
+    return loadVisibleCategoryIds();
+  }
+
+  const cacheKey = catalogCacheKeys.visibleCategoryIds();
+  const cached = memoryCache.get<string[]>(cacheKey);
+
+  if (cached) {
+    return new Set(cached);
+  }
+
+  const ids = await loadVisibleCategoryIds();
+  memoryCache.set(cacheKey, [...ids], { ttlMs: catalogCacheConfig.visibleCategoriesTtlMs });
 
   return ids;
 };
 
 export const invalidateVisibleCategoryIdsCache = (): void => {
-  cachedVisibleIds = null;
+  memoryCache.delete(catalogCacheKeys.visibleCategoryIds());
 };
 
 export const isCategoryPubliclyVisible = async (categoryId: string): Promise<boolean> => {

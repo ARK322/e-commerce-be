@@ -4,8 +4,9 @@ import {
 } from '@/internal/buyers/orders/order-item-validation';
 
 describe('resolveOrderUnitPrice', () => {
-  it('geçerli priceSnapshot varsa onu kullanır', () => {
-    expect(resolveOrderUnitPrice(850, 999)).toBe(850);
+  it('snapshot güncel fiyata yakınsa katalog fiyatını kullanır', () => {
+    expect(resolveOrderUnitPrice(999, 999)).toBe(999);
+    expect(resolveOrderUnitPrice(990, 999)).toBe(999);
   });
 
   it('snapshot yoksa ürün fiyatını kullanır', () => {
@@ -16,5 +17,14 @@ describe('resolveOrderUnitPrice', () => {
   it('geçersiz snapshot için ürün fiyatına döner', () => {
     expect(resolveOrderUnitPrice(-1, 999)).toBe(999);
     expect(resolveOrderUnitPrice(Number.NaN, 999)).toBe(999);
+    expect(resolveOrderUnitPrice(0, 999)).toBe(999);
+  });
+
+  it('snapshot katalog fiyatından yüksekse katalog fiyatına çeker', () => {
+    expect(resolveOrderUnitPrice(1200, 999)).toBe(999);
+  });
+
+  it('fiyat artışında kilitli snapshot fiyatını korur', () => {
+    expect(resolveOrderUnitPrice(850, 999)).toBe(850);
   });
 });

@@ -28,7 +28,10 @@ const resolveEmailForRegister = async (email: string) => {
   }
 
   if (existing.isEmailVerified) {
-    throw new AuthError(409, 'Bu e-posta adresi zaten kayıtlı');
+    throw new AuthError(
+      409,
+      'Kayıt işlemi tamamlanamadı. Giriş yapmayı veya şifre sıfırlamayı deneyin.'
+    );
   }
 
   await deleteUnverifiedUser(String(existing._id));
