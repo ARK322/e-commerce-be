@@ -102,7 +102,7 @@ describe('resetPassword', () => {
       expect(mockFindByIdAndUpdate).toHaveBeenCalled();
     });
 
-    it('kullanıcı yoksa 404 döner', async () => {
+    it('kullanıcı yoksa generic hata döner', async () => {
       mockFindOne.mockResolvedValue(null);
 
       await expect(
@@ -112,8 +112,8 @@ describe('resetPassword', () => {
           newPassword,
         })
       ).rejects.toMatchObject({
-        statusCode: 404,
-        message: 'Kullanıcı bulunamadı',
+        statusCode: 400,
+        message: 'Geçersiz doğrulama kodu veya e-posta',
       });
     });
 

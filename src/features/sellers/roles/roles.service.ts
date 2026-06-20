@@ -167,7 +167,7 @@ export const deleteSellerRole = async (ctx: SellerAccessContext, roleId: string)
     throw new AuthError(400, 'Sistem rolü silinemez');
   }
 
-  const assignedCount = await SellerMember.countDocuments({ roleId });
+  const assignedCount = await SellerMember.countDocuments({ sellerId: ctx.companyId, roleId });
 
   if (assignedCount > 0) {
     throw new AuthError(400, 'Bu role atanmış çalışanlar var, rol silinemez');

@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { validateBody } from '@/middleware/validation/validate-body';
 import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { disabledRouteRateLimit } from '@/middleware/presets/rate-limit';
+import { PAYMENT_CALLBACK_RATE_LIMIT } from '@/middleware/presets/rate-limit';
+import { registerScopedRateLimit } from '@/plugins/rate-limit/register-scoped';
 import { orderIdParamSchema } from '@/internal/common/validation/param-schemas';
 import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-guards';
 import {
@@ -41,9 +42,13 @@ export default async function paymentRoutes(fastify: FastifyInstance) {
     }
   );
 
-  fastify.post('/callback', { config: disabledRouteRateLimit }, async (req, reply) => {
-    const redirectUrl = await handlePaymentCallback(req.body);
-    return reply.redirect(redirectUrl);
+  await fastify.register(async (callbackScope) => {
+    await registerScopedRateLimit(callbackScope, PAYMENT_CALLBACK_RATE_LIMIT);
+
+    callbackScope.post('/callback', async (req, reply) => {
+      const redirectUrl = await handlePaymentCallback(req.body);
+      return reply.redirect(redirectUrl);
+    });
   });
 
   fastify.get('/order/:orderId', buyerWithOrderId, async (req, reply) => {

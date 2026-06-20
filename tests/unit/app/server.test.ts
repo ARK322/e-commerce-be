@@ -22,11 +22,25 @@ vi.mock('@/app/app', () => ({
   buildApp: (...args: unknown[]) => mockBuildApp(...args),
 }));
 
+vi.mock('@/internal/buyers/orders/expire-pending-orders', () => ({
+  startPendingOrderExpiryScheduler: vi.fn(),
+}));
+
+vi.mock('@/internal/buyers/orders/reconcile-payments', () => ({
+  startPaymentReconciliationScheduler: vi.fn(),
+}));
+
 vi.mock('@/internal/common/logging', () => ({
   logger: {
     info: (...args: unknown[]) => mockLoggerInfo(...args),
     error: (...args: unknown[]) => mockLoggerError(...args),
+    fatal: vi.fn(),
   },
+  createLogger: () => ({
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+  }),
 }));
 
 import { getPort, start } from '@/app/server';

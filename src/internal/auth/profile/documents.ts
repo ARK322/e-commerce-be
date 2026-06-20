@@ -98,6 +98,20 @@ export const uploadSellerDocument = async (
   }
 
   const profileUpdate = { [profileField]: url } as SellerProfileUpdate;
+
+  if (seller.approvalStatus === 'pending') {
+    await Seller.findByIdAndUpdate(ctx.companyId, { $set: profileUpdate });
+    const refreshed = await Seller.findById(ctx.companyId).lean();
+
+    return {
+      docType,
+      url,
+      field: profileField,
+      approvalStatus: refreshed?.approvalStatus ?? 'pending',
+      profile: refreshed,
+    };
+  }
+
   const result = await updateSellerProfile(auth.userId, profileUpdate);
 
   return {

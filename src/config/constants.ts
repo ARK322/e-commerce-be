@@ -15,6 +15,10 @@ export const IYZICO_SANDBOX_URI = 'https://sandbox-api.iyzipay.com';
 
 export const IYZICO_PRODUCTION_URI = 'https://api.iyzipay.com';
 
+export const DEFAULT_PENDING_ORDER_TTL_MINUTES = 15;
+
+export const DEFAULT_PENDING_ORDER_EXPIRY_INTERVAL_MS = 60_000;
+
 export const GLOBAL_RATE_LIMIT = {
   max: 100,
   timeWindow: '1 minute' as const,
@@ -46,6 +50,16 @@ export const BUYERS_RATE_LIMIT = {
 };
 
 export const SELLERS_WRITE_RATE_LIMIT = {
+  max: 30,
+  timeWindow: '1 minute' as const,
+};
+
+export const PAYMENT_CALLBACK_RATE_LIMIT = {
+  max: 30,
+  timeWindow: '1 minute' as const,
+};
+
+export const AUTH_AUTHENTICATED_RATE_LIMIT = {
   max: 30,
   timeWindow: '1 minute' as const,
 };

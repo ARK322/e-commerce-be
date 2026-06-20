@@ -141,14 +141,14 @@ describe('verifyEmail', () => {
       expect(save).toHaveBeenCalled();
     });
 
-    it('kullanıcı yoksa 404 döner', async () => {
+    it('kullanıcı yoksa generic hata döner', async () => {
       mockFindOne.mockResolvedValue(null);
 
       await expect(
         verifyEmail({ email: 'missing@example.com', code: '482913' })
       ).rejects.toMatchObject({
-        statusCode: 404,
-        message: 'Kullanıcı bulunamadı',
+        statusCode: 400,
+        message: 'Geçersiz doğrulama kodu veya e-posta',
       });
     });
 

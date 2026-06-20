@@ -1,16 +1,41 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockOrderFindOne = vi.fn();
-const mockOrderFindById = vi.fn();
-const mockPaymentFindOne = vi.fn();
-const mockPaymentCreate = vi.fn();
-const mockUserFindById = vi.fn();
-const mockBuyerFindById = vi.fn();
-const mockInitializeIyzicoCheckout = vi.fn();
-const mockBuildPaymentSplitsForOrder = vi.fn();
+const {
+  mockOrderFindOne,
+  mockOrderFindById,
+  mockPaymentFindOne,
+  mockPaymentCreate,
+  mockUserFindById,
+  mockBuyerFindById,
+  mockProductFindOne,
+  mockSellerFind,
+  mockInitializeIyzicoCheckout,
+  mockCompleteIyzicoCheckout,
+  mockBuildPaymentSplitsForOrder,
+  mockFulfillPaidOrder,
+  mockCancelPendingOrder,
+} = vi.hoisted(() => ({
+  mockOrderFindOne: vi.fn(),
+  mockOrderFindById: vi.fn(),
+  mockPaymentFindOne: vi.fn(),
+  mockPaymentCreate: vi.fn(),
+  mockUserFindById: vi.fn(),
+  mockBuyerFindById: vi.fn(),
+  mockProductFindOne: vi.fn(),
+  mockSellerFind: vi.fn(),
+  mockInitializeIyzicoCheckout: vi.fn(),
+  mockCompleteIyzicoCheckout: vi.fn(),
+  mockBuildPaymentSplitsForOrder: vi.fn(),
+  mockFulfillPaidOrder: vi.fn(),
+  mockCancelPendingOrder: vi.fn(),
+}));
 
 vi.mock('@/integrations/iyzico/initialize-checkout', () => ({
   initializeIyzicoCheckout: (...args: unknown[]) => mockInitializeIyzicoCheckout(...args),
+}));
+
+vi.mock('@/integrations/iyzico/retrieve-checkout', () => ({
+  completeIyzicoCheckout: (...args: unknown[]) => mockCompleteIyzicoCheckout(...args),
 }));
 
 vi.mock('@/internal/buyers/payment/payment-split', () => ({
@@ -18,8 +43,12 @@ vi.mock('@/internal/buyers/payment/payment-split', () => ({
   syncPaymentSplitTransactionIds: vi.fn(),
 }));
 
-vi.mock('@/integrations/iyzico/retrieve-checkout', () => ({
-  completeIyzicoCheckout: vi.fn(),
+vi.mock('@/internal/buyers/orders/fulfill-order', () => ({
+  fulfillPaidOrder: (...args: unknown[]) => mockFulfillPaidOrder(...args),
+}));
+
+vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+  cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
 vi.mock('@/integrations/mongo', () => ({
@@ -31,6 +60,12 @@ vi.mock('@/integrations/mongo', () => ({
     findOne: (...args: unknown[]) => mockPaymentFindOne(...args),
     create: (...args: unknown[]) => mockPaymentCreate(...args),
   },
+  Product: {
+    findOne: (...args: unknown[]) => mockProductFindOne(...args),
+  },
+  Seller: {
+    find: (...args: unknown[]) => mockSellerFind(...args),
+  },
   User: { findById: (...args: unknown[]) => mockUserFindById(...args) },
   Buyer: { findById: (...args: unknown[]) => mockBuyerFindById(...args) },
 }));
@@ -40,12 +75,15 @@ vi.mock('@/internal/common/ids', () => ({
 }));
 
 import {
+  completePaymentFromCheckoutToken,
   createPaymentForOrder,
   getPaymentByOrderId,
 } from '@/features/buyers/payments/payment.service';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
+const sellerId = '660e8400-e29b-41d4-a716-446655440001';
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
+const productId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 
 const pendingOrder = {
   _id: orderId,
@@ -53,7 +91,16 @@ const pendingOrder = {
   totalAmount: 1998,
   currency: 'TRY',
   status: 'pending',
-  items: [{ productId: 'p1', sellerId: 's1', name: 'Ürün', price: 999, quantity: 2, subtotal: 1998 }],
+  items: [
+    {
+      productId,
+      sellerId,
+      name: 'Ürün',
+      price: 999,
+      quantity: 2,
+      subtotal: 1998,
+    },
+  ],
 };
 
 const userRecord = {
@@ -71,15 +118,39 @@ const buyerRecord = {
   deliveryAddress: 'Test adres',
 };
 
+const productRecord = {
+  _id: productId,
+  stock: 10,
+  isActive: true,
+};
+
+const approvedSeller = {
+  _id: sellerId,
+  approvalStatus: 'approved',
+  iyzicoSubMerchantKey: 'sub-merchant-key',
+};
+
 const mockLeanOrder = (order: typeof pendingOrder | null) => ({
   lean: vi.fn().mockResolvedValue(order),
 });
+
+const mockApprovedSellersAndStock = () => {
+  mockSellerFind.mockReturnValue({
+    select: vi.fn().mockReturnValue({
+      lean: vi.fn().mockResolvedValue([approvedSeller]),
+    }),
+  });
+  mockProductFindOne.mockReturnValue({
+    lean: vi.fn().mockResolvedValue(productRecord),
+  });
+};
 
 describe('createPaymentForOrder', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUserFindById.mockReturnValue({ lean: vi.fn().mockResolvedValue(userRecord) });
     mockBuyerFindById.mockReturnValue({ lean: vi.fn().mockResolvedValue(buyerRecord) });
+    mockApprovedSellersAndStock();
     mockInitializeIyzicoCheckout.mockResolvedValue({
       token: 'iyzico-token',
       paymentPageUrl: 'https://sandbox-cpp.iyzipay.com?token=iyzico-token',
@@ -87,13 +158,13 @@ describe('createPaymentForOrder', () => {
     });
     mockBuildPaymentSplitsForOrder.mockResolvedValue([
       {
-        productId: 'p1',
-        sellerId: 's1',
+        productId,
+        sellerId,
         subtotal: 1998,
         commissionAmount: 199.8,
         sellerShare: 1798.2,
         checkoutItem: {
-          productId: 'p1',
+          productId,
           name: 'Ürün',
           price: 999,
           quantity: 2,
@@ -156,6 +227,81 @@ describe('createPaymentForOrder', () => {
     expect(result.checkout.paymentPageUrl).toContain('iyzico-token');
     expect(result.payment.status).toBe('pending');
     expect(result.payment.provider).toBe('iyzico');
+  });
+});
+
+describe('completePaymentFromCheckoutToken', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCancelPendingOrder.mockResolvedValue(true);
+    mockFulfillPaidOrder.mockResolvedValue(undefined);
+  });
+
+  it('başarısız ödemede pending siparişi iptal eder', async () => {
+    mockCompleteIyzicoCheckout.mockResolvedValue({
+      status: 'failed',
+      orderId,
+      reason: 'card_declined',
+    });
+    mockPaymentFindOne.mockResolvedValue({
+      orderId,
+      buyerId,
+      amount: 1998,
+      currency: 'TRY',
+      status: 'pending',
+      save: vi.fn().mockResolvedValue(undefined),
+      toObject: () => ({
+        _id: 'pay-1',
+        orderId,
+        buyerId,
+        amount: 1998,
+        currency: 'TRY',
+        status: 'failed',
+      }),
+    });
+
+    const result = await completePaymentFromCheckoutToken('token-1');
+
+    expect(result.success).toBe(false);
+    expect(mockCancelPendingOrder).toHaveBeenCalledWith(orderId);
+    expect(mockFulfillPaidOrder).not.toHaveBeenCalled();
+  });
+
+  it('başarılı ödemede stok düşer ve sipariş paid olur', async () => {
+    mockCompleteIyzicoCheckout.mockResolvedValue({
+      status: 'completed',
+      orderId,
+      externalId: 'iyzico-payment-id',
+      paidAmount: 1998,
+      itemTransactions: [],
+    });
+    mockPaymentFindOne.mockResolvedValue({
+      orderId,
+      buyerId,
+      amount: 1998,
+      currency: 'TRY',
+      status: 'pending',
+      save: vi.fn().mockResolvedValue(undefined),
+      toObject: () => ({
+        _id: 'pay-1',
+        orderId,
+        buyerId,
+        amount: 1998,
+        currency: 'TRY',
+        provider: 'iyzico',
+        externalId: 'iyzico-payment-id',
+        status: 'completed',
+      }),
+    });
+    mockOrderFindById.mockReturnValue(mockLeanOrder(pendingOrder));
+
+    const result = await completePaymentFromCheckoutToken('token-1');
+
+    expect(result.success).toBe(true);
+    expect(mockFulfillPaidOrder).toHaveBeenCalledWith(orderId, [
+      { productId, quantity: 2 },
+    ]);
+    expect(mockCancelPendingOrder).not.toHaveBeenCalled();
   });
 });
 

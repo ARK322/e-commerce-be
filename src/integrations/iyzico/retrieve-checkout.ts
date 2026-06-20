@@ -5,6 +5,16 @@ import { retrieveIyzicoPaymentItemTransactions } from '@/integrations/iyzico/ret
 import type { CompleteCheckoutResult } from '@/integrations/iyzico/types';
 import { HttpError } from '@/internal/common/errors';
 
+const parsePaidAmount = (paidPrice: string | undefined): number => {
+  if (!paidPrice) {
+    return Number.NaN;
+  }
+
+  const amount = Number(paidPrice);
+
+  return Number.isFinite(amount) ? amount : Number.NaN;
+};
+
 export const completeIyzicoCheckout = async (token: string): Promise<CompleteCheckoutResult> => {
   const client = getIyzicoClient();
 
@@ -14,13 +24,13 @@ export const completeIyzicoCheckout = async (token: string): Promise<CompleteChe
   });
 
   if (result.status !== 'success') {
-    throw new HttpError(502, result.errorMessage ?? 'Iyzico ödeme doğrulanamadı');
+    throw new HttpError(502, 'Ödeme doğrulanamadı');
   }
 
   const orderId = result.basketId ?? result.conversationId;
 
   if (!orderId) {
-    throw new HttpError(502, 'Iyzico yanıtında sipariş bilgisi bulunamadı');
+    throw new HttpError(502, 'Ödeme yanıtında sipariş bilgisi bulunamadı');
   }
 
   if (result.paymentStatus !== 'SUCCESS') {
@@ -32,7 +42,13 @@ export const completeIyzicoCheckout = async (token: string): Promise<CompleteChe
   }
 
   if (!result.paymentId) {
-    throw new HttpError(502, 'Iyzico yanıtında ödeme kimliği bulunamadı');
+    throw new HttpError(502, 'Ödeme yanıtında ödeme kimliği bulunamadı');
+  }
+
+  const paidAmount = parsePaidAmount(result.paidPrice);
+
+  if (!Number.isFinite(paidAmount)) {
+    throw new HttpError(502, 'Ödeme yanıtında tutar bilgisi bulunamadı');
   }
 
   const inlineTransactions =
@@ -52,6 +68,7 @@ export const completeIyzicoCheckout = async (token: string): Promise<CompleteChe
     status: 'completed',
     externalId: String(result.paymentId),
     orderId,
+    paidAmount,
     itemTransactions,
   };
 };

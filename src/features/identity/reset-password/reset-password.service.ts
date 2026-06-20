@@ -41,7 +41,7 @@ const resetPasswordByCode = async (email: string, code: string, newPassword: str
   const user = await User.findOne({ email: email.toLowerCase() });
 
   if (!user) {
-    throw new AuthError(404, 'Kullanıcı bulunamadı');
+    throw new AuthError(400, 'Geçersiz doğrulama kodu veya e-posta');
   }
 
   try {

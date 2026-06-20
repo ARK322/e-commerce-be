@@ -49,7 +49,7 @@ describe('validateEnvAtStartup', () => {
 
   it('zorunlu değişkenler tamamsa geçer', () => {
     vi.stubEnv('MONGO_URI', 'mongodb://localhost:27017/test');
-    vi.stubEnv('JWT_SECRET', 'test-secret');
+    vi.stubEnv('JWT_SECRET', 'test-secret-with-at-least-32-characters-long');
     vi.stubEnv('PLATFORM_COMMISSION_RATE', '0.10');
 
     expect(() => validateEnvAtStartup()).not.toThrow();

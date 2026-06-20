@@ -1,4 +1,5 @@
 import { HttpError } from '@/internal/common/errors';
+import { logger } from '@/internal/common/logging';
 
 type IyzipayCallback<T> = (err: unknown, result: T) => void;
 
@@ -7,10 +8,9 @@ const toIyzipayError = (err: unknown): HttpError => {
     return err;
   }
 
-  const message =
-    err instanceof Error ? err.message : typeof err === 'string' ? err : 'Iyzico isteği başarısız';
+  logger.error({ err }, 'Iyzico isteği başarısız');
 
-  return new HttpError(502, message);
+  return new HttpError(502, 'Ödeme servisi geçici olarak kullanılamıyor');
 };
 
 export const promisifyIyzipay = <T>(

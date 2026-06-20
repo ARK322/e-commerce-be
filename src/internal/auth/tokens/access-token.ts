@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { env } from '@/config/env';
+import { JWT_VERIFY_OPTIONS } from '@/internal/auth/tokens/jwt-options';
 
 const TOKEN_EXPIRES = {
   default: '1d',
@@ -25,11 +26,12 @@ export const signAuthToken = (
   return jwt.sign({ purpose: 'access', role }, getSecret(), {
     subject: userId,
     expiresIn,
+    algorithm: 'HS256',
   });
 };
 
 export const verifyAuthToken = (token: string): AuthTokenPayload => {
-  const payload = jwt.verify(token, getSecret()) as jwt.JwtPayload;
+  const payload = jwt.verify(token, getSecret(), JWT_VERIFY_OPTIONS) as jwt.JwtPayload;
 
   if (payload.purpose !== 'access' || !payload.sub || !payload.role) {
     throw new jwt.JsonWebTokenError('Geçersiz token');

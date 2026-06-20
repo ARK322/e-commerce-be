@@ -209,6 +209,12 @@ export const getCategoryPaths = async (categoryId: string) => {
   }
 
   const graphNodes = await loadAllGraphNodes();
+  const visibleNodes = filterCategoriesWithActiveAncestors(graphNodes);
+  const isVisible = visibleNodes.some((node) => node.id === categoryId);
+
+  if (!isVisible) {
+    throw new CommerceError(404, 'Kategori bulunamadı');
+  }
 
   return collectAncestorPaths(categoryId, graphNodes);
 };

@@ -33,7 +33,7 @@ export {
   ORDER_STATUSES,
   ORDER_CURRENCIES,
 } from '@/integrations/mongo/models/ecommerce/order.model';
-export type { OrderStatus, OrderCurrency } from '@/integrations/mongo/models/ecommerce/order.model';
+export type { OrderStatus, OrderCurrency, ItemFulfillmentStatus } from '@/integrations/mongo/models/ecommerce/order.model';
 export {
   Payment,
   PAYMENT_STATUSES,

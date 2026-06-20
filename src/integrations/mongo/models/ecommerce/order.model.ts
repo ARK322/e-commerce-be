@@ -12,6 +12,9 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const ORDER_CURRENCIES = ['TRY'] as const;
 export type OrderCurrency = (typeof ORDER_CURRENCIES)[number];
 
+export const ITEM_FULFILLMENT_STATUSES = ['pending', 'shipped', 'delivered'] as const;
+export type ItemFulfillmentStatus = (typeof ITEM_FULFILLMENT_STATUSES)[number];
+
 const stringField = { type: String, trim: true, maxlength: 500 };
 
 const orderItemSchema = new Schema(
@@ -22,6 +25,11 @@ const orderItemSchema = new Schema(
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
     subtotal: { type: Number, required: true, min: 0 },
+    fulfillmentStatus: {
+      type: String,
+      enum: ITEM_FULFILLMENT_STATUSES,
+      default: 'pending',
+    },
   },
   { _id: false, strict: true }
 );

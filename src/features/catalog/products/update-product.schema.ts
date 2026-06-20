@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { safeString, safeUrlSchema, uuidSchema } from '@/internal/common/validation/common-schemas';
+import { safeString, uuidSchema } from '@/internal/common/validation/common-schemas';
 import { slugSchema } from '@/internal/common/validation/slug-schema';
 
 export const updateProductSchema = z
@@ -24,7 +24,6 @@ export const updateProductSchema = z
       .min(1, 'Minimum sipariş adedi en az 1 olmalı')
       .optional(),
     isActive: z.boolean().optional(),
-    images: z.array(safeUrlSchema).max(10, 'En fazla 10 görsel eklenebilir').optional(),
   })
   .refine((data) => Object.values(data).some((value) => value !== undefined), {
     message: 'Güncellenecek en az bir alan gerekli',

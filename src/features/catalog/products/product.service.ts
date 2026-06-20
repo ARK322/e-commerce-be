@@ -6,7 +6,9 @@ import {
   assertProductCategory,
   getCategoryProductFilterIds,
 } from '@/features/catalog/categories/category.service';
+import { escapeRegex } from '@/internal/common/validation/escape-regex';
 import { slugify } from '@/internal/catalog/category/slugify';
+import { getPublicVisibleCategoryIds, isCategoryPubliclyVisible } from '@/internal/catalog/category/visible-categories';
 import {
   toPublicProductResponse,
   toSellerProductResponse,
@@ -49,18 +51,21 @@ const getOwnedProduct = async (sellerId: string, productId: string) => {
 };
 
 const buildPublicFilter = async (query: ListProductsQuery) => {
+  const visibleCategoryIds = [...(await getPublicVisibleCategoryIds())];
+
   const filter: Record<string, unknown> = {
     isActive: true,
-    categoryId: { $ne: null },
+    categoryId: { $in: visibleCategoryIds },
   };
 
   if (query.categoryId) {
     const leafCategoryIds = await getCategoryProductFilterIds(query.categoryId);
-    filter.categoryId = { $in: leafCategoryIds };
+    const visibleLeafIds = leafCategoryIds.filter((id) => visibleCategoryIds.includes(id));
+    filter.categoryId = { $in: visibleLeafIds };
   }
 
   if (query.search) {
-    filter.name = { $regex: query.search, $options: 'i' };
+    filter.name = { $regex: escapeRegex(query.search), $options: 'i' };
   }
 
   return filter;
@@ -121,7 +126,13 @@ const getPublicProductByIdUncached = async (productId: string) => {
     categoryId: { $ne: null },
   }).lean();
 
-  if (!product) {
+  if (!product || !product.categoryId) {
+    throw new CommerceError(404, 'Ürün bulunamadı');
+  }
+
+  const visible = await isCategoryPubliclyVisible(product.categoryId);
+
+  if (!visible) {
     throw new CommerceError(404, 'Ürün bulunamadı');
   }
 
@@ -238,8 +249,24 @@ export const updateProduct = async (
     product.isActive = input.isActive;
   }
 
-  if (input.images !== undefined) {
-    product.images = input.images;
+  if (
+    input.minOrderQuantity !== undefined &&
+    input.stock !== undefined &&
+    input.minOrderQuantity > input.stock
+  ) {
+    throw new CommerceError(400, 'Minimum sipariş adedi stoktan fazla olamaz');
+  } else if (
+    input.minOrderQuantity !== undefined &&
+    input.stock === undefined &&
+    input.minOrderQuantity > product.stock
+  ) {
+    throw new CommerceError(400, 'Minimum sipariş adedi stoktan fazla olamaz');
+  } else if (
+    input.stock !== undefined &&
+    input.minOrderQuantity === undefined &&
+    product.minOrderQuantity > input.stock
+  ) {
+    throw new CommerceError(400, 'Minimum sipariş adedi stoktan fazla olamaz');
   }
 
   product.updatedAt = new Date();

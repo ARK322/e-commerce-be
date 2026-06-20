@@ -3,6 +3,7 @@ import {
   sendSellerApprovedEmail,
   sendSellerRejectedEmail,
 } from '@/internal/auth/admin/mail/send-seller-notifications';
+import { isSellerProfileComplete } from '@/internal/auth/profile/profile-completion';
 import { createLogger } from '@/internal/common/logging';
 import { Seller, User, type SellerApprovalStatus } from '@/integrations/mongo';
 import { AuthError } from '@/internal/auth/errors';
@@ -69,7 +70,7 @@ const registerSellerIyzicoSubMerchant = async (
     }
 
     if (error instanceof HttpError) {
-      throw new AuthError(error.statusCode, error.message);
+      throw new AuthError(error.statusCode, 'Satıcı Iyzico alt üye kaydı oluşturulamadı');
     }
 
     log.error({ err: error, userId }, 'Iyzico alt üye kaydı oluşturulamadı');
@@ -183,10 +184,14 @@ export const rejectSeller = async (
 export const approveSeller = async (ctx: AdminAccessContext, userId: string) => {
   assertCanManageSellerApproval(ctx);
 
-  const user = await User.findById(userId).select('role email').lean();
+  const user = await User.findById(userId).select('role email isEmailVerified').lean();
 
   if (!user || user.role !== 'seller') {
     throw new AuthError(404, 'Satıcı bulunamadı');
+  }
+
+  if (!user.isEmailVerified) {
+    throw new AuthError(400, 'Satıcı e-postası doğrulanmadan onaylanamaz');
   }
 
   const seller = await Seller.findById(userId);
@@ -199,25 +204,37 @@ export const approveSeller = async (ctx: AdminAccessContext, userId: string) => 
     throw new AuthError(400, 'Sadece onay bekleyen satıcılar onaylanabilir');
   }
 
-  seller.iyzicoSubMerchantKey = await registerSellerIyzicoSubMerchant(
-    seller,
-    user.email,
-    userId
+  if (!isSellerProfileComplete(seller.toObject())) {
+    throw new AuthError(400, 'Satıcı profili ve belgeler tamamlanmadan onaylanamaz');
+  }
+
+  const subMerchantKey = await registerSellerIyzicoSubMerchant(seller, user.email, userId);
+
+  const updated = await Seller.findOneAndUpdate(
+    { _id: userId, approvalStatus: 'pending' },
+    {
+      $set: {
+        approvalStatus: 'approved',
+        rejectionReason: null,
+        iyzicoSubMerchantKey: subMerchantKey,
+      },
+    },
+    { returnDocument: 'after' }
   );
 
-  seller.approvalStatus = 'approved';
-  seller.rejectionReason = null;
-  await seller.save();
+  if (!updated) {
+    throw new AuthError(409, 'Satıcı onayı başka bir işlem tarafından tamamlandı');
+  }
 
   try {
-    await sendSellerApprovedEmail(user.email, seller.companyName);
+    await sendSellerApprovedEmail(user.email, updated.companyName);
   } catch (error) {
     log.error({ err: error, userId }, 'Satıcı onay bildirimi gönderilemedi');
   }
 
   return {
-    userId: seller._id,
-    approvalStatus: seller.approvalStatus,
+    userId: updated._id,
+    approvalStatus: updated.approvalStatus,
   };
 };
 

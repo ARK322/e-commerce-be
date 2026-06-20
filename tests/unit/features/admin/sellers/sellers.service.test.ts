@@ -4,6 +4,7 @@ import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
 
 const mockUserFindById = vi.fn();
 const mockSellerFindById = vi.fn();
+const mockSellerFindOneAndUpdate = vi.fn();
 const mockSendApproved = vi.fn();
 const mockSendRejected = vi.fn();
 
@@ -19,6 +20,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
   Seller: {
     findById: (...args: unknown[]) => mockSellerFindById(...args),
+    findOneAndUpdate: (...args: unknown[]) => mockSellerFindOneAndUpdate(...args),
   },
 }));
 
@@ -58,21 +60,41 @@ const limitedCtx: AdminAccessContext = {
   isOwner: false,
 };
 
+const completeSellerProfile = {
+  sellerType: 'kurumsal' as const,
+  companyName: 'Test A.Ş.',
+  taxNumber: '1234567890',
+  taxOffice: 'Kadıköy',
+  country: 'Türkiye',
+  city: 'İstanbul',
+  district: 'Kadıköy',
+  companyAddress: 'Test adres',
+  taxCertificateUrl: 'https://cdn.example.com/tax.pdf',
+  signatureCircularUrl: 'https://cdn.example.com/sig.pdf',
+  bankName: 'Test Bank',
+  iban: 'TR330006100519786457841326',
+  accountHolderName: 'Test A.Ş.',
+  companyLogoUrl: 'https://cdn.example.com/logo.png',
+  companyDescription: 'Test şirket açıklaması en az on karakter',
+  authorizedFirstName: 'Ali',
+  authorizedLastName: 'Veli',
+  authorizedPhone: '05551234567',
+  companyPhone: '05551234567',
+  companyType: 'ltd' as const,
+};
+
 const mockPendingSeller = (save: ReturnType<typeof vi.fn>) => ({
   _id: userId,
   approvalStatus: 'pending',
-  companyName: 'Test A.Ş.',
   rejectionReason: null,
   iyzicoSubMerchantKey: null,
-  sellerType: 'kurumsal',
-  companyType: 'ltd',
-  authorizedFirstName: 'Ali',
-  authorizedLastName: 'Veli',
-  companyPhone: '05551234567',
-  companyAddress: 'Test adres',
-  taxNumber: '1234567890',
-  taxOffice: 'Kadıköy',
-  iban: 'TR330006100519786457841326',
+  phone: '05551234567',
+  ...completeSellerProfile,
+  toObject: () => ({
+    _id: userId,
+    approvalStatus: 'pending',
+    ...completeSellerProfile,
+  }),
   save,
 });
 
@@ -83,10 +105,16 @@ describe('sellers.service bildirimleri', () => {
       chainFindById({
         role: 'seller',
         email: 'seller@example.com',
+        isEmailVerified: true,
       })
     );
     mockSendApproved.mockResolvedValue(undefined);
     mockSendRejected.mockResolvedValue(undefined);
+    mockSellerFindOneAndUpdate.mockResolvedValue({
+      _id: userId,
+      approvalStatus: 'approved',
+      companyName: 'Test A.Ş.',
+    });
   });
 
   it('onay sonrası satıcıya mail gönderir', async () => {
@@ -95,7 +123,7 @@ describe('sellers.service bildirimleri', () => {
 
     await approveSeller(ownerCtx, userId);
 
-    expect(save).toHaveBeenCalled();
+    expect(mockSellerFindOneAndUpdate).toHaveBeenCalled();
     expect(createIyzicoSubMerchant).toHaveBeenCalled();
     expect(mockSendApproved).toHaveBeenCalledWith('seller@example.com', 'Test A.Ş.');
   });

@@ -41,6 +41,7 @@ export type CompleteCheckoutResult =
       status: 'completed';
       externalId: string;
       orderId: string;
+      paidAmount: number;
       itemTransactions: Array<{
         itemId: string;
         paymentTransactionId: string;

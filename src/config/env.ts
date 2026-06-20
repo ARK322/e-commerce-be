@@ -4,6 +4,8 @@ import {
   DEFAULT_DEV_CORS_ORIGINS,
   DEFAULT_FRONTEND_URL,
   DEFAULT_LOG_LEVEL,
+  DEFAULT_PENDING_ORDER_EXPIRY_INTERVAL_MS,
+  DEFAULT_PENDING_ORDER_TTL_MINUTES,
   DEFAULT_PORT,
   IYZICO_PRODUCTION_URI,
   IYZICO_SANDBOX_URI,
@@ -72,7 +74,13 @@ export const env = {
     }
 
     const parsed = nodeEnvSchema.safeParse(raw);
-    return parsed.success ? parsed.data : 'development';
+    if (!parsed.success) {
+      throw new Error(
+        `NODE_ENV geçersiz: "${raw}". İzin verilen değerler: development, production, test`
+      );
+    }
+
+    return parsed.data;
   },
 
   get isProduction(): boolean {
@@ -178,6 +186,21 @@ export const env = {
     return parseCommissionRate(process.env.PLATFORM_COMMISSION_RATE);
   },
 
+  get pendingOrderTtlMs(): number {
+    const raw = trim(process.env.PENDING_ORDER_TTL_MINUTES);
+    const minutes = raw ? Number(raw) : DEFAULT_PENDING_ORDER_TTL_MINUTES;
+
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+      return DEFAULT_PENDING_ORDER_TTL_MINUTES * 60_000;
+    }
+
+    return minutes * 60_000;
+  },
+
+  get pendingOrderExpiryIntervalMs(): number {
+    return DEFAULT_PENDING_ORDER_EXPIRY_INTERVAL_MS;
+  },
+
   resolveIyzicoUri(apiKey: string): string {
     if (env.iyzipayUri) {
       return env.iyzipayUri;
@@ -201,14 +224,26 @@ export const env = {
 
 const startupEnvSchema = z.object({
   mongoUri: z.string().min(1, 'MongoDB bağlantı adresi bulunamadı'),
-  jwtSecret: z.string().min(1, 'JWT_SECRET tanımlanmamış'),
+  jwtSecret: z.string().min(32, 'JWT_SECRET en az 32 karakter olmalı'),
   platformCommissionRate: z
     .string()
     .min(1, 'PLATFORM_COMMISSION_RATE tanımlı olmalı (örn. 0.10 = %10 komisyon)'),
 });
 
+const productionStartupEnvSchema = z.object({
+  frontendUrl: z.string().min(1, 'FRONTEND_URL tanımlanmamış'),
+  resendApiKey: z.string().min(1, 'SMTP_PASS (Resend API anahtarı) tanımlanmamış'),
+  mailFrom: z.string().min(1, 'SMTP_FROM tanımlanmamış'),
+  supabaseUrl: z.string().min(1, 'SUPABASE_URL tanımlanmamış'),
+  supabaseServiceRoleKey: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY tanımlanmamış'),
+  iyzipayApiKey: z.string().min(1, 'IYZIPAY_API_KEY tanımlanmamış'),
+  iyzipaySecretKey: z.string().min(1, 'IYZIPAY_SECRET_KEY tanımlanmamış'),
+});
+
 /** Sunucu başlatılırken zorunlu env değişkenlerini doğrular. */
 export const validateEnvAtStartup = (): void => {
+  void env.nodeEnv;
+
   const result = startupEnvSchema.safeParse({
     mongoUri: env.mongoUri ?? '',
     jwtSecret: process.env.JWT_SECRET ?? '',
@@ -221,4 +256,25 @@ export const validateEnvAtStartup = (): void => {
   }
 
   parseCommissionRate(process.env.PLATFORM_COMMISSION_RATE);
+
+  if (env.isProduction) {
+    const productionResult = productionStartupEnvSchema.safeParse({
+      frontendUrl: process.env.FRONTEND_URL ?? '',
+      resendApiKey: process.env.SMTP_PASS ?? '',
+      mailFrom: process.env.SMTP_FROM ?? '',
+      supabaseUrl: process.env.SUPABASE_URL ?? '',
+      supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+      iyzipayApiKey: process.env.IYZIPAY_API_KEY ?? '',
+      iyzipaySecretKey: process.env.IYZIPAY_SECRET_KEY ?? '',
+    });
+
+    if (!productionResult.success) {
+      const message = productionResult.error.issues.map((issue) => issue.message).join('; ');
+      throw new Error(message);
+    }
+
+    if (env.allowedOrigins.length === 0) {
+      throw new Error('Production ortamında CORS_ORIGINS veya FRONTEND_URL tanımlanmalı');
+    }
+  }
 };

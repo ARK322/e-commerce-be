@@ -67,12 +67,9 @@ export const sellerProfileUpdateSchema = z
     city: optionalSafeString({ min: 2, max: 100, label: 'İl' }),
     district: optionalSafeString({ min: 2, max: 100, label: 'İlçe' }),
     companyAddress: optionalSafeString({ min: 5, max: 1000, label: 'Şirket adresi' }),
-    taxCertificateUrl: safeUrlSchema.optional(),
-    signatureCircularUrl: safeUrlSchema.optional(),
     bankName: optionalSafeString({ min: 2, max: 100, label: 'Banka adı' }),
     iban: ibanSchema.optional(),
     accountHolderName: optionalSafeString({ min: 2, max: 100, label: 'Hesap sahibi adı' }),
-    companyLogoUrl: safeUrlSchema.optional(),
     companyDescription: optionalSafeString({
       min: 10,
       max: 2000,

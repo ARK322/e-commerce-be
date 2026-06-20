@@ -9,8 +9,8 @@ export default async function catalogRoutes(fastify: FastifyInstance) {
   await fastify.register(async (publicScope) => {
     await registerScopedRateLimit(publicScope, CATALOG_PUBLIC_RATE_LIMIT);
     await publicScope.register(categoryRoutes, { prefix: '/categories' });
+    await publicScope.register(publicProductRoutes, { prefix: '/products' });
   });
 
-  await fastify.register(publicProductRoutes, { prefix: '/products' });
   await fastify.register(sellerProductRoutes, { prefix: '/products' });
 }

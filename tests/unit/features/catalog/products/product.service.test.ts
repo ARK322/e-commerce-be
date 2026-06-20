@@ -4,6 +4,14 @@ import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
 const mockAssertProductCategory = vi.fn();
 const mockGetCategoryProductFilterIds = vi.fn();
 
+vi.mock('@/internal/catalog/category/visible-categories', () => ({
+  getPublicVisibleCategoryIds: vi.fn().mockResolvedValue(
+    new Set(['660e8400-e29b-41d4-a716-446655440001', 'leaf-category-id'])
+  ),
+  isCategoryPubliclyVisible: vi.fn().mockResolvedValue(true),
+  invalidateVisibleCategoryIdsCache: vi.fn(),
+}));
+
 vi.mock('@/features/catalog/categories/category.service', () => ({
   assertProductCategory: (...args: unknown[]) => mockAssertProductCategory(...args),
   getCategoryProductFilterIds: (...args: unknown[]) => mockGetCategoryProductFilterIds(...args),
@@ -199,7 +207,7 @@ describe('listPublicProducts', () => {
 
     expect(mockProductFind).toHaveBeenCalledWith({
       isActive: true,
-      categoryId: { $ne: null },
+      categoryId: { $in: ['660e8400-e29b-41d4-a716-446655440001', 'leaf-category-id'] },
     });
     expect(result.products).toHaveLength(1);
     expect(result.pagination.total).toBe(1);

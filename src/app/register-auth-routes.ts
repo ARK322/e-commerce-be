@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import {
   AUTH_ADMIN_RATE_LIMIT,
+  AUTH_AUTHENTICATED_RATE_LIMIT,
   AUTH_PUBLIC_RATE_LIMIT,
   AUTH_SELLER_RATE_LIMIT,
 } from '@/middleware/presets/rate-limit';
@@ -32,11 +33,15 @@ export const registerAuthRoutes = async (app: FastifyInstance): Promise<void> =>
       await publicAuth.register(resendVerificationRoutes, { prefix: '/resend-verification' });
     });
 
-    await authScope.register(meRoutes, { prefix: '/me' });
-    await authScope.register(profileRoutes, { prefix: '/profile' });
-    await authScope.register(documentsRoutes, { prefix: '/profile/documents' });
-    await authScope.register(changePasswordRoutes, { prefix: '/change-password' });
-    await authScope.register(logoutRoutes, { prefix: '/logout' });
+    await authScope.register(async (authenticatedAuth) => {
+      await registerScopedRateLimit(authenticatedAuth, AUTH_AUTHENTICATED_RATE_LIMIT);
+
+      await authenticatedAuth.register(meRoutes, { prefix: '/me' });
+      await authenticatedAuth.register(profileRoutes, { prefix: '/profile' });
+      await authenticatedAuth.register(documentsRoutes, { prefix: '/profile/documents' });
+      await authenticatedAuth.register(changePasswordRoutes, { prefix: '/change-password' });
+      await authenticatedAuth.register(logoutRoutes, { prefix: '/logout' });
+    });
 
     await authScope.register(async (adminScope) => {
       await registerScopedRateLimit(adminScope, AUTH_ADMIN_RATE_LIMIT);
