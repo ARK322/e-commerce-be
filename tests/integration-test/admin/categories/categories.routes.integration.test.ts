@@ -12,7 +12,7 @@ const mockGetAdminContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/catalog/categories/category.service', () => ({
+vi.mock('@/features/admin/categories/admin-categories.service', () => ({
   listAdminCategories: (...args: unknown[]) => mockListAdminCategories(...args),
   linkCategory: (...args: unknown[]) => mockLinkCategory(...args),
   createCategory: (...args: unknown[]) => mockCreateCategory(...args),
@@ -89,13 +89,13 @@ describe('category admin routes integration', () => {
     mockRevokedTokenExists.mockResolvedValue(null);
   });
 
-  it('GET /admin/categories token olmadan 401 döner', async () => {
-    const response = await app.inject({ method: 'GET', url: '/admin/categories' });
+  it('GET /auth/admin/categories token olmadan 401 döner', async () => {
+    const response = await app.inject({ method: 'GET', url: '/auth/admin/categories' });
 
     expect(response.statusCode).toBe(401);
   });
 
-  it('GET /admin/categories admin token ile kategori listesi döner', async () => {
+  it('GET /auth/admin/categories admin token ile kategori listesi döner', async () => {
     const token = signAuthToken(adminId, 'admin');
     mockAdminAuth();
     mockListAdminCategories.mockResolvedValue([
@@ -104,7 +104,7 @@ describe('category admin routes integration', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: '/admin/categories',
+      url: '/auth/admin/categories',
       headers: { authorization: `Bearer ${token}` },
     });
 
@@ -114,7 +114,7 @@ describe('category admin routes integration', () => {
     });
   });
 
-  it('POST /admin/categories/:id/links parent bağlantısı ekler', async () => {
+  it('POST /auth/admin/categories/:id/links parent bağlantısı ekler', async () => {
     const token = signAuthToken(adminId, 'admin');
     mockAdminAuth();
     mockLinkCategory.mockResolvedValue({
@@ -125,7 +125,7 @@ describe('category admin routes integration', () => {
 
     const response = await app.inject({
       method: 'POST',
-      url: `/admin/categories/${childId}/links`,
+      url: `/auth/admin/categories/${childId}/links`,
       headers: { authorization: `Bearer ${token}` },
       payload: { parentId: categoryId },
     });
@@ -139,13 +139,13 @@ describe('category admin routes integration', () => {
     expect(mockLinkCategory).toHaveBeenCalledWith(childId, { parentId: categoryId });
   });
 
-  it('POST /admin/categories/:id/links geçersiz body ile 400 döner', async () => {
+  it('POST /auth/admin/categories/:id/links geçersiz body ile 400 döner', async () => {
     const token = signAuthToken(adminId, 'admin');
     mockAdminAuth();
 
     const response = await app.inject({
       method: 'POST',
-      url: `/admin/categories/${childId}/links`,
+      url: `/auth/admin/categories/${childId}/links`,
       headers: { authorization: `Bearer ${token}` },
       payload: {},
     });
@@ -154,7 +154,7 @@ describe('category admin routes integration', () => {
     expect(response.json()).toMatchObject({ message: 'Geçersiz istek verisi' });
   });
 
-  it('DELETE /admin/categories/:id/links parent bağlantısını kaldırır', async () => {
+  it('DELETE /auth/admin/categories/:id/links parent bağlantısını kaldırır', async () => {
     const token = signAuthToken(adminId, 'admin');
     mockAdminAuth();
     mockUnlinkCategory.mockResolvedValue({
@@ -165,7 +165,7 @@ describe('category admin routes integration', () => {
 
     const response = await app.inject({
       method: 'DELETE',
-      url: `/admin/categories/${childId}/links`,
+      url: `/auth/admin/categories/${childId}/links`,
       headers: { authorization: `Bearer ${token}` },
       payload: { parentId: categoryId },
     });
@@ -178,7 +178,7 @@ describe('category admin routes integration', () => {
     expect(mockUnlinkCategory).toHaveBeenCalledWith(childId, { parentId: categoryId });
   });
 
-  it('POST /admin/categories yeni kategori oluşturur', async () => {
+  it('POST /auth/admin/categories yeni kategori oluşturur', async () => {
     const token = signAuthToken(adminId, 'admin');
     mockAdminAuth();
     mockCreateCategory.mockResolvedValue({
@@ -190,7 +190,7 @@ describe('category admin routes integration', () => {
 
     const response = await app.inject({
       method: 'POST',
-      url: '/admin/categories',
+      url: '/auth/admin/categories',
       headers: { authorization: `Bearer ${token}` },
       payload: { name: 'Elektronik', slug: 'elektronik' },
     });

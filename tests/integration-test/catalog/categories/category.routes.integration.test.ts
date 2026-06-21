@@ -87,10 +87,4 @@ describe('category routes integration', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ categoryId, paths: [[categoryId]] });
   });
-
-  it('GET /admin/categories token olmadan 401 döner', async () => {
-    const response = await app.inject({ method: 'GET', url: '/admin/categories' });
-
-    expect(response.statusCode).toBe(401);
-  });
 });

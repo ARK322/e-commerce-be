@@ -28,11 +28,13 @@ vi.mock('@/internal/common/ids', () => ({
 }));
 
 import {
+  listPublicCategories,
+} from '@/features/catalog/categories/category.service';
+import {
   deleteCategory,
   getCategoryById,
-  listPublicCategories,
   updateCategory,
-} from '@/features/catalog/categories/category.service';
+} from '@/features/admin/categories/admin-categories.service';
 
 const categoryId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 const childCategoryId = '8d9e6679-7425-40de-944b-e07fc1f90ae8';

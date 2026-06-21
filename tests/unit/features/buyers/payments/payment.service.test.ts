@@ -109,6 +109,7 @@ const pendingOrder = {
   totalAmount: 1998,
   currency: 'TRY',
   status: 'pending',
+  stockReserved: false,
   items: [
     {
       productId,
@@ -256,6 +257,74 @@ describe('createPaymentForOrder', () => {
     expect(result.checkout.paymentPageUrl).toContain('iyzico-token');
     expect(result.payment.status).toBe('pending');
     expect(result.payment.provider).toBe('iyzico');
+  });
+
+  it('stok zaten rezerve edilmişse tekrar rezerve etmez', async () => {
+    mockOrderFindOne.mockReturnValue(
+      mockLeanOrder({
+        ...pendingOrder,
+        stockReserved: true,
+      })
+    );
+    mockPaymentFindOne.mockResolvedValue(null);
+    mockPaymentCreate.mockResolvedValue({
+      toObject: () => ({
+        _id: '9c9e6679-7425-40de-944b-e07fc1f90ae9',
+        orderId,
+        buyerId,
+        amount: 1998,
+        currency: 'TRY',
+        provider: 'iyzico',
+        externalId: 'iyzico-token',
+        status: 'pending',
+      }),
+      save: vi.fn().mockResolvedValue(undefined),
+      provider: null,
+      externalId: null,
+      status: 'pending',
+      updatedAt: undefined,
+    });
+
+    await createPaymentForOrder(buyerId, { orderId });
+
+    expect(mockReservePendingOrderStock).not.toHaveBeenCalled();
+  });
+
+  it('stok rezerve edilmiş siparişte kalan stok 0 olsa bile ödemeye izin verir', async () => {
+    mockOrderFindOne.mockReturnValue(
+      mockLeanOrder({
+        ...pendingOrder,
+        stockReserved: true,
+      })
+    );
+    mockPaymentFindOne.mockResolvedValue(null);
+    mockProductFindOne.mockReturnValue({
+      lean: vi.fn().mockResolvedValue({
+        ...productRecord,
+        stock: 0,
+      }),
+    });
+    mockPaymentCreate.mockResolvedValue({
+      toObject: () => ({
+        _id: '9c9e6679-7425-40de-944b-e07fc1f90ae9',
+        orderId,
+        buyerId,
+        amount: 1998,
+        currency: 'TRY',
+        provider: 'iyzico',
+        externalId: 'iyzico-token',
+        status: 'pending',
+      }),
+      save: vi.fn().mockResolvedValue(undefined),
+      provider: null,
+      externalId: null,
+      status: 'pending',
+      updatedAt: undefined,
+    });
+
+    await expect(createPaymentForOrder(buyerId, { orderId })).resolves.toMatchObject({
+      payment: { status: 'pending' },
+    });
   });
 });
 

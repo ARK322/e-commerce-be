@@ -13,6 +13,7 @@ const {
   mockAssertPurchasableCatalogProduct,
   mockReservePendingOrderStock,
   mockCancelPendingOrder,
+  mockRestoreCartItemsForBuyer,
 } = vi.hoisted(() => {
   const mockWithTransaction = vi.fn();
   const mockEndSession = vi.fn().mockResolvedValue(undefined);
@@ -34,6 +35,7 @@ const {
     mockAssertPurchasableCatalogProduct: vi.fn(),
     mockReservePendingOrderStock: vi.fn(),
     mockCancelPendingOrder: vi.fn(),
+    mockRestoreCartItemsForBuyer: vi.fn(),
   };
 });
 
@@ -49,6 +51,16 @@ vi.mock('@/internal/buyers/orders/reserve-order-stock', () => ({
 vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
+
+vi.mock('@/repositories/buyers/cart.repository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/repositories/buyers/cart.repository')>();
+
+  return {
+    ...actual,
+    clearNonEmptyCartInSession: (...args: unknown[]) => mockCartFindOneAndUpdate(...args),
+    restoreCartItemsForBuyer: (...args: unknown[]) => mockRestoreCartItemsForBuyer(...args),
+  };
+});
 
 vi.mock('mongoose', () => ({
   default: {
@@ -127,6 +139,7 @@ describe('createOrderFromCartForBuyer', () => {
     });
     mockReservePendingOrderStock.mockResolvedValue(true);
     mockCancelPendingOrder.mockResolvedValue(true);
+    mockRestoreCartItemsForBuyer.mockResolvedValue(undefined);
   });
 
   it('sepet boşsa 400 fırlatır', async () => {
@@ -216,5 +229,8 @@ describe('createOrderFromCartForBuyer', () => {
     });
 
     expect(mockCancelPendingOrder).toHaveBeenCalledWith(orderId);
+    expect(mockRestoreCartItemsForBuyer).toHaveBeenCalledWith(buyerId, [
+      { productId, quantity: 2, priceSnapshot: null },
+    ]);
   });
 });

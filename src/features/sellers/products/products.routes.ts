@@ -16,7 +16,7 @@ import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-key
 import {
   updateProductSchema,
   type UpdateProductInput,
-} from '@/features/catalog/products/update-product.schema';
+} from '@/features/sellers/products/update-product.schema';
 import {
   createProductFromRequest,
   deleteProduct,
@@ -24,7 +24,7 @@ import {
   updateProduct,
   addProductImage,
   removeProductImage,
-} from '@/features/catalog/products/product.service';
+} from '@/features/sellers/products/seller-products.service';
 import {
   deleteProductImageSchema,
   type DeleteProductImageInput,

@@ -48,13 +48,15 @@ vi.mock('@/internal/common/ids', () => ({
 }));
 
 import {
+  getPublicProductById,
+  listPublicProducts,
+} from '@/features/catalog/products/product.service';
+import {
   createProduct,
   createProductWithImages,
   deleteProduct,
-  getPublicProductById,
-  listPublicProducts,
   updateProduct,
-} from '@/features/catalog/products/product.service';
+} from '@/features/sellers/products/seller-products.service';
 import { uploadProductImage } from '@/internal/catalog/product/product-images';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';

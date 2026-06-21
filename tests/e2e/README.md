@@ -66,7 +66,7 @@ Seed/helper: onaylı satıcı + ürün + `iyzicoSubMerchantKey` (admin approve m
 ### 3. `seller-onboarding`
 
 ```
-register seller → PATCH profile → admin approve → GET /products/mine
+register seller → PATCH profile → admin approve → GET /auth/seller/products/mine
 ```
 
 ---

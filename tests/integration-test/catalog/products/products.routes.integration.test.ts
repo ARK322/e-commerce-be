@@ -17,6 +17,9 @@ const mockRevokedTokenExists = vi.fn();
 vi.mock('@/features/catalog/products/product.service', () => ({
   listPublicProducts: (...args: unknown[]) => mockListPublicProducts(...args),
   getPublicProductById: (...args: unknown[]) => mockGetPublicProductById(...args),
+}));
+
+vi.mock('@/features/sellers/products/seller-products.service', () => ({
   listSellerProducts: (...args: unknown[]) => mockListSellerProducts(...args),
   createProductWithImages: vi.fn(),
   updateProduct: (...args: unknown[]) => mockUpdateProduct(...args),
@@ -135,20 +138,20 @@ describe('product routes integration', () => {
     expect(response.json().product.name).toBe('Telefon');
   });
 
-  it('GET /products/mine token olmadan 401 döner', async () => {
-    const response = await app.inject({ method: 'GET', url: '/products/mine' });
+  it('GET /auth/seller/products/mine token olmadan 401 döner', async () => {
+    const response = await app.inject({ method: 'GET', url: '/auth/seller/products/mine' });
 
     expect(response.statusCode).toBe(401);
   });
 
-  it('GET /products/mine onaylı satıcı ürünlerini döner', async () => {
+  it('GET /auth/seller/products/mine onaylı satıcı ürünlerini döner', async () => {
     const token = signAuthToken(sellerId, 'seller');
     mockApprovedSeller();
     mockListSellerProducts.mockResolvedValue([{ id: productId, name: 'Telefon', price: 999 }]);
 
     const response = await app.inject({
       method: 'GET',
-      url: '/products/mine',
+      url: '/auth/seller/products/mine',
       headers: { authorization: `Bearer ${token}` },
     });
 
@@ -156,14 +159,14 @@ describe('product routes integration', () => {
     expect(response.json().products).toHaveLength(1);
   });
 
-  it('PATCH /products/:productId satıcı ürünü günceller', async () => {
+  it('PATCH /auth/seller/products/:productId satıcı ürünü günceller', async () => {
     const token = signAuthToken(sellerId, 'seller');
     mockApprovedSeller();
     mockUpdateProduct.mockResolvedValue({ id: productId, name: 'Yeni Telefon', price: 1299 });
 
     const response = await app.inject({
       method: 'PATCH',
-      url: `/products/${productId}`,
+      url: `/auth/seller/products/${productId}`,
       headers: { authorization: `Bearer ${token}` },
       payload: { name: 'Yeni Telefon', price: 1299 },
     });
@@ -175,14 +178,14 @@ describe('product routes integration', () => {
     });
   });
 
-  it('DELETE /products/:productId satıcı ürünü siler', async () => {
+  it('DELETE /auth/seller/products/:productId satıcı ürünü siler', async () => {
     const token = signAuthToken(sellerId, 'seller');
     mockApprovedSeller();
     mockDeleteProduct.mockResolvedValue(undefined);
 
     const response = await app.inject({
       method: 'DELETE',
-      url: `/products/${productId}`,
+      url: `/auth/seller/products/${productId}`,
       headers: { authorization: `Bearer ${token}` },
     });
 

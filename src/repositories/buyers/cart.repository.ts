@@ -34,3 +34,17 @@ export const clearNonEmptyCartInSession = async (buyerId: string, session: Clien
     { $set: { items: [], updatedAt: new Date() } },
     { session, returnDocument: 'before' }
   );
+
+export type CartItemSnapshot = {
+  productId: string;
+  quantity: number;
+  priceSnapshot?: number | null;
+};
+
+export const restoreCartItemsForBuyer = async (
+  buyerId: string,
+  items: CartItemSnapshot[]
+): Promise<void> => {
+  const cart = await ensureCartDocument(buyerId);
+  await saveCartDocumentItems(cart, items);
+};

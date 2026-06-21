@@ -57,7 +57,7 @@ describeE2E('seller onboarding (E2E)', () => {
 
     const productsResponse = await app.inject({
       method: 'GET',
-      url: '/products/mine',
+      url: '/auth/seller/products/mine',
       headers: { authorization: `Bearer ${sellerToken}` },
     });
 

@@ -42,6 +42,10 @@ vi.mock('@/internal/buyers/orders/retry-failed-payment-splits', () => ({
   startPaymentSplitApprovalRetryScheduler: vi.fn(),
 }));
 
+vi.mock('@/internal/sellers/wallet/retry-missing-wallet-credits', () => ({
+  startMissingSellerWalletCreditRetryScheduler: vi.fn(),
+}));
+
 vi.mock('@/internal/common/outbox/process-outbox-events', () => ({
   startOutboxProcessorScheduler: vi.fn(),
 }));

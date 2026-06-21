@@ -10,7 +10,11 @@ import {
 } from '@/internal/buyers/orders/order-item-validation';
 import { assertPurchasableCatalogProduct } from '@/internal/catalog/product/assert-purchasable-product';
 import { findBuyerShippingProfileLean } from '@/repositories/buyers/buyer.repository';
-import { clearNonEmptyCartInSession } from '@/repositories/buyers/cart.repository';
+import {
+  clearNonEmptyCartInSession,
+  restoreCartItemsForBuyer,
+  type CartItemSnapshot,
+} from '@/repositories/buyers/cart.repository';
 import { createOrderInSession } from '@/repositories/buyers/order.repository';
 
 type OrderItemRecord = {
@@ -105,6 +109,7 @@ export const createOrderFromCartForBuyer = async (
 
   try {
     let createdOrder: CreatedOrderRecord | null = null;
+    let clearedCartItems: CartItemSnapshot[] = [];
 
     await session.withTransaction(async () => {
       const cart = await clearNonEmptyCartInSession(buyerId, session);
@@ -112,6 +117,12 @@ export const createOrderFromCartForBuyer = async (
       if (!cart?.items?.length) {
         throw new CommerceError(400, 'Sepet boş');
       }
+
+      clearedCartItems = cart.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        priceSnapshot: item.priceSnapshot ?? null,
+      }));
 
       const orderItems = await buildOrderItemsFromCart(cart.items);
       const totalAmount = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
@@ -148,6 +159,7 @@ export const createOrderFromCartForBuyer = async (
       );
     } catch (error) {
       await cancelPendingOrder(orderId);
+      await restoreCartItemsForBuyer(buyerId, clearedCartItems);
       throw error;
     }
 

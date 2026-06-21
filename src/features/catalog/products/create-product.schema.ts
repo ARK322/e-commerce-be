@@ -1,32 +1,4 @@
-import { z } from 'zod';
-import { safeString, uuidSchema } from '@/internal/common/validation/common-schemas';
-import { slugSchema } from '@/internal/common/validation/slug-schema';
-
-export const createProductSchema = z
-  .object({
-    categoryId: uuidSchema,
-    name: safeString({
-      min: 1,
-      max: 200,
-      label: 'Ürün adı',
-    }),
-    slug: slugSchema.optional(),
-    description: safeString({
-      min: 1,
-      max: 5000,
-      label: 'Açıklama',
-    }).optional(),
-    price: z
-      .number({ error: 'Fiyat zorunlu' })
-      .min(0, 'Fiyat 0 veya daha büyük olmalı'),
-    stock: z.number().int().min(0, 'Stok 0 veya daha büyük olmalı').default(0),
-    minOrderQuantity: z
-      .number()
-      .int('Minimum sipariş adedi tam sayı olmalı')
-      .min(1, 'Minimum sipariş adedi en az 1 olmalı')
-      .default(1),
-    isActive: z.boolean().optional(),
-  })
-  .strict();
-
-export type CreateProductInput = z.infer<typeof createProductSchema>;
+export {
+  createProductSchema,
+  type CreateProductInput,
+} from '@/internal/catalog/product/product-seller.schema';

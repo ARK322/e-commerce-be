@@ -11,13 +11,12 @@ import { CommerceError } from '@/internal/common/errors/commerce-error';
 import { logger } from '@/internal/common/logging';
 import {
   buildPaymentSplitsForOrder,
-  syncPaymentSplitTransactionIds,
 } from '@/internal/buyers/payment/payment-split';
+import { ensurePostPaymentSideEffects } from '@/internal/buyers/payment/post-payment-side-effects';
 import { logPaymentTransition } from '@/internal/buyers/payment/payment-audit';
 import { refundCapturedIyzicoPayment } from '@/internal/buyers/payment/refund-captured-payment';
 import { cancelPendingOrder } from '@/internal/buyers/orders/cancel-pending-order';
 import { fulfillPaidOrder } from '@/internal/buyers/orders/fulfill-order';
-import { creditSellerPendingFromPaidOrder } from '@/internal/sellers/wallet/credit-pending-from-order';
 
 const AMOUNT_TOLERANCE = 0.01;
 const FINAL_ORDER_STATUSES = new Set(['paid', 'shipped', 'delivered']);
@@ -79,22 +78,7 @@ const markPaymentCompleted = async (
   });
 };
 
-const runPostPaymentSideEffects = async (
-  orderId: string,
-  itemTransactions: Array<{ itemId: string; paymentTransactionId: string }>
-) => {
-  try {
-    await syncPaymentSplitTransactionIds(orderId, itemTransactions);
-  } catch (syncError) {
-    logger.error({ err: syncError, orderId }, 'Split transaction sync başarısız');
-  }
-
-  try {
-    await creditSellerPendingFromPaidOrder(orderId);
-  } catch (walletError) {
-    logger.error({ err: walletError, orderId }, 'Satıcı pending bakiye yazılamadı');
-  }
-};
+const runPostPaymentSideEffects = ensurePostPaymentSideEffects;
 
 const handleFulfillmentFailure = async (
   payment: {
@@ -230,6 +214,8 @@ export const finalizeSuccessfulIyzicoCheckout = async (
     const order = await findOrderByIdLean(result.orderId);
 
     if (isFinalOrderStatus(order?.status)) {
+      await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+
       return {
         payment: toPaymentResponse(payment.toObject() as PaymentRecord),
         success: true as const,
@@ -247,6 +233,8 @@ export const finalizeSuccessfulIyzicoCheckout = async (
     if (payment.status !== 'completed') {
       await markPaymentCompleted(payment, result.externalId);
     }
+
+    await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
 
     return {
       payment: toPaymentResponse(payment.toObject() as PaymentRecord),
@@ -299,6 +287,8 @@ export const finalizeSuccessfulIyzicoCheckout = async (
       payment = latestPayment;
 
       if (payment.status === 'completed') {
+        await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+
         return {
           payment: toPaymentResponse(payment.toObject() as PaymentRecord),
           success: true as const,

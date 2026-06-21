@@ -73,12 +73,18 @@ const loadBuyerPaymentProfile = async (buyerId: string) => {
   };
 };
 
-const assertOrderReadyForPayment = async (items: OrderItemRecord[]) => {
+const assertOrderReadyForPayment = async (
+  items: OrderItemRecord[],
+  options?: { stockAlreadyReserved?: boolean }
+) => {
   await assertSellersReadyForOrder(items);
 
   for (const item of items) {
     const product = await assertPurchasableCatalogProduct(item.productId);
-    assertProductStockAvailable(product, item.quantity);
+
+    if (!options?.stockAlreadyReserved) {
+      assertProductStockAvailable(product, item.quantity);
+    }
   }
 };
 
@@ -103,14 +109,19 @@ export const createPaymentForOrder = async (
     throw new CommerceError(409, 'Bu sipariş için ödeme işleniyor');
   }
 
-  await assertOrderReadyForPayment(order.items as OrderItemRecord[]);
-  await reservePendingOrderStock(
-    input.orderId,
-    order.items.map((item) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-    }))
-  );
+  const stockAlreadyReserved = Boolean(order.stockReserved);
+
+  await assertOrderReadyForPayment(order.items as OrderItemRecord[], { stockAlreadyReserved });
+
+  if (!stockAlreadyReserved) {
+    await reservePendingOrderStock(
+      input.orderId,
+      order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }))
+    );
+  }
 
   const buyerProfile = await loadBuyerPaymentProfile(buyerId);
   const paymentSplits = await buildPaymentSplitsForOrder(input.orderId, order.items);

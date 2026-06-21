@@ -26,7 +26,7 @@ import {
   listAdminCategories,
   unlinkCategory,
   updateCategory,
-} from '@/features/catalog/categories/category.service';
+} from '@/features/admin/categories/admin-categories.service';
 
 const adminWithCategoryId = {
   preHandler: [...adminOnly.preHandler, validateParams(categoryIdParamSchema)],
