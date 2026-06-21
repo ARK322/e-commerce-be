@@ -16,6 +16,7 @@ import { ensurePostPaymentSideEffects } from '@/internal/buyers/payment/post-pay
 import { logPaymentTransition } from '@/internal/buyers/payment/payment-audit';
 import { refundCapturedIyzicoPayment } from '@/internal/buyers/payment/refund-captured-payment';
 import { cancelPendingOrder } from '@/internal/buyers/orders/cancel-pending-order';
+import { enqueueOrderConfirmationEmail } from '@/internal/buyers/orders/enqueue-order-confirmation';
 import { fulfillPaidOrder } from '@/internal/buyers/orders/fulfill-order';
 
 const AMOUNT_TOLERANCE = 0.01;
@@ -194,6 +195,7 @@ const finalizeProcessingPayment = async (
 
   await markPaymentCompleted(payment, result.externalId);
   await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+  await enqueueOrderConfirmationEmail(result.orderId);
 
   return {
     payment: toPaymentResponse(payment.toObject()),

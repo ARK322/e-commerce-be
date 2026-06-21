@@ -11,7 +11,7 @@ import { orderIdParamSchema } from '@/internal/common/validation/param-schemas';
 import { handleRouteError } from '@/internal/common/errors/handle-route-error';
 import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
 import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-guards';
-import { createOrderSchema } from '@/features/buyers/orders/create-order.schema';
+import { createOrderSchema, type CreateOrderInput } from '@/features/buyers/orders/create-order.schema';
 import {
   updateOrderStatusSchema,
   type UpdateOrderStatusInput,
@@ -84,7 +84,7 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     { preHandler: [...buyerOnly.preHandler, validateBody(createOrderSchema)] },
     async (req, reply) => {
       try {
-        const order = await createOrderFromCart(req.auth!.userId);
+        const order = await createOrderFromCart(req.auth!.userId, req.body as CreateOrderInput);
 
         return reply.status(201).send({
           message: 'Sipariş oluşturuldu',

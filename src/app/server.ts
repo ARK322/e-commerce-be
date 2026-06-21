@@ -10,6 +10,7 @@ import { startStuckPaymentRecoveryScheduler } from '@/internal/buyers/orders/rec
 import { startOutboxProcessorScheduler } from '@/internal/common/outbox/process-outbox-events';
 import { startPaymentSplitApprovalRetryScheduler } from '@/internal/buyers/orders/retry-failed-payment-splits';
 import { startMissingSellerWalletCreditRetryScheduler } from '@/internal/sellers/wallet/retry-missing-wallet-credits';
+import { startSellerWalletReconciliationScheduler } from '@/internal/sellers/wallet/reconcile-seller-wallet-releases';
 import { startUnverifiedUserExpiryScheduler } from '@/internal/auth/register/expire-unverified-users';
 
 export const getPort = (): number => env.port;
@@ -57,6 +58,7 @@ export const start = async (): Promise<void> => {
     startStuckPaymentRecoveryScheduler();
     startPaymentSplitApprovalRetryScheduler();
     startMissingSellerWalletCreditRetryScheduler();
+    startSellerWalletReconciliationScheduler();
     startOutboxProcessorScheduler();
     startUnverifiedUserExpiryScheduler();
 

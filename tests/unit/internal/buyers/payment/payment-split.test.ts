@@ -27,6 +27,10 @@ vi.mock('@/internal/sellers/wallet/release-available-from-split', () => ({
   releaseSellerAvailableFromSplit: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('@/internal/common/outbox/ops-alert', () => ({
+  enqueueOpsAlert: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.stubEnv('PLATFORM_COMMISSION_RATE', '0.10');
 
 import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/internal/buyers/payment/payment-split';
@@ -131,6 +135,8 @@ describe('approvePaymentSplitsForOrder', () => {
 
   it('iyzico onay hatasında split failed olur ve hatayı yükseltir', async () => {
     const split = {
+      _id: 'split-id-001',
+      sellerId,
       paymentTransactionId: 'tx-1',
       approvalStatus: 'pending',
       save: vi.fn().mockResolvedValue(undefined),

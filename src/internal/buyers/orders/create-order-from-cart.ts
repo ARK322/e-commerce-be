@@ -72,13 +72,57 @@ const buildShippingAddress = async (buyerId: string): Promise<ShippingAddressRec
   };
 };
 
+const PRICE_TOLERANCE = 0.001;
+
+const assertCartPricesAccepted = (
+  cartItems: Array<{ productId: string; quantity: number; priceSnapshot?: number | null }>,
+  productPrices: Map<string, number>,
+  acceptPriceChanges: boolean
+) => {
+  const changedItems: Array<{
+    productId: string;
+    priceSnapshot: number;
+    currentPrice: number;
+  }> = [];
+
+  for (const item of cartItems) {
+    if (item.priceSnapshot == null) {
+      continue;
+    }
+
+    const currentPrice = productPrices.get(item.productId);
+
+    if (currentPrice == null) {
+      continue;
+    }
+
+    if (Math.abs(item.priceSnapshot - currentPrice) > PRICE_TOLERANCE) {
+      changedItems.push({
+        productId: item.productId,
+        priceSnapshot: item.priceSnapshot,
+        currentPrice,
+      });
+    }
+  }
+
+  if (changedItems.length > 0 && !acceptPriceChanges) {
+    throw new CommerceError(409, 'Sepette fiyat değişikliği var', {
+      code: 'PRICE_CHANGED',
+      items: changedItems,
+    });
+  }
+};
+
 const buildOrderItemsFromCart = async (
-  cartItems: Array<{ productId: string; quantity: number; priceSnapshot?: number | null }>
+  cartItems: Array<{ productId: string; quantity: number; priceSnapshot?: number | null }>,
+  acceptPriceChanges: boolean
 ) => {
   const orderItems: OrderItemRecord[] = [];
+  const productPrices = new Map<string, number>();
 
   for (const item of cartItems) {
     const product = await assertPurchasableCatalogProduct(item.productId);
+    productPrices.set(item.productId, product.price);
 
     assertProductStockAvailable(product, item.quantity);
 
@@ -95,13 +139,16 @@ const buildOrderItemsFromCart = async (
     });
   }
 
+  assertCartPricesAccepted(cartItems, productPrices, acceptPriceChanges);
+
   await assertSellersReadyForOrder(orderItems);
 
   return orderItems;
 };
 
 export const createOrderFromCartForBuyer = async (
-  buyerId: string
+  buyerId: string,
+  options?: { acceptPriceChanges?: boolean }
 ): Promise<CreatedOrderRecord> => {
   const shippingAddress = await buildShippingAddress(buyerId);
   const orderId = createUserId();
@@ -124,7 +171,10 @@ export const createOrderFromCartForBuyer = async (
         priceSnapshot: item.priceSnapshot ?? null,
       }));
 
-      const orderItems = await buildOrderItemsFromCart(cart.items);
+      const orderItems = await buildOrderItemsFromCart(
+        cart.items,
+        options?.acceptPriceChanges ?? false
+      );
       const totalAmount = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
 
       const order = await createOrderInSession(

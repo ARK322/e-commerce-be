@@ -1,8 +1,11 @@
 import { HttpError } from '@/internal/common/errors';
 
 export class CommerceError extends HttpError {
-  constructor(statusCode: number, message: string) {
+  readonly details?: unknown;
+
+  constructor(statusCode: number, message: string, details?: unknown) {
     super(statusCode, message);
     this.name = 'CommerceError';
+    this.details = details;
   }
 }

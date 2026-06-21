@@ -62,6 +62,10 @@ export {
 export type { SellerWalletLedgerEntryType } from '@/integrations/mongo/models/ecommerce/seller-wallet-ledger.model';
 
 export {
+  PaymentAuditLog,
+} from '@/integrations/mongo/models/ecommerce/payment-audit-log.model';
+
+export {
   OutboxEvent,
   OUTBOX_EVENT_STATUSES,
 } from '@/integrations/mongo/models/common/outbox-event.model';

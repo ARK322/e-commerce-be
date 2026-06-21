@@ -3,8 +3,10 @@ import {
   sendSellerApprovedEmail,
   sendSellerRejectedEmail,
 } from '@/internal/auth/admin/mail/send-seller-notifications';
+import { sendOrderConfirmationEmail } from '@/internal/buyers/orders/mail/send-order-confirmation';
 import { logger } from '@/internal/common/logging';
 import { OUTBOX_EVENT_TYPES } from '@/internal/common/outbox/enqueue-outbox-event';
+import { sendOpsAlertEmail } from '@/internal/common/outbox/send-ops-alert-email';
 import {
   claimPendingOutboxEvent,
   markOutboxEventFailed,
@@ -32,6 +34,24 @@ const processOutboxEvent = async (event: {
       const reason = String(event.payload.reason ?? '');
       const companyName = String(event.payload.companyName ?? '');
       await sendSellerRejectedEmail(email, reason, companyName);
+    } else if (event.eventType === OUTBOX_EVENT_TYPES.EMAIL_ORDER_CONFIRMATION) {
+      const email = String(event.payload.email ?? '');
+      const orderId = String(event.payload.orderId ?? '');
+      const totalAmount = Number(event.payload.totalAmount ?? 0);
+      const currency = String(event.payload.currency ?? 'TRY');
+      await sendOrderConfirmationEmail(email, orderId, totalAmount, currency);
+    } else if (
+      event.eventType === OUTBOX_EVENT_TYPES.OPS_PAYMENT_SIDE_EFFECTS_FAILED ||
+      event.eventType === OUTBOX_EVENT_TYPES.OPS_PAYMENT_SPLIT_APPROVAL_FAILED
+    ) {
+      logger.error(
+        {
+          eventType: event.eventType,
+          payload: event.payload,
+        },
+        'Operasyon uyarısı işlendi — manuel müdahale gerekebilir'
+      );
+      await sendOpsAlertEmail(event.eventType, event.payload);
     } else {
       throw new Error(`Unsupported outbox event type: ${event.eventType}`);
     }

@@ -20,6 +20,7 @@ import {
 } from '@/repositories/auth/user.repository';
 import { AuthError } from '@/internal/auth/errors';
 import { recordAdminAction } from '@/internal/auth/admin/admin-audit';
+import { getSellerWalletSummary } from '@/features/sellers/wallet/wallet.service';
 import {
   applyUserActiveStatus,
   recordUserActiveStatusChange,
@@ -160,6 +161,13 @@ export const getSellerByUserId = async (ctx: AdminAccessContext, userId: string)
     rejectionReason: profile.rejectionReason,
     profile,
   };
+};
+
+export const getSellerWalletByUserId = async (ctx: AdminAccessContext, userId: string) => {
+  assertCanReadSellers(ctx);
+  await getSellerByUserId(ctx, userId);
+
+  return getSellerWalletSummary(userId);
 };
 
 export const rejectSeller = async (

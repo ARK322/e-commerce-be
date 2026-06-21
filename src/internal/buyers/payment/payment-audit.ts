@@ -1,5 +1,7 @@
 import type { PaymentStatus } from '@/integrations/mongo';
+import { createUserId } from '@/internal/common/ids';
 import { createLogger } from '@/internal/common/logging';
+import { createPaymentAuditLog } from '@/repositories/buyers/payment-audit-log.repository';
 
 const log = createLogger({ module: 'payment-audit' });
 
@@ -24,4 +26,16 @@ export const logPaymentTransition = (input: PaymentTransitionInput): void => {
     },
     'Payment status transitioned'
   );
+
+  void createPaymentAuditLog({
+    _id: createUserId(),
+    paymentId: input.paymentId,
+    orderId: input.orderId,
+    fromStatus: input.from,
+    toStatus: input.to,
+    reason: input.reason,
+    metadata: input.metadata ?? null,
+  }).catch((error) => {
+    log.error({ err: error, orderId: input.orderId }, 'Payment audit log yazılamadı');
+  });
 };

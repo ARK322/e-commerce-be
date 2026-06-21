@@ -8,6 +8,7 @@ import {
   computeAggregateOrderStatus,
   computeSellerSubtotal,
 } from '@/internal/buyers/orders/order-fulfillment';
+import type { CreateOrderInput } from '@/features/buyers/orders/create-order.schema';
 import type { UpdateOrderStatusInput } from '@/features/buyers/orders/update-order-status.schema';
 import {
   findBuyerOrder,
@@ -65,8 +66,13 @@ const toOrderResponse = (order: OrderRecord) => ({
 
 export const getBuyerOrder = findBuyerOrder;
 
-export const createOrderFromCart = async (buyerId: string) => {
-  const createdOrder = await createOrderFromCartForBuyer(buyerId);
+export const createOrderFromCart = async (
+  buyerId: string,
+  input: CreateOrderInput = { acceptPriceChanges: false }
+) => {
+  const createdOrder = await createOrderFromCartForBuyer(buyerId, {
+    acceptPriceChanges: input.acceptPriceChanges,
+  });
 
   return toOrderResponse(createdOrder as OrderRecord);
 };

@@ -18,6 +18,12 @@ vi.mock('@/internal/sellers/wallet/credit-pending-from-order', () => ({
     mockCreditSellerPendingFromPaidOrder(...args),
 }));
 
+const mockEnqueueOpsAlert = vi.fn();
+
+vi.mock('@/internal/common/outbox/ops-alert', () => ({
+  enqueueOpsAlert: (...args: unknown[]) => mockEnqueueOpsAlert(...args),
+}));
+
 import { ensurePostPaymentSideEffects } from '@/internal/buyers/payment/post-payment-side-effects';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
@@ -27,6 +33,7 @@ describe('ensurePostPaymentSideEffects', () => {
     vi.clearAllMocks();
     mockSyncPaymentSplitTransactionIds.mockResolvedValue(undefined);
     mockCreditSellerPendingFromPaidOrder.mockResolvedValue(undefined);
+    mockEnqueueOpsAlert.mockResolvedValue(undefined);
   });
 
   it('split sync ve wallet credit çağırır', async () => {
@@ -56,5 +63,13 @@ describe('ensurePostPaymentSideEffects', () => {
 
     expect(mockSyncPaymentSplitTransactionIds).not.toHaveBeenCalled();
     expect(mockCreditSellerPendingFromPaidOrder).toHaveBeenCalledWith(orderId);
+  });
+
+  it('tüm denemeler başarısız olursa ops alert kuyruğuna alır', async () => {
+    mockCreditSellerPendingFromPaidOrder.mockRejectedValue(new Error('wallet down'));
+
+    await ensurePostPaymentSideEffects(orderId, []);
+
+    expect(mockEnqueueOpsAlert).toHaveBeenCalled();
   });
 });

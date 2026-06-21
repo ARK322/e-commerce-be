@@ -12,6 +12,7 @@ import { rejectSellerSchema, type RejectSellerInput } from '@/features/admin/sel
 import {
   approveSeller,
   getSellerByUserId,
+  getSellerWalletByUserId,
   listSellers,
   rejectSeller,
   setSellerActiveStatus,
@@ -59,6 +60,25 @@ export default async function (fastify: FastifyInstance) {
         return reply.status(200).send(seller);
       } catch (error) {
         return handleRouteError(reply, error, 'Satıcı işlemi sırasında bir hata oluştu');
+      }
+    }
+  );
+
+  fastify.get(
+    '/:userId/wallet',
+    {
+      preHandler: [
+        ...adminWithUserId.preHandler,
+        requirePermission(PERMISSIONS.SELLERS_READ),
+      ],
+    },
+    async (req, reply) => {
+      try {
+        const { userId } = req.params as { userId: string };
+        const wallet = await getSellerWalletByUserId(req.adminContext!, userId);
+        return reply.status(200).send({ wallet });
+      } catch (error) {
+        return handleRouteError(reply, error, 'Satıcı cüzdan bilgisi alınırken bir hata oluştu');
       }
     }
   );

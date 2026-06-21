@@ -1,5 +1,6 @@
 import { FastifyReply } from 'fastify';
 import { HttpError, isDuplicateKeyError } from '@/internal/common/errors';
+import { CommerceError } from '@/internal/common/errors/commerce-error';
 import { logger } from '@/internal/common/logging';
 
 type HandleRouteErrorOptions = {
@@ -14,7 +15,13 @@ export const handleRouteError = (
   options?: HandleRouteErrorOptions
 ) => {
   if (error instanceof HttpError) {
-    return reply.status(error.statusCode).send({ message: error.message });
+    const payload: Record<string, unknown> = { message: error.message };
+
+    if (error instanceof CommerceError && error.details !== undefined) {
+      payload.details = error.details;
+    }
+
+    return reply.status(error.statusCode).send(payload);
   }
 
   if (options?.duplicateKeyMessage && isDuplicateKeyError(error)) {

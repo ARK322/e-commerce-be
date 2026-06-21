@@ -86,6 +86,9 @@ export const savePaymentSplitDocument = async (split: { save: () => Promise<unkn
 export const findPaymentSplitsByOrderIdLean = async (orderId: string) =>
   PaymentSplit.find({ orderId }).lean();
 
+export const listApprovedPaymentSplitsLean = async (limit = 50) =>
+  PaymentSplit.find({ approvalStatus: 'approved' }).sort({ updatedAt: 1 }).limit(limit).lean();
+
 export const paymentSplitWithNullTransactionExists = async (orderId: string) =>
   PaymentSplit.exists({
     orderId,

@@ -1,4 +1,6 @@
 import { createLogger } from '@/internal/common/logging';
+import { enqueueOpsAlert } from '@/internal/common/outbox/ops-alert';
+import { OUTBOX_EVENT_TYPES } from '@/internal/common/outbox/enqueue-outbox-event';
 import { approvePaymentSplitsForSeller } from '@/internal/buyers/payment/payment-split';
 import { findOrderByIdLean } from '@/repositories/buyers/order.repository';
 import {
@@ -38,6 +40,12 @@ export const retryFailedPaymentSplitApprovals = async (): Promise<number> => {
         { err: error, orderId: group.orderId, sellerId: group.sellerId },
         'Split onay yeniden denemesi başarısız'
       );
+      await enqueueOpsAlert(OUTBOX_EVENT_TYPES.OPS_PAYMENT_SPLIT_APPROVAL_FAILED, {
+        orderId: group.orderId,
+        sellerId: group.sellerId,
+        source: 'retry_scheduler',
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

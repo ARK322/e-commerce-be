@@ -4,6 +4,8 @@ import { CommerceError } from '@/internal/common/errors/commerce-error';
 import { assertSellersReadyForOrder } from '@/internal/buyers/orders/order-item-validation';
 import { approveIyzicoPaymentItem } from '@/integrations/iyzico/approve-payment-item';
 import { releaseSellerAvailableFromSplit } from '@/internal/sellers/wallet/release-available-from-split';
+import { enqueueOpsAlert } from '@/internal/common/outbox/ops-alert';
+import { OUTBOX_EVENT_TYPES } from '@/internal/common/outbox/enqueue-outbox-event';
 import type { InitializeCheckoutItem } from '@/integrations/iyzico/types';
 import {
   findPendingPaymentSplitsForOrder,
@@ -135,6 +137,12 @@ export const approvePaymentSplitsForSeller = async (orderId: string, sellerId: s
       split.approvalStatus = 'failed';
       split.updatedAt = new Date();
       await savePaymentSplitDocument(split);
+      await enqueueOpsAlert(OUTBOX_EVENT_TYPES.OPS_PAYMENT_SPLIT_APPROVAL_FAILED, {
+        orderId,
+        sellerId,
+        paymentSplitId: String(split._id),
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -160,6 +168,12 @@ export const approvePaymentSplitsForOrder = async (orderId: string) => {
       split.approvalStatus = 'failed';
       split.updatedAt = new Date();
       await savePaymentSplitDocument(split);
+      await enqueueOpsAlert(OUTBOX_EVENT_TYPES.OPS_PAYMENT_SPLIT_APPROVAL_FAILED, {
+        orderId,
+        sellerId: String(split.sellerId),
+        paymentSplitId: String(split._id),
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }

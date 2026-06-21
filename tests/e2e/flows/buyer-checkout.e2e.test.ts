@@ -94,4 +94,66 @@ describeE2E('buyer checkout (E2E)', () => {
     expect(paidOrder?.status).toBe('paid');
     expect(paidOrder?.totalAmount).toBeCloseTo(productPrice, 2);
   });
+
+  it('callback iki kez gelince sipariş yine paid kalır', async () => {
+    const { email, password, userId } = await registerBuyer(app);
+    await verifyUserEmail(app, userId);
+
+    const token = await loginUser(app, email, password);
+    await completeBuyerProfile(app, token);
+
+    await app.inject({
+      method: 'POST',
+      url: '/cart/items',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { productId, quantity: 1 },
+    });
+
+    const orderResponse = await app.inject({
+      method: 'POST',
+      url: '/orders',
+      headers: { authorization: `Bearer ${token}` },
+      payload: {},
+    });
+
+    const orderBody = orderResponse.json() as { order: { id: string; totalAmount: number } };
+    const orderId = orderBody.order.id;
+
+    mockCompleteIyzicoCheckout.mockResolvedValue({
+      status: 'completed',
+      externalId: 'e2e-payment-id-dup',
+      orderId,
+      paidAmount: orderBody.order.totalAmount,
+      itemTransactions: [{ itemId: productId, paymentTransactionId: 'txn-e2e-dup' }],
+    });
+
+    await app.inject({
+      method: 'POST',
+      url: '/payments',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { orderId },
+    });
+
+    const firstCallback = await app.inject({
+      method: 'POST',
+      url: '/payments/callback',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      payload: 'token=e2e-checkout-token-dup',
+    });
+
+    const secondCallback = await app.inject({
+      method: 'POST',
+      url: '/payments/callback',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      payload: 'token=e2e-checkout-token-dup',
+    });
+
+    expect(firstCallback.statusCode).toBe(302);
+    expect(secondCallback.statusCode).toBe(302);
+    expect(firstCallback.headers.location).toContain('payment=success');
+    expect(secondCallback.headers.location).toContain('payment=success');
+
+    const paidOrder = await Order.findById(orderId).lean();
+    expect(paidOrder?.status).toBe('paid');
+  });
 });

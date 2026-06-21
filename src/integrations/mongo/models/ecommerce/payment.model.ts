@@ -31,5 +31,13 @@ const paymentSchema = new Schema(
 paymentSchema.index({ orderId: 1 }, { unique: true });
 paymentSchema.index({ buyerId: 1, createdAt: -1 });
 paymentSchema.index({ status: 1 });
+paymentSchema.index(
+  { externalId: 1 },
+  {
+    unique: true,
+    sparse: true,
+    partialFilterExpression: { status: 'completed', externalId: { $type: 'string' } },
+  }
+);
 
 export const Payment = model('Payment', paymentSchema);

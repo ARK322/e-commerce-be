@@ -56,3 +56,6 @@ export const findSellerWalletLedgerEntry = async (
   paymentSplitId: string,
   entryType: 'pending_credit' | 'available_release'
 ) => SellerWalletLedger.findOne({ paymentSplitId, entryType }).lean();
+
+export const listSellerWalletLedgerBySellerIdLean = async (sellerId: string, limit = 20) =>
+  SellerWalletLedger.find({ sellerId }).sort({ createdAt: -1 }).limit(limit).lean();

@@ -157,7 +157,9 @@ describe('createOrderFromCart', () => {
 
     const result = await createOrderFromCart(buyerId);
 
-    expect(mockCreateOrderFromCartForBuyer).toHaveBeenCalledWith(buyerId);
+    expect(mockCreateOrderFromCartForBuyer).toHaveBeenCalledWith(buyerId, {
+      acceptPriceChanges: false,
+    });
     expect(result.id).toBe(orderId);
     expect(result.totalAmount).toBe(1998);
   });

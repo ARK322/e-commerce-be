@@ -193,7 +193,7 @@ describe('createOrderFromCartForBuyer', () => {
     expect(result.totalAmount).toBe(1998);
   });
 
-  it('stok rezervasyonu başarısız olursa siparişi iptal eder', async () => {
+  it('stok rezervasyonu başarısız olursa siparişi iptal eder ve sepeti geri yükler', async () => {
     mockCartFindOneAndUpdate.mockResolvedValue({
       items: [{ productId, quantity: 2 }],
     });
@@ -232,5 +232,60 @@ describe('createOrderFromCartForBuyer', () => {
     expect(mockRestoreCartItemsForBuyer).toHaveBeenCalledWith(buyerId, [
       { productId, quantity: 2, priceSnapshot: null },
     ]);
+  });
+
+  it('fiyat değiştiyse acceptPriceChanges olmadan 409 fırlatır', async () => {
+    mockCartFindOneAndUpdate.mockResolvedValue({
+      items: [{ productId, quantity: 2, priceSnapshot: 899 }],
+    });
+    mockAssertPurchasableCatalogProduct.mockResolvedValue({ ...productDoc, price: 999 });
+
+    await expect(
+      createOrderFromCartForBuyer(buyerId, { acceptPriceChanges: false })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: 'Sepette fiyat değişikliği var',
+    });
+  });
+
+  it('fiyat değiştiyse acceptPriceChanges true ile sipariş oluşturur', async () => {
+    mockCartFindOneAndUpdate.mockResolvedValue({
+      items: [{ productId, quantity: 2, priceSnapshot: 899 }],
+    });
+    mockAssertPurchasableCatalogProduct.mockResolvedValue({ ...productDoc, price: 999 });
+    mockOrderCreate.mockResolvedValue([
+      {
+        toObject: () => ({
+          _id: orderId,
+          buyerId,
+          items: [
+            {
+              productId,
+              sellerId,
+              name: 'Kulaklık',
+              price: 999,
+              quantity: 2,
+              subtotal: 1998,
+              fulfillmentStatus: 'pending',
+            },
+          ],
+          totalAmount: 1998,
+          currency: 'TRY',
+          status: 'pending',
+          shippingAddress: {
+            firstName: 'Ali',
+            lastName: 'Veli',
+            phone: '+905551112233',
+            country: 'Türkiye',
+            city: 'İstanbul',
+            address: 'Kadıköy Mah. No:1',
+          },
+        }),
+      },
+    ]);
+
+    const result = await createOrderFromCartForBuyer(buyerId, { acceptPriceChanges: true });
+
+    expect(result.totalAmount).toBe(1998);
   });
 });

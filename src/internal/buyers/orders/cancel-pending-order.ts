@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { incrementStockForOrderItems } from '@/internal/buyers/orders/order-stock';
+import { restoreCartFromOrder } from '@/internal/buyers/orders/restore-cart-from-order';
 import { findPendingOrderByIdWithSession } from '@/repositories/buyers/order.repository';
 
 export const cancelPendingOrder = async (orderId: string): Promise<boolean> => {
@@ -32,6 +33,10 @@ export const cancelPendingOrder = async (orderId: string): Promise<boolean> => {
       await order.save({ session });
       cancelled = true;
     });
+
+    if (cancelled) {
+      await restoreCartFromOrder(orderId);
+    }
 
     return cancelled;
   } finally {
