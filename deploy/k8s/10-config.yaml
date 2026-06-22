@@ -1,0 +1,35 @@
+# Ortak config + secret iskeleti. Ger\u00e7ek de\u011ferler CI/CD veya sealed-secrets ile doldurulur.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: ecommerce
+data:
+  NODE_ENV: 'production'
+  PORT: '3000'
+  LOG_LEVEL: 'info'
+  REDIS_URL: 'redis://redis:6379'
+  QUEUE_URL: 'amqp://app:app@rabbitmq:5672'
+  # Faz 2'de catalog pod'unda 'redis' yap:
+  CATALOG_CACHE_BACKEND: 'memory'
+  # Faz 1'de worker devredeyken 'rabbitmq' yap:
+  NOTIFICATIONS_TRANSPORT: 'outbox'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecommerce-secrets
+  namespace: ecommerce
+type: Opaque
+stringData:
+  MONGO_URI: 'REPLACE_ME'
+  JWT_SECRET: 'REPLACE_ME_AT_LEAST_32_CHARS'
+  PLATFORM_COMMISSION_RATE: '0.10'
+  SMTP_PASS: 'REPLACE_ME'
+  SMTP_FROM: 'REPLACE_ME'
+  FRONTEND_URL: 'https://app.example.com'
+  IYZIPAY_API_KEY: 'REPLACE_ME'
+  IYZIPAY_SECRET_KEY: 'REPLACE_ME'
+  SUPABASE_URL: 'REPLACE_ME'
+  SUPABASE_SERVICE_ROLE_KEY: 'REPLACE_ME'
+  OPS_ALERT_EMAIL: 'ops@example.com'

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockLogout = vi.fn();
@@ -8,7 +8,7 @@ const mockLogoutAllSessions = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/identity/logout/logout.service', () => ({
+vi.mock('@/api/auth/logout/logout.service', () => ({
   logout: (...args: unknown[]) => mockLogout(...args),
   logoutAllSessions: (...args: unknown[]) => mockLogoutAllSessions(...args),
 }));

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache } from '@/domains/catalog/infrastructure/cache/memory-cache';
 
 const mockAssertProductCategory = vi.fn();
 const mockGetCategoryProductFilterIds = vi.fn();
 
-vi.mock('@/internal/catalog/category/visible-categories', () => ({
+vi.mock('@/domains/catalog/application/category/visible-categories', () => ({
   getPublicVisibleCategoryIds: vi.fn().mockResolvedValue(
     new Set(['660e8400-e29b-41d4-a716-446655440001', 'leaf-category-id'])
   ),
@@ -12,15 +12,15 @@ vi.mock('@/internal/catalog/category/visible-categories', () => ({
   invalidateVisibleCategoryIdsCache: vi.fn(),
 }));
 
-vi.mock('@/internal/catalog/category/product-category-validation', () => ({
+vi.mock('@/domains/catalog/application/category/product-category-validation', () => ({
   assertProductCategory: (...args: unknown[]) => mockAssertProductCategory(...args),
 }));
 
-vi.mock('@/internal/catalog/category/product-category-filters', () => ({
+vi.mock('@/domains/catalog/application/category/product-category-filters', () => ({
   getCategoryProductFilterIds: (...args: unknown[]) => mockGetCategoryProductFilterIds(...args),
 }));
 
-vi.mock('@/internal/catalog/product/product-images', () => ({
+vi.mock('@/domains/catalog/application/product/product-images', () => ({
   deleteProductImagesFromStorage: vi.fn().mockResolvedValue(undefined),
   uploadProductImage: vi.fn(),
 }));
@@ -43,21 +43,21 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '7c9e6679-7425-40de-944b-e07fc1f90ae7',
 }));
 
 import {
   getPublicProductById,
   listPublicProducts,
-} from '@/features/catalog/products/product.service';
+} from '@/api/public/catalog/products/product.service';
 import {
   createProduct,
   createProductWithImages,
   deleteProduct,
   updateProduct,
-} from '@/features/sellers/products/seller-products.service';
-import { uploadProductImage } from '@/internal/catalog/product/product-images';
+} from '@/api/seller/products/seller-products.service';
+import { uploadProductImage } from '@/domains/catalog/application/product/product-images';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 const categoryId = '660e8400-e29b-41d4-a716-446655440001';

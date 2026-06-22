@@ -18,20 +18,20 @@ vi.mock('@/integrations/supabase/supabase', () => ({
   },
 }));
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   findSellerByIdLean: (...args: unknown[]) => mockFindSellerByIdLean(...args),
   updateSellerById: (...args: unknown[]) => mockUpdateSellerById(...args),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-vi.mock('@/internal/auth/profile/seller', () => ({
+vi.mock('@/domains/identity/application/profile/seller', () => ({
   updateSellerProfile: (...args: unknown[]) => mockUpdateSellerProfile(...args),
 }));
 
-import { uploadSellerDocument } from '@/internal/auth/profile/documents';
+import { uploadSellerDocument } from '@/domains/identity/application/profile/documents';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const pdfBuffer = Buffer.from('%PDF-1.4 test');

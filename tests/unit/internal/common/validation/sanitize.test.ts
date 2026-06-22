@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sanitizeRequestBody } from '@/internal/common/validation/sanitize';
+import { sanitizeRequestBody } from '@/shared/validation/sanitize';
 
 describe('sanitizeRequestBody', () => {
   it('$ ile başlayan anahtarları temizler', () => {

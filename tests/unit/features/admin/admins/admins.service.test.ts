@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domains/identity/application/queries/admin-context';
 
 const mockAdminFindById = vi.fn();
 const mockUserFindById = vi.fn();
@@ -10,7 +10,7 @@ const mockAssertAssignableRoleId = vi.fn();
 const mockCountOwnerAdmins = vi.fn();
 const mockIsOwnerRoleId = vi.fn();
 
-vi.mock('@/repositories/auth/admin.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/admin.repository', () => ({
   findAdminById: (...args: unknown[]) => mockAdminFindById(...args),
   countDocuments: (...args: unknown[]) => mockCountDocuments(...args),
   listAdminsLean: vi.fn(),
@@ -21,19 +21,19 @@ vi.mock('@/repositories/auth/admin.repository', () => ({
   }),
 }));
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserById: (...args: unknown[]) => mockUserFindById(...args),
   findUsersByIdsLean: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/access/admin/role-queries', () => ({
+vi.mock('@/domains/identity/application/access/admin/role-queries', () => ({
   getRoleSummariesByIds: (...args: unknown[]) => mockGetRoleSummariesByIds(...args),
   assertAssignableRoleId: (...args: unknown[]) => mockAssertAssignableRoleId(...args),
   countOwnerAdmins: (...args: unknown[]) => mockCountOwnerAdmins(...args),
   isOwnerRoleId: (...args: unknown[]) => mockIsOwnerRoleId(...args),
 }));
 
-import { getAdminByUserId, listAdmins, updateAdmin } from '@/features/admin/admins/admins.service';
+import { getAdminByUserId, listAdmins, updateAdmin } from '@/api/admin/admins/admins.service';
 
 const ownerId = '550e8400-e29b-41d4-a716-446655440000';
 const limitedId = '550e8400-e29b-41d4-a716-446655440001';

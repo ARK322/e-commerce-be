@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domains/identity/application/queries/admin-context';
 
 const mockUserFindByIdLean = vi.fn();
 const mockSellerFindById = vi.fn();
@@ -9,11 +9,11 @@ const mockSaveSellerDocument = vi.fn();
 const mockSendApproved = vi.fn();
 const mockSendRejected = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserByIdLean: (...args: unknown[]) => mockUserFindByIdLean(...args),
 }));
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   findSellerById: (...args: unknown[]) => mockSellerFindById(...args),
   approveSellerIfPending: (...args: unknown[]) => mockApproveSellerIfPending(...args),
   saveSellerDocument: (...args: unknown[]) => mockSaveSellerDocument(...args),
@@ -23,16 +23,16 @@ vi.mock('@/integrations/iyzico/create-submerchant', () => ({
   createIyzicoSubMerchant: vi.fn().mockResolvedValue('sandbox-sub-merchant-key'),
 }));
 
-vi.mock('@/internal/auth/admin/mail/send-seller-notifications', () => ({
+vi.mock('@/domains/identity/application/admin/mail/send-seller-notifications', () => ({
   sendSellerApprovedEmail: (...args: unknown[]) => mockSendApproved(...args),
   sendSellerRejectedEmail: (...args: unknown[]) => mockSendRejected(...args),
 }));
 
-vi.mock('@/internal/auth/admin/admin-audit', () => ({
+vi.mock('@/domains/identity/application/admin/admin-audit', () => ({
   recordAdminAction: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/internal/common/outbox/enqueue-outbox-event', () => ({
+vi.mock('@/domains/notifications/application/outbox/enqueue-outbox-event', () => ({
   enqueueOutboxEvent: vi.fn().mockResolvedValue(undefined),
   OUTBOX_EVENT_TYPES: {
     EMAIL_SELLER_APPROVED: 'email.seller.approved',
@@ -44,7 +44,7 @@ import {
   approveSeller,
   rejectSeller,
   syncSellerIyzicoSubMerchant,
-} from '@/features/admin/sellers/sellers.service';
+} from '@/api/admin/sellers/sellers.service';
 import { createIyzicoSubMerchant } from '@/integrations/iyzico/create-submerchant';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';

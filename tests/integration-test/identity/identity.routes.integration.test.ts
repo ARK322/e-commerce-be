@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { hashPassword } from '@/internal/common/security';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { hashPassword } from '@/shared/security';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockUserFindOne = vi.fn();
@@ -11,7 +11,7 @@ const mockSellerFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 const mockGetSellerContext = vi.fn();
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 

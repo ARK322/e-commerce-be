@@ -14,27 +14,27 @@ vi.mock('@/integrations/iyzico/retrieve-checkout', () => ({
   completeIyzicoCheckout: (...args: unknown[]) => mockCompleteIyzicoCheckout(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/finalize-checkout-payment', () => ({
+vi.mock('@/domains/payments/application/payment/finalize-checkout-payment', () => ({
   finalizeSuccessfulIyzicoCheckout: (...args: unknown[]) => mockFinalizeSuccessful(...args),
   finalizeFailedIyzicoCheckout: (...args: unknown[]) => mockFinalizeFailed(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/refund-captured-payment', () => ({
+vi.mock('@/domains/payments/application/payment/refund-captured-payment', () => ({
   refundCapturedIyzicoPayment: (...args: unknown[]) => mockRefundCaptured(...args),
 }));
 
-vi.mock('@/repositories/buyers/order.repository', () => ({
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', () => ({
   findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
 }));
 
-vi.mock('@/repositories/buyers/payment.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/payment.repository', () => ({
   findPaymentById: (...args: unknown[]) => mockFindPaymentById(...args),
   listCompletedIyzicoPaymentsLean: (...args: unknown[]) => mockListCompleted(...args),
   listProcessingIyzicoPaymentsLean: (...args: unknown[]) => mockListProcessing(...args),
   updatePaymentById: (...args: unknown[]) => mockUpdatePaymentById(...args),
 }));
 
-import { reconcilePaymentOrderMismatches } from '@/internal/buyers/orders/reconcile-payments';
+import { reconcilePaymentOrderMismatches } from '@/domains/commerce/application/orders/reconcile-payments';
 
 const paymentId = 'pay-1';
 const orderId = 'order-1';

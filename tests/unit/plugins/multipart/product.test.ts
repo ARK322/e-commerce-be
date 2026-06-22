@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fastify from 'fastify';
 import { PRODUCT_MULTIPART_LIMITS } from '@/config/constants';
-import { registerProductMultipart } from '@/plugins/multipart/product';
+import { registerProductMultipart } from '@/shared/plugins/multipart/product';
 
 describe('registerProductMultipart', () => {
   it('multipart eklentisini ürün limitleriyle register eder', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { forgotPasswordSchema } from '@/features/identity/forgot-password/forgot-password.schema';
+import { forgotPasswordSchema } from '@/api/auth/forgot-password/forgot-password.schema';
 
 describe('forgotPasswordSchema', () => {
   it('geçerli email kabul edilir', () => {

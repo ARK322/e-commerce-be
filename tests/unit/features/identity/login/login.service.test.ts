@@ -12,15 +12,15 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/common/security', () => ({
+vi.mock('@/shared/security', () => ({
   comparePassword: (...args: unknown[]) => mockComparePassword(...args),
 }));
 
-vi.mock('@/internal/auth/tokens/access-token', () => ({
+vi.mock('@/domains/identity/application/tokens/access-token', () => ({
   signAuthToken: (...args: unknown[]) => mockSignAuthToken(...args),
 }));
 
-vi.mock('@/internal/auth/responses/user.response', () => ({
+vi.mock('@/domains/identity/application/responses/user.response', () => ({
   buildAuthUserFields: vi.fn().mockResolvedValue({
     role: 'buyer',
     isActive: true,
@@ -30,7 +30,7 @@ vi.mock('@/internal/auth/responses/user.response', () => ({
   }),
 }));
 
-import { login } from '@/features/identity/login/login.service';
+import { login } from '@/api/auth/login/login.service';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

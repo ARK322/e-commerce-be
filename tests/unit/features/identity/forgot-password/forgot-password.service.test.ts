@@ -8,17 +8,17 @@ const mockAssertEmailCooldown = vi.fn();
 const mockMarkPasswordResetEmailSent = vi.fn();
 const mockUpdateUserById = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserByEmail: (...args: unknown[]) => mockFindOne(...args),
   updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
 }));
 
-vi.mock('@/internal/auth/otp/otp', () => ({
+vi.mock('@/domains/identity/application/otp/otp', () => ({
   createAuthOtp: (...args: unknown[]) => mockCreateAuthOtp(...args),
   invalidateAuthOtp: (...args: unknown[]) => mockInvalidateAuthOtp(...args),
 }));
 
-vi.mock('@/internal/auth/tokens/email-token', () => ({
+vi.mock('@/domains/identity/application/tokens/email-token', () => ({
   signPasswordResetToken: vi.fn().mockReturnValue('reset-token'),
 }));
 
@@ -26,9 +26,9 @@ vi.mock('@/integrations/resend/send', () => ({
   sendPasswordResetEmail: (...args: unknown[]) => mockSendPasswordResetEmail(...args),
 }));
 
-vi.mock('@/internal/auth/mail/cooldown', async () => {
-  const actual = await vi.importActual<typeof import('@/internal/auth/mail/cooldown')>(
-    '@/internal/auth/mail/cooldown'
+vi.mock('@/domains/identity/application/mail/cooldown', async () => {
+  const actual = await vi.importActual<typeof import('@/domains/identity/application/mail/cooldown')>(
+    '@/domains/identity/application/mail/cooldown'
   );
 
   return {
@@ -38,8 +38,8 @@ vi.mock('@/internal/auth/mail/cooldown', async () => {
   };
 });
 
-import { EmailCooldownError } from '@/internal/auth/mail/cooldown';
-import { forgotPassword } from '@/features/identity/forgot-password/forgot-password.service';
+import { EmailCooldownError } from '@/domains/identity/application/mail/cooldown';
+import { forgotPassword } from '@/api/auth/forgot-password/forgot-password.service';
 
 describe('forgotPassword', () => {
   beforeEach(() => {

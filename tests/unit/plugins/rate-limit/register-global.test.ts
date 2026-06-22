@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import fastify from 'fastify';
-import { registerGlobalRateLimit } from '@/plugins/rate-limit/register-global';
+import { registerGlobalRateLimit } from '@/shared/plugins/rate-limit/register-global';
 
 describe('registerGlobalRateLimit', () => {
   it('global rate limit plugin register edilir', async () => {

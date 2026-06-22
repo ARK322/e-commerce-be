@@ -15,7 +15,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/catalog/product/assert-purchasable-product', () => ({
+vi.mock('@/domains/catalog/application/product/assert-purchasable-product', () => ({
   assertPurchasableCatalogProduct: (...args: unknown[]) =>
     mockAssertPurchasableCatalogProduct(...args),
 }));
@@ -25,7 +25,7 @@ import {
   clearCart,
   removeCartItem,
   updateCartItem,
-} from '@/features/buyers/cart/cart.service';
+} from '@/api/buyer/cart/cart.service';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const productId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
@@ -68,7 +68,7 @@ describe('addToCart', () => {
   });
 
   it('kategorisiz (orphan) ürün sepete eklenemez', async () => {
-    const { CommerceError } = await import('@/internal/common/errors/commerce-error');
+    const { CommerceError } = await import('@/shared/errors/commerce-error');
     mockAssertPurchasableCatalogProduct.mockRejectedValue(
       new CommerceError(404, 'Ürün bulunamadı')
     );
@@ -85,7 +85,7 @@ describe('addToCart', () => {
   });
 
   it('aktif ürün yoksa 404 fırlatır', async () => {
-    const { CommerceError } = await import('@/internal/common/errors/commerce-error');
+    const { CommerceError } = await import('@/shared/errors/commerce-error');
     mockAssertPurchasableCatalogProduct.mockRejectedValue(
       new CommerceError(404, 'Ürün bulunamadı')
     );

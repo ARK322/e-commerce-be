@@ -2,7 +2,7 @@ import Iyzipay from 'iyzipay';
 import { getIyzicoClient } from '@/integrations/iyzico/client';
 import { formatIyzicoPhone } from '@/integrations/iyzico/format';
 import { promisifyIyzipay } from '@/integrations/iyzico/promisify';
-import { HttpError } from '@/internal/common/errors';
+import { HttpError } from '@/shared/errors';
 
 type SellerSubMerchantProfile = {
   sellerId: string;

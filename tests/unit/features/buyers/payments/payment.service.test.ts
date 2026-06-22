@@ -40,28 +40,28 @@ vi.mock('@/integrations/iyzico/retrieve-checkout', () => ({
   completeIyzicoCheckout: (...args: unknown[]) => mockCompleteIyzicoCheckout(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/payment-split', () => ({
+vi.mock('@/domains/payments/application/payment/payment-split', () => ({
   buildPaymentSplitsForOrder: (...args: unknown[]) => mockBuildPaymentSplitsForOrder(...args),
   syncPaymentSplitTransactionIds: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/fulfill-order', () => ({
+vi.mock('@/domains/commerce/application/orders/fulfill-order', () => ({
   fulfillPaidOrder: (...args: unknown[]) => mockFulfillPaidOrder(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/reserve-order-stock', () => ({
+vi.mock('@/domains/commerce/application/orders/reserve-order-stock', () => ({
   reservePendingOrderStock: (...args: unknown[]) => mockReservePendingOrderStock(...args),
 }));
 
-vi.mock('@/internal/sellers/wallet/credit-pending-from-order', () => ({
+vi.mock('@/domains/payments/application/wallet/credit-pending-from-order', () => ({
   creditSellerPendingFromPaidOrder: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+vi.mock('@/domains/commerce/application/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
-vi.mock('@/internal/catalog/product/assert-purchasable-product', () => ({
+vi.mock('@/domains/catalog/application/product/assert-purchasable-product', () => ({
   assertPurchasableCatalogProduct: vi.fn().mockResolvedValue({
     _id: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
     stock: 10,
@@ -88,7 +88,7 @@ vi.mock('@/integrations/mongo', () => ({
   Buyer: { findById: (...args: unknown[]) => mockBuyerFindById(...args) },
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '9c9e6679-7425-40de-944b-e07fc1f90ae9',
 }));
 
@@ -96,7 +96,7 @@ import {
   completePaymentFromCheckoutToken,
   createPaymentForOrder,
   getPaymentByOrderId,
-} from '@/features/buyers/payments/payment.service';
+} from '@/api/buyer/payments/payment.service';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerId = '660e8400-e29b-41d4-a716-446655440001';

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockHandlePaymentCallback = vi.fn();
@@ -9,7 +9,7 @@ const mockGetPaymentByOrderId = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/buyers/payments/payment.service', () => ({
+vi.mock('@/api/buyer/payments/payment.service', () => ({
   handlePaymentCallback: (...args: unknown[]) => mockHandlePaymentCallback(...args),
   createPaymentForOrder: (...args: unknown[]) => mockCreatePaymentForOrder(...args),
   getPaymentByOrderId: (...args: unknown[]) => mockGetPaymentByOrderId(...args),

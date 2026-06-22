@@ -5,7 +5,7 @@ import {
   resolveAcceptedMimeType,
   resolveDocumentExtension,
   SELLER_DOCUMENT_FIELD_MAP,
-} from '@/internal/auth/profile/seller-document-types';
+} from '@/domains/identity/application/profile/seller-document-types';
 
 describe('seller-document-types', () => {
   it('geçerli docType tanır', () => {

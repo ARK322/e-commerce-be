@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emailSchema } from '@/internal/auth/schemas/email.schema';
+import { emailSchema } from '@/domains/identity/application/schemas/email.schema';
 
 describe('emailSchema', () => {
   it('geçersiz email reddeder', () => {

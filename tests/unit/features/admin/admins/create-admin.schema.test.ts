@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createAdminSchema } from '@/features/admin/admins/create-admin.schema';
+import { createAdminSchema } from '@/api/admin/admins/create-admin.schema';
 
 describe('createAdminSchema', () => {
   it('geçerli admin oluşturmayı kabul eder', () => {

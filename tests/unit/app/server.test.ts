@@ -22,39 +22,39 @@ vi.mock('@/app/app', () => ({
   buildApp: (...args: unknown[]) => mockBuildApp(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/expire-pending-orders', () => ({
+vi.mock('@/domains/commerce/application/orders/expire-pending-orders', () => ({
   startPendingOrderExpiryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/reconcile-payments', () => ({
+vi.mock('@/domains/commerce/application/orders/reconcile-payments', () => ({
   startPaymentReconciliationScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/recover-stuck-payments', () => ({
+vi.mock('@/domains/commerce/application/orders/recover-stuck-payments', () => ({
   startStuckPaymentRecoveryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/retry-payment-split-sync', () => ({
+vi.mock('@/domains/commerce/application/orders/retry-payment-split-sync', () => ({
   startPaymentSplitSyncRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/retry-failed-payment-splits', () => ({
+vi.mock('@/domains/commerce/application/orders/retry-failed-payment-splits', () => ({
   startPaymentSplitApprovalRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/sellers/wallet/retry-missing-wallet-credits', () => ({
+vi.mock('@/domains/payments/application/wallet/retry-missing-wallet-credits', () => ({
   startMissingSellerWalletCreditRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/common/outbox/process-outbox-events', () => ({
+vi.mock('@/domains/notifications/application/outbox/process-outbox-events', () => ({
   startOutboxProcessorScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/register/expire-unverified-users', () => ({
+vi.mock('@/domains/identity/application/register/expire-unverified-users', () => ({
   startUnverifiedUserExpiryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/common/logging', () => ({
+vi.mock('@/shared/logging', () => ({
   logger: {
     info: (...args: unknown[]) => mockLoggerInfo(...args),
     error: (...args: unknown[]) => mockLoggerError(...args),

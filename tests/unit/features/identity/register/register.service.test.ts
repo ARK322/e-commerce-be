@@ -25,9 +25,9 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/auth/mail/cooldown', async () => {
-  const actual = await vi.importActual<typeof import('@/internal/auth/mail/cooldown')>(
-    '@/internal/auth/mail/cooldown'
+vi.mock('@/domains/identity/application/mail/cooldown', async () => {
+  const actual = await vi.importActual<typeof import('@/domains/identity/application/mail/cooldown')>(
+    '@/domains/identity/application/mail/cooldown'
   );
   return {
     ...actual,
@@ -37,30 +37,30 @@ vi.mock('@/internal/auth/mail/cooldown', async () => {
   };
 });
 
-vi.mock('@/internal/auth/otp/otp', () => ({
+vi.mock('@/domains/identity/application/otp/otp', () => ({
   invalidateAuthOtp: (...args: unknown[]) => mockInvalidateAuthOtp(...args),
 }));
 
-vi.mock('@/internal/auth/register/unverified-user', () => ({
+vi.mock('@/domains/identity/application/register/unverified-user', () => ({
   deleteUnverifiedUser: (...args: unknown[]) => mockDeleteUnverifiedUser(...args),
   getVerificationExpiresAt: () => new Date(Date.now() + 86_400_000),
 }));
 
-vi.mock('@/internal/auth/mail/send-verification', () => ({
+vi.mock('@/domains/identity/application/mail/send-verification', () => ({
   sendUserVerificationEmail: (...args: unknown[]) => mockSendVerification(...args),
 }));
 
 const mockCreateUserId = vi.fn();
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => mockCreateUserId(),
 }));
 
-vi.mock('@/internal/common/security', () => ({
+vi.mock('@/shared/security', () => ({
   hashPassword: vi.fn().mockResolvedValue('hashed-password'),
 }));
 
-vi.mock('@/internal/auth/responses/user.response', () => ({
+vi.mock('@/domains/identity/application/responses/user.response', () => ({
   buildAuthUserFields: vi.fn().mockImplementation(async (user: { role: string }) => ({
     role: user.role,
     isActive: false,
@@ -70,7 +70,7 @@ vi.mock('@/internal/auth/responses/user.response', () => ({
   })),
 }));
 
-import { register } from '@/features/identity/register/register.service';
+import { register } from '@/api/auth/register/register.service';
 
 const existingUserId = '550e8400-e29b-41d4-a716-446655440000';
 const newUserId = '550e8400-e29b-41d4-a716-446655440001';
@@ -113,7 +113,7 @@ describe('register', () => {
   });
 
   it('cooldown aktifken genel onay mesajı döner', async () => {
-    const { EmailCooldownError } = await import('@/internal/auth/mail/cooldown');
+    const { EmailCooldownError } = await import('@/domains/identity/application/mail/cooldown');
 
     mockAssertRegisterEmailCooldown.mockRejectedValue(
       new EmailCooldownError(429, 'E-posta gönderimleri arasında bekleme süresi var')

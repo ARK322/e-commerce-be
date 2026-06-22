@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { signEmailVerificationToken } from '@/internal/auth/tokens/email-token';
-import { AuthError } from '@/internal/auth/errors';
+import { signEmailVerificationToken } from '@/domains/identity/application/tokens/email-token';
+import { AuthError } from '@/domains/identity/application/errors';
 
 const mockFindOne = vi.fn();
 const mockFindById = vi.fn();
@@ -9,18 +9,18 @@ const mockVerifyAuthOtp = vi.fn();
 const mockInvalidateAuthOtp = vi.fn();
 const mockDeleteUnverifiedUser = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserByEmail: (...args: unknown[]) => mockFindOne(...args),
   findUserById: (...args: unknown[]) => mockFindById(...args),
   updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
   saveUserDocument: (user: { save: () => Promise<unknown> }) => user.save(),
 }));
 
-vi.mock('@/internal/auth/register/unverified-user', () => ({
+vi.mock('@/domains/identity/application/register/unverified-user', () => ({
   deleteUnverifiedUser: (...args: unknown[]) => mockDeleteUnverifiedUser(...args),
 }));
 
-vi.mock('@/internal/auth/otp/otp', async () => {
+vi.mock('@/domains/identity/application/otp/otp', async () => {
   class OtpError extends Error {
     constructor(
       public statusCode: number,
@@ -37,7 +37,7 @@ vi.mock('@/internal/auth/otp/otp', async () => {
   };
 });
 
-vi.mock('@/internal/auth/responses/user.response', () => ({
+vi.mock('@/domains/identity/application/responses/user.response', () => ({
   buildAuthUserFields: vi.fn().mockImplementation(async (user: { role: string; isEmailVerified: boolean }) => ({
     role: user.role,
     isActive: false,
@@ -47,8 +47,8 @@ vi.mock('@/internal/auth/responses/user.response', () => ({
   })),
 }));
 
-import { OtpError } from '@/internal/auth/otp/otp';
-import { verifyEmail } from '@/features/identity/verify-email/verify-email.service';
+import { OtpError } from '@/domains/identity/application/otp/otp';
+import { verifyEmail } from '@/api/auth/verify-email/verify-email.service';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const tokenJti = '770e8400-e29b-41d4-a716-446655440002';

@@ -4,12 +4,12 @@ import jwt from 'jsonwebtoken';
 const mockRevokedTokenExists = vi.fn();
 const mockUpsertRevokedToken = vi.fn();
 
-vi.mock('@/repositories/auth/revoked-token.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/revoked-token.repository', () => ({
   revokedTokenExists: (...args: unknown[]) => mockRevokedTokenExists(...args),
   upsertRevokedToken: (...args: unknown[]) => mockUpsertRevokedToken(...args),
 }));
 
-import { isTokenRevoked, revokeToken } from '@/internal/auth/tokens/revoke-token';
+import { isTokenRevoked, revokeToken } from '@/domains/identity/application/tokens/revoke-token';
 
 describe('revoke-token', () => {
   beforeEach(() => {

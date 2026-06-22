@@ -5,7 +5,7 @@ const mockPushProductImageIfUnderLimit = vi.fn();
 const mockUpload = vi.fn();
 const mockDelete = vi.fn();
 
-vi.mock('@/repositories/catalog/product.repository', () => ({
+vi.mock('@/domains/catalog/infrastructure/repositories/product.repository', () => ({
   findOwnedProductById: (...args: unknown[]) => mockFindOwnedProductById(...args),
   pushProductImageIfUnderLimit: (...args: unknown[]) => mockPushProductImageIfUnderLimit(...args),
   saveProductDocument: (product: { save: () => Promise<unknown> }) => product.save(),
@@ -22,14 +22,14 @@ vi.mock('@/integrations/supabase/supabase', () => ({
   },
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '880e8400-e29b-41d4-a716-446655440000',
 }));
 
 import {
   deleteProductImage,
   uploadProductImage,
-} from '@/internal/catalog/product/product-images';
+} from '@/domains/catalog/application/product/product-images';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 const productId = '660e8400-e29b-41d4-a716-446655440001';

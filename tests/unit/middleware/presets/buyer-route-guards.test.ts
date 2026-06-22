@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buyerOnly } from '@/middleware/presets/buyer-route-guards';
-import { requireAuth } from '@/middleware/auth/require-auth';
-import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
-import { requireActiveBuyer } from '@/middleware/buyers/require-active-buyer';
+import { buyerOnly } from '@/shared/middleware/presets/buyer-route-guards';
+import { requireAuth } from '@/shared/middleware/auth/require-auth';
+import { requireEmailVerified } from '@/shared/middleware/auth/require-email-verified';
+import { requireActiveBuyer } from '@/shared/middleware/buyers/require-active-buyer';
 
 describe('buyerOnly', () => {
   it('buyer guard zincirini korur', () => {

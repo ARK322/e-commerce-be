@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListAdminCategories = vi.fn();
@@ -12,7 +12,7 @@ const mockGetAdminContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/admin/categories/admin-categories.service', () => ({
+vi.mock('@/api/admin/categories/admin-categories.service', () => ({
   listAdminCategories: (...args: unknown[]) => mockListAdminCategories(...args),
   linkCategory: (...args: unknown[]) => mockLinkCategory(...args),
   createCategory: (...args: unknown[]) => mockCreateCategory(...args),
@@ -22,7 +22,7 @@ vi.mock('@/features/admin/categories/admin-categories.service', () => ({
   deleteCategory: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/queries/admin-context', () => ({
+vi.mock('@/domains/identity/application/queries/admin-context', () => ({
   getAdminContext: (...args: unknown[]) => mockGetAdminContext(...args),
 }));
 

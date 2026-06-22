@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domains/identity/application/queries/seller-context';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListPublicProducts = vi.fn();
@@ -14,19 +14,19 @@ const mockGetSellerContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/catalog/products/product.service', () => ({
+vi.mock('@/api/public/catalog/products/product.service', () => ({
   listPublicProducts: (...args: unknown[]) => mockListPublicProducts(...args),
   getPublicProductById: (...args: unknown[]) => mockGetPublicProductById(...args),
 }));
 
-vi.mock('@/features/sellers/products/seller-products.service', () => ({
+vi.mock('@/api/seller/products/seller-products.service', () => ({
   listSellerProducts: (...args: unknown[]) => mockListSellerProducts(...args),
   createProductWithImages: vi.fn(),
   updateProduct: (...args: unknown[]) => mockUpdateProduct(...args),
   deleteProduct: (...args: unknown[]) => mockDeleteProduct(...args),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 

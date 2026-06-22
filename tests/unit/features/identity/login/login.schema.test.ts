@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loginSchema } from '@/features/identity/login/login.schema';
+import { loginSchema } from '@/api/auth/login/login.schema';
 
 describe('loginSchema', () => {
   it('rememberMe default false', () => {

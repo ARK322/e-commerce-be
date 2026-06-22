@@ -3,15 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockFindUserById = vi.fn();
 const mockBuildAuthUserFields = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserById: (...args: unknown[]) => mockFindUserById(...args),
 }));
 
-vi.mock('@/internal/auth/responses/user.response', () => ({
+vi.mock('@/domains/identity/application/responses/user.response', () => ({
   buildAuthUserFields: (...args: unknown[]) => mockBuildAuthUserFields(...args),
 }));
 
-import { getMe } from '@/features/identity/me/me.service';
+import { getMe } from '@/api/auth/me/me.service';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

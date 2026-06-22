@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache } from '@/domains/catalog/infrastructure/cache/memory-cache';
 
 const mockCategoryFind = vi.fn();
 const mockCategoryFindById = vi.fn();
@@ -23,18 +23,18 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '7c9e6679-7425-40de-944b-e07fc1f90ae7',
 }));
 
 import {
   listPublicCategories,
-} from '@/features/catalog/categories/category.service';
+} from '@/api/public/catalog/categories/category.service';
 import {
   deleteCategory,
   getCategoryById,
   updateCategory,
-} from '@/features/admin/categories/admin-categories.service';
+} from '@/api/admin/categories/admin-categories.service';
 
 const categoryId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 const childCategoryId = '8d9e6679-7425-40de-944b-e07fc1f90ae8';

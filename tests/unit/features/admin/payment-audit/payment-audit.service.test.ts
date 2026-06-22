@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockListPaymentAuditLogsByOrderIdLean = vi.fn();
 
-vi.mock('@/repositories/buyers/payment-audit-log.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/payment-audit-log.repository', () => ({
   listPaymentAuditLogsByOrderIdLean: (...args: unknown[]) =>
     mockListPaymentAuditLogsByOrderIdLean(...args),
 }));
 
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import { listPaymentAuditLogs } from '@/features/admin/payment-audit/payment-audit.service';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domains/identity/application/queries/admin-context';
+import { listPaymentAuditLogs } from '@/api/admin/payment-audit/payment-audit.service';
 
 const adminCtx: AdminAccessContext = {
   userId: '550e8400-e29b-41d4-a716-446655440000',

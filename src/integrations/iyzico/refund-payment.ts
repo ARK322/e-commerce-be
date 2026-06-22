@@ -2,7 +2,7 @@ import Iyzipay from 'iyzipay';
 import { getIyzicoClient } from '@/integrations/iyzico/client';
 import { postIyzicoApi } from '@/integrations/iyzico/iyzico-http';
 import { promisifyIyzipay } from '@/integrations/iyzico/promisify';
-import { createLogger } from '@/internal/common/logging';
+import { createLogger } from '@/shared/logging';
 
 const log = createLogger({ module: 'iyzico-refund' });
 

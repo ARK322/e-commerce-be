@@ -222,6 +222,33 @@ export const env = {
     return trim(process.env.OPS_ALERT_EMAIL);
   },
 
+  get redisUrl(): string | undefined {
+    return trim(process.env.REDIS_URL);
+  },
+
+  get queueUrl(): string | undefined {
+    return trim(process.env.QUEUE_URL);
+  },
+
+  /** catalog cache backend: 'memory' (default) | 'redis' */
+  get catalogCacheBackend(): 'memory' | 'redis' {
+    return trim(process.env.CATALOG_CACHE_BACKEND) === 'redis' ? 'redis' : 'memory';
+  },
+
+  /** notification transport: 'outbox' (default) | 'rabbitmq' */
+  get notificationsTransport(): 'outbox' | 'rabbitmq' {
+    return trim(process.env.NOTIFICATIONS_TRANSPORT) === 'rabbitmq' ? 'rabbitmq' : 'outbox';
+  },
+
+  /**
+   * Gateway ↔ alt servis güven sınırı için paylaşılan HMAC anahtarı. Tanımlıysa
+   * alt servis imzalı X-User-* header'larına güvenebilir; tanımsızsa downstream
+   * gateway header'larını yok sayıp klasik Bearer akışına düşer.
+   */
+  get gatewaySigningSecret(): string | undefined {
+    return trim(process.env.GATEWAY_SIGNING_SECRET);
+  },
+
   get platformCommissionRate(): number {
     return parseCommissionRate(process.env.PLATFORM_COMMISSION_RATE);
   },

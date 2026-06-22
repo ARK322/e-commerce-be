@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createProductSchema } from '@/features/catalog/products/create-product.schema';
+import { createProductSchema } from '@/api/public/catalog/products/create-product.schema';
 
 describe('createProductSchema', () => {
   it('images alanı kabul etmez', () => {

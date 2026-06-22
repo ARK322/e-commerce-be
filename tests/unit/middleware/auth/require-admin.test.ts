@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
 
 const mockGetAdminContext = vi.fn();
 
-vi.mock('@/internal/auth/queries/admin-context', () => ({
+vi.mock('@/domains/identity/application/queries/admin-context', () => ({
   getAdminContext: (...args: unknown[]) => mockGetAdminContext(...args),
 }));
 
@@ -12,7 +12,7 @@ import {
   requireAdmin,
   requirePermission,
   requireOwner,
-} from '@/middleware/auth/require-admin';
+} from '@/shared/middleware/auth/require-admin';
 
 const adminId = '550e8400-e29b-41d4-a716-446655440000';
 

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListAdminOrdersLean = vi.fn();
@@ -9,15 +9,15 @@ const mockGetAdminContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/repositories/buyers/order.repository', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/repositories/buyers/order.repository')>();
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/domains/commerce/infrastructure/repositories/order.repository')>();
   return {
     ...actual,
     listAdminOrdersLean: (...args: unknown[]) => mockListAdminOrdersLean(...args),
   };
 });
 
-vi.mock('@/internal/auth/queries/admin-context', () => ({
+vi.mock('@/domains/identity/application/queries/admin-context', () => ({
   getAdminContext: (...args: unknown[]) => mockGetAdminContext(...args),
 }));
 

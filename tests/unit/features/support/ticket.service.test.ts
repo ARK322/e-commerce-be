@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domains/identity/application/queries/admin-context';
 
 const mockFindOrderByIdLean = vi.fn();
 const mockCreateSupportTicket = vi.fn();
@@ -9,11 +9,11 @@ const mockFindSupportTicketByIdOrThrow = vi.fn();
 const mockListSupportTicketsLean = vi.fn();
 const mockRecordAdminAction = vi.fn();
 
-vi.mock('@/repositories/buyers/order.repository', () => ({
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', () => ({
   findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
 }));
 
-vi.mock('@/repositories/support/support-ticket.repository', () => ({
+vi.mock('@/domains/support/infrastructure/repositories/support-ticket.repository', () => ({
   createSupportTicket: (...args: unknown[]) => mockCreateSupportTicket(...args),
   findSupportTicketByIdOrThrow: (...args: unknown[]) => mockFindSupportTicketByIdOrThrow(...args),
   listSupportTicketsLean: (...args: unknown[]) => mockListSupportTicketsLean(...args),
@@ -21,12 +21,12 @@ vi.mock('@/repositories/support/support-ticket.repository', () => ({
   updateSupportTicketById: vi.fn(),
 }));
 
-vi.mock('@/repositories/support/support-message.repository', () => ({
+vi.mock('@/domains/support/infrastructure/repositories/support-message.repository', () => ({
   createSupportMessage: (...args: unknown[]) => mockCreateSupportMessage(...args),
   listSupportMessagesLean: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 }));
 
-vi.mock('@/internal/auth/admin/admin-audit', () => ({
+vi.mock('@/domains/identity/application/admin/admin-audit', () => ({
   recordAdminAction: (...args: unknown[]) => mockRecordAdminAction(...args),
 }));
 
@@ -34,9 +34,9 @@ import {
   createBuyerSupportTicket,
   listAdminSupportTickets,
   postBuyerSupportMessage,
-} from '@/features/support/ticket.service';
-import { AuthError } from '@/internal/auth/errors';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+} from '@/domains/support/application/ticket.service';
+import { AuthError } from '@/domains/identity/application/errors';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const ticketId = '660e8400-e29b-41d4-a716-446655440000';

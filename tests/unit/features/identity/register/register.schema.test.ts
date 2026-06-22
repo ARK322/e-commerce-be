@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { registerSchema } from '@/features/identity/register/register.schema';
+import { registerSchema } from '@/api/auth/register/register.schema';
 
 describe('registerSchema', () => {
   it('geçerli kayıt gövdesini kabul eder', () => {

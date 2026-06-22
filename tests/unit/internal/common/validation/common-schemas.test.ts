@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { objectIdSchema, safeString, uuidSchema } from '@/internal/common/validation/common-schemas';
+import { objectIdSchema, safeString, uuidSchema } from '@/shared/validation/common-schemas';
 
 describe('objectIdSchema', () => {
   it('geçerli ObjectId kabul eder', () => {

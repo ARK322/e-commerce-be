@@ -1,22 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domains/identity/application/queries/admin-context';
 
 const mockListAdminOrdersLean = vi.fn();
 const mockFindOrderByIdLean = vi.fn();
 const mockFindPaymentByOrderIdLean = vi.fn();
 
-vi.mock('@/repositories/buyers/order.repository', () => ({
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', () => ({
   listAdminOrdersLean: (...args: unknown[]) => mockListAdminOrdersLean(...args),
   findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
 }));
 
-vi.mock('@/repositories/buyers/payment.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/payment.repository', () => ({
   findPaymentByOrderIdLean: (...args: unknown[]) => mockFindPaymentByOrderIdLean(...args),
 }));
 
-import { getAdminOrderById, listAdminOrders } from '@/features/admin/orders/orders.service';
-import { AuthError } from '@/internal/auth/errors';
+import { getAdminOrderById, listAdminOrders } from '@/api/admin/orders/orders.service';
+import { AuthError } from '@/domains/identity/application/errors';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 

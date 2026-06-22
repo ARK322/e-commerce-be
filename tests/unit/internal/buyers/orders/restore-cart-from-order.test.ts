@@ -3,15 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockRestoreCartItemsForBuyer = vi.fn();
 const mockFindOrderByIdLean = vi.fn();
 
-vi.mock('@/repositories/buyers/cart.repository', () => ({
+vi.mock('@/domains/commerce/infrastructure/repositories/cart.repository', () => ({
   restoreCartItemsForBuyer: (...args: unknown[]) => mockRestoreCartItemsForBuyer(...args),
 }));
 
-vi.mock('@/repositories/buyers/order.repository', () => ({
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', () => ({
   findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
 }));
 
-import { restoreCartFromOrder } from '@/internal/buyers/orders/restore-cart-from-order';
+import { restoreCartFromOrder } from '@/domains/commerce/application/orders/restore-cart-from-order';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';

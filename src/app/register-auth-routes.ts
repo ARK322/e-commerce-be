@@ -6,21 +6,21 @@ import {
   AUTH_RECOVERY_RATE_LIMIT,
   AUTH_REGISTER_RATE_LIMIT,
   AUTH_SELLER_RATE_LIMIT,
-} from '@/middleware/presets/rate-limit';
-import { registerScopedRateLimit } from '@/plugins/rate-limit/register-scoped';
-import registerRoutes from '@/features/identity/register/register.routes';
-import loginRoutes from '@/features/identity/login/login.routes';
-import logoutRoutes from '@/features/identity/logout/logout.routes';
-import changePasswordRoutes from '@/features/identity/change-password/change-password.routes';
-import verifyEmailRoutes from '@/features/identity/verify-email/verify-email.routes';
-import resendVerificationRoutes from '@/features/identity/resend-verification/resend-verification.routes';
-import forgotPasswordRoutes from '@/features/identity/forgot-password/forgot-password.routes';
-import resetPasswordRoutes from '@/features/identity/reset-password/reset-password.routes';
-import meRoutes from '@/features/identity/me/me.routes';
-import profileRoutes from '@/features/buyers/profile/profile.routes';
-import documentsRoutes from '@/features/sellers/documents/documents.routes';
-import adminRoutes from '@/features/admin/admin.routes';
-import sellersRoutes from '@/features/sellers/sellers.routes';
+} from '@/shared/middleware/presets/rate-limit';
+import { registerScopedRateLimit } from '@/shared/plugins/rate-limit/register-scoped';
+import registerRoutes from '@/api/auth/register/register.routes';
+import loginRoutes from '@/api/auth/login/login.routes';
+import logoutRoutes from '@/api/auth/logout/logout.routes';
+import changePasswordRoutes from '@/api/auth/change-password/change-password.routes';
+import verifyEmailRoutes from '@/api/auth/verify-email/verify-email.routes';
+import resendVerificationRoutes from '@/api/auth/resend-verification/resend-verification.routes';
+import forgotPasswordRoutes from '@/api/auth/forgot-password/forgot-password.routes';
+import resetPasswordRoutes from '@/api/auth/reset-password/reset-password.routes';
+import meRoutes from '@/api/auth/me/me.routes';
+import profileRoutes from '@/api/buyer/profile/profile.routes';
+import documentsRoutes from '@/api/seller/documents/documents.routes';
+import adminRoutes from '@/api/admin/admin.routes';
+import sellersRoutes from '@/api/seller/sellers.routes';
 
 export const registerAuthRoutes = async (app: FastifyInstance): Promise<void> => {
   await app.register(async (authScope) => {

@@ -3,7 +3,7 @@ import {
   resetPasswordByCodeSchema,
   resetPasswordByTokenSchema,
   resetPasswordSchema,
-} from '@/features/identity/reset-password/reset-password.schema';
+} from '@/api/auth/reset-password/reset-password.schema';
 
 describe('resetPasswordSchema', () => {
   it('token + newPassword gövdesini kabul eder', () => {

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domains/identity/application/queries/seller-context';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListSellerRoles = vi.fn();
@@ -11,7 +11,7 @@ const mockGetSellerContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/sellers/roles/roles.service', () => ({
+vi.mock('@/api/seller/roles/roles.service', () => ({
   listSellerRoles: (...args: unknown[]) => mockListSellerRoles(...args),
   createSellerRole: (...args: unknown[]) => mockCreateSellerRole(...args),
   listSellerPermissionRegistry: () => [{ key: SELLER_PERMISSIONS.PRODUCTS_READ, label: 'Ürün görüntüle' }],
@@ -21,7 +21,7 @@ vi.mock('@/features/sellers/roles/roles.service', () => ({
   deleteSellerRole: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 

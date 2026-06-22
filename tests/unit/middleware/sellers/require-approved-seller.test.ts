@@ -3,11 +3,11 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 const mockGetSellerContext = vi.fn();
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-import { requireApprovedSeller } from '@/middleware/sellers/require-approved-seller';
+import { requireApprovedSeller } from '@/shared/middleware/sellers/require-approved-seller';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const companyId = '660e8400-e29b-41d4-a716-446655440000';

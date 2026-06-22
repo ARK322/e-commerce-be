@@ -1,23 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
 
 const mockFindSellerApprovalStatusLean = vi.fn();
 const mockGetAdminContext = vi.fn();
 const mockGetSellerContext = vi.fn();
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   findSellerApprovalStatusLean: (...args: unknown[]) => mockFindSellerApprovalStatusLean(...args),
 }));
 
-vi.mock('@/internal/auth/queries/admin-context', () => ({
+vi.mock('@/domains/identity/application/queries/admin-context', () => ({
   getAdminContext: (...args: unknown[]) => mockGetAdminContext(...args),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
+import { buildAuthUserFields } from '@/domains/identity/application/responses/user.response';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const companyId = '660e8400-e29b-41d4-a716-446655440000';

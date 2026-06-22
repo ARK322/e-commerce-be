@@ -6,7 +6,7 @@ const mockListPublicCategories = vi.fn();
 const mockGetPublicCategoryById = vi.fn();
 const mockGetCategoryPaths = vi.fn();
 
-vi.mock('@/features/catalog/categories/category.service', () => ({
+vi.mock('@/api/public/catalog/categories/category.service', () => ({
   listPublicCategories: (...args: unknown[]) => mockListPublicCategories(...args),
   getPublicCategoryById: (...args: unknown[]) => mockGetPublicCategoryById(...args),
   getCategoryPaths: (...args: unknown[]) => mockGetCategoryPaths(...args),
@@ -67,7 +67,7 @@ describe('category routes integration', () => {
   });
 
   it('GET /categories/:id pasif kategori için 404 döner', async () => {
-    const { CommerceError } = await import('@/internal/common/errors/commerce-error');
+    const { CommerceError } = await import('@/shared/errors/commerce-error');
     mockGetPublicCategoryById.mockRejectedValue(new CommerceError(404, 'Kategori bulunamadı'));
 
     const response = await app.inject({ method: 'GET', url: `/categories/${categoryId}` });

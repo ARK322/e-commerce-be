@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { hashPassword } from '@/internal/common/security';
+import { hashPassword } from '@/shared/security';
 
 const mockUpsertAuthOtp = vi.fn();
 const mockFindAuthOtpById = vi.fn();
 const mockDeleteAuthOtpById = vi.fn();
 const mockSaveAuthOtpDocument = vi.fn();
 
-vi.mock('@/repositories/auth/auth-otp.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/auth-otp.repository', () => ({
   upsertAuthOtp: (...args: unknown[]) => mockUpsertAuthOtp(...args),
   findAuthOtpById: (...args: unknown[]) => mockFindAuthOtpById(...args),
   deleteAuthOtpById: (...args: unknown[]) => mockDeleteAuthOtpById(...args),
   saveAuthOtpDocument: (...args: unknown[]) => mockSaveAuthOtpDocument(...args),
 }));
 
-import { createAuthOtp, generateOtpCode, OtpError, verifyAuthOtp } from '@/internal/auth/otp/otp';
+import { createAuthOtp, generateOtpCode, OtpError, verifyAuthOtp } from '@/domains/identity/application/otp/otp';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const otpId = `${userId}:email_verify`;

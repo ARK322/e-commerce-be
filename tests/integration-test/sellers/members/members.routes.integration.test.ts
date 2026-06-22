@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domains/identity/application/queries/seller-context';
+import { signAuthToken } from '@/domains/identity/application/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListSellerMembers = vi.fn();
@@ -11,7 +11,7 @@ const mockGetSellerContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/sellers/members/members.service', () => ({
+vi.mock('@/api/seller/members/members.service', () => ({
   listSellerMembers: (...args: unknown[]) => mockListSellerMembers(...args),
   createSellerMember: (...args: unknown[]) => mockCreateSellerMember(...args),
   getSellerMemberByUserId: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('@/features/sellers/members/members.service', () => ({
   deleteSellerMember: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 

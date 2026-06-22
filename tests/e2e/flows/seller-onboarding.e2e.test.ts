@@ -43,6 +43,15 @@ describeE2E('seller onboarding (E2E)', () => {
 
     expect(profileResponse.statusCode).toBe(200);
 
+    await Seller.findByIdAndUpdate(userId, {
+      $set: {
+        taxCertificateUrl: 'https://example.com/tax.pdf',
+        signatureCircularUrl: 'https://example.com/signature.pdf',
+        companyLogoUrl: 'https://example.com/logo.png',
+        approvalStatus: 'pending',
+      },
+    });
+
     const approveResponse = await app.inject({
       method: 'POST',
       url: `/auth/admin/sellers/${userId}/approve`,

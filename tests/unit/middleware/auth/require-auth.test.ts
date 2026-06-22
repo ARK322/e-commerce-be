@@ -11,15 +11,15 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/auth/tokens/revoke-token', () => ({
+vi.mock('@/domains/identity/application/tokens/revoke-token', () => ({
   isTokenRevoked: (...args: unknown[]) => mockIsTokenRevoked(...args),
 }));
 
-vi.mock('@/internal/auth/tokens/access-token', () => ({
+vi.mock('@/domains/identity/application/tokens/access-token', () => ({
   verifyAuthToken: (...args: unknown[]) => mockVerifyAuthToken(...args),
 }));
 
-import { requireAuth } from '@/middleware/auth/require-auth';
+import { requireAuth } from '@/shared/middleware/auth/require-auth';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

@@ -5,20 +5,20 @@ const mockCancelPendingOrder = vi.fn();
 const mockDistinctPendingCheckoutOrderIds = vi.fn();
 const mockFailStalePendingPayments = vi.fn();
 
-vi.mock('@/repositories/buyers/order.repository', () => ({
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', () => ({
   findExpiringPendingOrdersLean: (...args: unknown[]) => mockFindExpiringPendingOrdersLean(...args),
 }));
 
-vi.mock('@/repositories/buyers/payment.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/payment.repository', () => ({
   distinctPendingCheckoutOrderIds: (...args: unknown[]) => mockDistinctPendingCheckoutOrderIds(...args),
   failStalePendingPayments: (...args: unknown[]) => mockFailStalePendingPayments(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+vi.mock('@/domains/commerce/application/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
-import { expirePendingOrders } from '@/internal/buyers/orders/expire-pending-orders';
+import { expirePendingOrders } from '@/domains/commerce/application/orders/expire-pending-orders';
 
 describe('expirePendingOrders', () => {
   beforeEach(() => {

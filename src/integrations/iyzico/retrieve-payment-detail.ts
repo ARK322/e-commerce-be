@@ -2,7 +2,7 @@ import Iyzipay from 'iyzipay';
 import { getIyzicoClient } from '@/integrations/iyzico/client';
 import { promisifyIyzipay } from '@/integrations/iyzico/promisify';
 import type { IyzicoItemTransaction } from '@/integrations/iyzico/types';
-import { HttpError } from '@/internal/common/errors';
+import { HttpError } from '@/shared/errors';
 
 export const retrieveIyzicoPaymentItemTransactions = async (
   paymentId: string,

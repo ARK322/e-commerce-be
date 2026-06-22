@@ -31,8 +31,8 @@ vi.mock('@/integrations/iyzico/retrieve-checkout', () => ({
   completeIyzicoCheckout: (...args: unknown[]) => mockCompleteIyzicoCheckout(...args),
 }));
 
-vi.mock('@/repositories/buyers/payment.repository', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/repositories/buyers/payment.repository')>();
+vi.mock('@/domains/payments/infrastructure/repositories/payment.repository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/domains/payments/infrastructure/repositories/payment.repository')>();
   return {
     ...actual,
     findPaymentByOrderId: (...args: unknown[]) => mockFindPaymentByOrderId(...args),
@@ -45,35 +45,35 @@ vi.mock('@/repositories/buyers/payment.repository', async (importOriginal) => {
   };
 });
 
-vi.mock('@/repositories/buyers/order.repository', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/repositories/buyers/order.repository')>();
+vi.mock('@/domains/commerce/infrastructure/repositories/order.repository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/domains/commerce/infrastructure/repositories/order.repository')>();
   return {
     ...actual,
     findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
   };
 });
 
-vi.mock('@/internal/buyers/orders/fulfill-order', () => ({
+vi.mock('@/domains/commerce/application/orders/fulfill-order', () => ({
   fulfillPaidOrder: (...args: unknown[]) => mockFulfillPaidOrder(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/post-payment-side-effects', () => ({
+vi.mock('@/domains/payments/application/payment/post-payment-side-effects', () => ({
   ensurePostPaymentSideEffects: (...args: unknown[]) => mockEnsurePostPaymentSideEffects(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/enqueue-order-confirmation', () => ({
+vi.mock('@/domains/commerce/application/orders/enqueue-order-confirmation', () => ({
   enqueueOrderConfirmationEmail: (...args: unknown[]) => mockEnqueueOrderConfirmationEmail(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/refund-captured-payment', () => ({
+vi.mock('@/domains/payments/application/payment/refund-captured-payment', () => ({
   refundCapturedIyzicoPayment: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+vi.mock('@/domains/commerce/application/orders/cancel-pending-order', () => ({
   cancelPendingOrder: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/payment/payment-audit', () => ({
+vi.mock('@/domains/payments/application/payment/payment-audit', () => ({
   logPaymentTransition: vi.fn(),
 }));
 

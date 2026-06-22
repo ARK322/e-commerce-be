@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fastify from 'fastify';
-import { validateParams } from '@/middleware/validation/validate-params';
-import { categoryIdParamSchema } from '@/internal/common/validation/param-schemas';
+import { validateParams } from '@/shared/middleware/validation/validate-params';
+import { categoryIdParamSchema } from '@/shared/validation/param-schemas';
 
 const categoryId = '550e8400-e29b-41d4-a716-446655440000';
 

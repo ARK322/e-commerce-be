@@ -5,17 +5,17 @@ const mockUpsertPaymentSplit = vi.fn();
 const mockFindPendingPaymentSplitsForOrder = vi.fn();
 const mockApproveIyzicoPaymentItem = vi.fn();
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   findSellersByIdsLean: (...args: unknown[]) => mockFindSellersByIdsLean(...args),
 }));
 
-vi.mock('@/repositories/buyers/payment-split.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/payment-split.repository', () => ({
   upsertPaymentSplit: (...args: unknown[]) => mockUpsertPaymentSplit(...args),
   findPendingPaymentSplitsForOrder: (...args: unknown[]) => mockFindPendingPaymentSplitsForOrder(...args),
   savePaymentSplitDocument: (split: { save: () => Promise<unknown> }) => split.save(),
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => 'split-id-001',
 }));
 
@@ -23,18 +23,18 @@ vi.mock('@/integrations/iyzico/approve-payment-item', () => ({
   approveIyzicoPaymentItem: (...args: unknown[]) => mockApproveIyzicoPaymentItem(...args),
 }));
 
-vi.mock('@/internal/sellers/wallet/release-available-from-split', () => ({
+vi.mock('@/domains/payments/application/wallet/release-available-from-split', () => ({
   releaseSellerAvailableFromSplit: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/internal/common/outbox/ops-alert', () => ({
+vi.mock('@/domains/notifications/application/outbox/ops-alert', () => ({
   enqueueOpsAlert: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.stubEnv('PLATFORM_COMMISSION_RATE', '0.10');
 
-import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/internal/buyers/payment/payment-split';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/domains/payments/application/payment/payment-split';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 const sellerId = '660e8400-e29b-41d4-a716-446655440000';

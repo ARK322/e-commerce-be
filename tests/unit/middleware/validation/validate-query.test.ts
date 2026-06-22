@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fastify from 'fastify';
-import { validateQuery } from '@/middleware/validation/validate-query';
-import { listProductsQuerySchema } from '@/features/catalog/products/list-products.schema';
+import { validateQuery } from '@/shared/middleware/validation/validate-query';
+import { listProductsQuerySchema } from '@/api/public/catalog/products/list-products.schema';
 
 describe('validateQuery', () => {
   it('geçerli query parse edilir', async () => {

@@ -4,7 +4,7 @@ import { buildApp } from '@/app/app';
 
 const mockResetPassword = vi.fn();
 
-vi.mock('@/features/identity/reset-password/reset-password.service', () => ({
+vi.mock('@/api/auth/reset-password/reset-password.service', () => ({
   resetPassword: (...args: unknown[]) => mockResetPassword(...args),
 }));
 

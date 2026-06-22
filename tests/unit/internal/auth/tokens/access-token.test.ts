@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import jwt from 'jsonwebtoken';
-import { signAuthToken, verifyAuthToken } from '@/internal/auth/tokens/access-token';
+import { signAuthToken, verifyAuthToken } from '@/domains/identity/application/tokens/access-token';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 
@@ -14,7 +14,8 @@ describe('access-token', () => {
 
     const payload = verifyAuthToken(token);
 
-    expect(payload).toEqual({ userId, role: 'buyer' });
+    expect(payload).toMatchObject({ userId, role: 'buyer' });
+    expect(payload.scopes).toContain('cart:write');
   });
 
   it('rememberMe ile token üretir', () => {
@@ -43,5 +44,17 @@ describe('access-token', () => {
     delete process.env.JWT_SECRET;
 
     expect(() => signAuthToken(userId, 'buyer')).toThrow('JWT_SECRET tanımlanmamış');
+  });
+
+  it('eski token (scopes alanı yok) doğrulanırken role’den scope türetir', () => {
+    const legacyToken = jwt.sign({ purpose: 'access', role: 'seller' }, process.env.JWT_SECRET!, {
+      subject: userId,
+      expiresIn: '1h',
+    });
+
+    const payload = verifyAuthToken(legacyToken);
+
+    expect(payload).toMatchObject({ userId, role: 'seller' });
+    expect(payload.scopes).toContain('products:write');
   });
 });

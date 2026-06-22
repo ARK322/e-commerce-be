@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   BIREYSEL_SELLER_PERMISSIONS,
   SELLER_PERMISSIONS,
-} from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
+} from '@/domains/identity/application/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domains/identity/application/queries/seller-context';
 import {
   canWriteProducts,
   hasSellerPermission,
-} from '@/internal/auth/access/seller/permissions';
+} from '@/domains/identity/application/access/seller/permissions';
 
 const bireyselCtx: SellerAccessContext = {
   userId: '550e8400-e29b-41d4-a716-446655440000',

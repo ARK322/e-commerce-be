@@ -6,6 +6,10 @@ build/
 # Gizli bilgiler
 .env
 
+# JWT RS256 anahtarları (asla commit edilmez — Identity private key)
+keys/
+*.pem
+
 # Log dosyaları
 *.log
 npm-debug.log*

@@ -8,30 +8,30 @@ const mockDeleteSellerById = vi.fn();
 const mockDeleteSellerMemberById = vi.fn();
 const mockDeleteSellerRolesBySellerId = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserById: (...args: unknown[]) => mockFindUserById(...args),
   deleteUserById: (...args: unknown[]) => mockDeleteUserById(...args),
 }));
 
-vi.mock('@/repositories/buyers/buyer.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/buyer.repository', () => ({
   deleteBuyerById: (...args: unknown[]) => mockDeleteBuyerById(...args),
 }));
 
-vi.mock('@/repositories/sellers/seller-member.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller-member.repository', () => ({
   deleteSellerMemberById: (...args: unknown[]) => mockDeleteSellerMemberById(...args),
 }));
 
-vi.mock('@/repositories/sellers/seller-role.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller-role.repository', () => ({
   deleteSellerRolesBySellerId: (...args: unknown[]) => mockDeleteSellerRolesBySellerId(...args),
 }));
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   deleteSellerById: (...args: unknown[]) => mockDeleteSellerById(...args),
 }));
 
-vi.mock('@/internal/auth/otp/otp', async () => {
-  const actual = await vi.importActual<typeof import('@/internal/auth/otp/otp')>(
-    '@/internal/auth/otp/otp'
+vi.mock('@/domains/identity/application/otp/otp', async () => {
+  const actual = await vi.importActual<typeof import('@/domains/identity/application/otp/otp')>(
+    '@/domains/identity/application/otp/otp'
   );
   return {
     ...actual,
@@ -39,7 +39,7 @@ vi.mock('@/internal/auth/otp/otp', async () => {
   };
 });
 
-import { deleteUnverifiedUser, getVerificationExpiresAt } from '@/internal/auth/register/unverified-user';
+import { deleteUnverifiedUser, getVerificationExpiresAt } from '@/domains/identity/application/register/unverified-user';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

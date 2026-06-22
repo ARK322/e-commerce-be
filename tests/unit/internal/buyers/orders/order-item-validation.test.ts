@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   resolveOrderUnitPrice,
-} from '@/internal/buyers/orders/order-item-validation';
+} from '@/domains/commerce/application/orders/order-item-validation';
 
 describe('resolveOrderUnitPrice', () => {
   it('her zaman güncel ürün fiyatını kullanır', () => {

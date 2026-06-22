@@ -1,22 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
 
 const mockFindSellerById = vi.fn();
 const mockUpdateSellerById = vi.fn();
 const mockSaveSellerDocument = vi.fn();
 const mockGetSellerContext = vi.fn();
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   findSellerById: (...args: unknown[]) => mockFindSellerById(...args),
   updateSellerById: (...args: unknown[]) => mockUpdateSellerById(...args),
   saveSellerDocument: (...args: unknown[]) => mockSaveSellerDocument(...args),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domains/identity/application/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-import { updateSellerProfile } from '@/internal/auth/profile/seller';
+import { updateSellerProfile } from '@/domains/identity/application/profile/seller';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const companyId = '550e8400-e29b-41d4-a716-446655440000';

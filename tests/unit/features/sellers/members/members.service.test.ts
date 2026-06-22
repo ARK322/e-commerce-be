@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { AuthError } from '@/internal/auth/errors';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domains/identity/application/queries/seller-context';
+import { AuthError } from '@/domains/identity/application/errors';
 
 const mockListSellerMembersByCompanyIdLean = vi.fn();
 const mockFindSellerMemberByCompanyAndUserId = vi.fn();
@@ -9,23 +9,23 @@ const mockFindUserByIdLean = vi.fn();
 const mockFindUsersByIdsLean = vi.fn();
 const mockGetSellerRoleSummariesByIds = vi.fn();
 
-vi.mock('@/repositories/sellers/seller-member.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller-member.repository', () => ({
   findSellerMemberByCompanyAndUserId: (...args: unknown[]) =>
     mockFindSellerMemberByCompanyAndUserId(...args),
   listSellerMembersByCompanyIdLean: (...args: unknown[]) =>
     mockListSellerMembersByCompanyIdLean(...args),
 }));
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserByIdLean: (...args: unknown[]) => mockFindUserByIdLean(...args),
   findUsersByIdsLean: (...args: unknown[]) => mockFindUsersByIdsLean(...args),
 }));
 
-vi.mock('@/internal/auth/access/seller/role-queries', () => ({
+vi.mock('@/domains/identity/application/access/seller/role-queries', () => ({
   getSellerRoleSummariesByIds: (...args: unknown[]) => mockGetSellerRoleSummariesByIds(...args),
 }));
 
-import { getSellerMemberByUserId, listSellerMembers } from '@/features/sellers/members/members.service';
+import { getSellerMemberByUserId, listSellerMembers } from '@/api/seller/members/members.service';
 
 const companyId = '660e8400-e29b-41d4-a716-446655440000';
 const memberId = '550e8400-e29b-41d4-a716-446655440000';

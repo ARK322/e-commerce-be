@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { env } from '@/config/env';
-import { logger } from '@/internal/common/logging';
-import { redactMongoUri } from '@/internal/common/security/redact-uri';
+import { logger } from '@/shared/logging';
+import { redactMongoUri } from '@/shared/security/redact-uri';
 
 export const connectDB = async (): Promise<void> => {
   const mongoUri = env.mongoUri;

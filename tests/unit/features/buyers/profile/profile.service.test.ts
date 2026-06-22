@@ -6,27 +6,27 @@ const mockSellerFindByIdLean = vi.fn();
 const mockUpdateBuyerProfile = vi.fn();
 const mockUpdateSellerProfile = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserById: (...args: unknown[]) => mockUserFindById(...args),
 }));
 
-vi.mock('@/repositories/buyers/buyer.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/buyer.repository', () => ({
   findBuyerByIdLean: (...args: unknown[]) => mockBuyerFindByIdLean(...args),
 }));
 
-vi.mock('@/repositories/sellers/seller.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/seller.repository', () => ({
   findSellerByIdLean: (...args: unknown[]) => mockSellerFindByIdLean(...args),
 }));
 
-vi.mock('@/internal/auth/profile/buyer', () => ({
+vi.mock('@/domains/identity/application/profile/buyer', () => ({
   updateBuyerProfile: (...args: unknown[]) => mockUpdateBuyerProfile(...args),
 }));
 
-vi.mock('@/internal/auth/profile/seller', () => ({
+vi.mock('@/domains/identity/application/profile/seller', () => ({
   updateSellerProfile: (...args: unknown[]) => mockUpdateSellerProfile(...args),
 }));
 
-vi.mock('@/internal/auth/responses/user.response', () => ({
+vi.mock('@/domains/identity/application/responses/user.response', () => ({
   buildAuthUserFields: vi.fn(async (user: { _id: unknown; role: string; isActive?: boolean }) => {
     if (user.role === 'buyer') {
       return {
@@ -46,7 +46,7 @@ vi.mock('@/internal/auth/responses/user.response', () => ({
   }),
 }));
 
-import { getProfile, updateProfile } from '@/features/buyers/profile/profile.service';
+import { getProfile, updateProfile } from '@/api/buyer/profile/profile.service';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

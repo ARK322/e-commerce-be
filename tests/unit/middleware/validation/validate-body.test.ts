@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fastify from 'fastify';
 import { z } from 'zod';
-import { validateBody } from '@/middleware/validation/validate-body';
+import { validateBody } from '@/shared/middleware/validation/validate-body';
 
 const testSchema = z.object({
   name: z.string().min(1),

@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache } from '@/domains/catalog/infrastructure/cache/memory-cache';
 import {
   invalidateCatalogProductDetail,
   invalidateCatalogProductStock,
-} from '@/internal/common/cache/catalog-cache';
-import { catalogCacheKeys } from '@/internal/common/cache/catalog-keys';
-import { memoryCache } from '@/internal/common/cache/memory-cache';
+} from '@/domains/catalog/infrastructure/cache/catalog-cache';
+import { catalogCacheKeys } from '@/domains/catalog/infrastructure/cache/catalog-keys';
+import { memoryCache } from '@/domains/catalog/infrastructure/cache/memory-cache';
 
 describe('catalog-cache invalidation', () => {
   afterEach(() => {
     clearMemoryCache();
   });
 
-  it('stok invalidation yalnızca ilgili ürün detayını siler', () => {
+  it('stok invalidation yalnızca ilgili ürün detayını siler', async () => {
     const productA = 'prod-a';
     const productB = 'prod-b';
 
@@ -22,7 +22,7 @@ describe('catalog-cache invalidation', () => {
       ttlMs: 60_000,
     });
 
-    invalidateCatalogProductStock([productA]);
+    await invalidateCatalogProductStock([productA]);
 
     expect(memoryCache.get(catalogCacheKeys.productDetail(productA))).toBeUndefined();
     expect(memoryCache.get(catalogCacheKeys.productDetail(productB))).toEqual({ id: productB });
@@ -31,10 +31,10 @@ describe('catalog-cache invalidation', () => {
     ).toEqual({ products: [] });
   });
 
-  it('invalidateCatalogProductDetail tek ürün detayını siler', () => {
+  it('invalidateCatalogProductDetail tek ürün detayını siler', async () => {
     memoryCache.set(catalogCacheKeys.productDetail('prod-x'), { id: 'prod-x' }, { ttlMs: 60_000 });
 
-    invalidateCatalogProductDetail('prod-x');
+    await invalidateCatalogProductDetail('prod-x');
 
     expect(memoryCache.get(catalogCacheKeys.productDetail('prod-x'))).toBeUndefined();
   });
@@ -48,7 +48,7 @@ describe('catalog cache env', () => {
   it('CATALOG_CACHE_ENABLED=false iken cache kapalı', async () => {
     vi.stubEnv('CATALOG_CACHE_ENABLED', 'false');
 
-    const { catalogCacheConfig } = await import('@/internal/common/cache/catalog-cache-config');
+    const { catalogCacheConfig } = await import('@/domains/catalog/infrastructure/cache/catalog-cache-config');
 
     expect(catalogCacheConfig.enabled).toBe(false);
   });

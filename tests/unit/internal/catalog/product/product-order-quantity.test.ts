@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
-import { assertCartItemQuantity } from '@/internal/catalog/product/product-order-quantity';
+import { CommerceError } from '@/shared/errors/commerce-error';
+import { assertCartItemQuantity } from '@/domains/catalog/application/product/product-order-quantity';
 
 describe('assertCartItemQuantity', () => {
   it('minimum adedin altında 400 fırlatır', () => {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { AuthError } from '@/internal/auth/errors';
+import { SELLER_PERMISSIONS } from '@/domains/identity/application/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domains/identity/application/queries/seller-context';
+import { AuthError } from '@/domains/identity/application/errors';
 
 const mockSellerRoleFind = vi.fn();
 
@@ -12,7 +12,7 @@ vi.mock('@/integrations/mongo', () => ({
   SELLER_SYSTEM_OWNER_ROLE_SLUG: 'owner',
 }));
 
-import { listSellerRoles } from '@/features/sellers/roles/roles.service';
+import { listSellerRoles } from '@/api/seller/roles/roles.service';
 
 const ownerCtx: SellerAccessContext = {
   userId: '550e8400-e29b-41d4-a716-446655440000',

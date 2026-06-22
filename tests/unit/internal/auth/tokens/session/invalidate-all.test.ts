@@ -3,7 +3,7 @@ import {
   isTokenIssuedBefore,
   PASSWORD_CHANGED_MESSAGE,
   SESSIONS_REVOKED_MESSAGE,
-} from '@/internal/auth/tokens/invalidate-all';
+} from '@/domains/identity/application/tokens/invalidate-all';
 
 describe('isTokenIssuedBefore', () => {
   it('invalidationPoint yoksa oturumu geçerli sayar', () => {

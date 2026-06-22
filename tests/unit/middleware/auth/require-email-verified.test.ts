@@ -9,7 +9,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
+import { requireEmailVerified } from '@/shared/middleware/auth/require-email-verified';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

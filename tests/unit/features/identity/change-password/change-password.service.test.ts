@@ -5,23 +5,23 @@ const mockUpdateUserById = vi.fn();
 const mockComparePassword = vi.fn();
 const mockHashPassword = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserById: (...args: unknown[]) => mockFindUserById(...args),
   updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
 }));
 
-vi.mock('@/internal/common/security', () => ({
+vi.mock('@/shared/security', () => ({
   comparePassword: (...args: unknown[]) => mockComparePassword(...args),
   hashPassword: (...args: unknown[]) => mockHashPassword(...args),
 }));
 
 const mockRevokeAllSessions = vi.fn();
 
-vi.mock('@/internal/auth/tokens/invalidate-all', () => ({
+vi.mock('@/domains/identity/application/tokens/invalidate-all', () => ({
   revokeAllSessions: (...args: unknown[]) => mockRevokeAllSessions(...args),
 }));
 
-import { changePassword } from '@/features/identity/change-password/change-password.service';
+import { changePassword } from '@/api/auth/change-password/change-password.service';
 
 describe('changePassword', () => {
   beforeEach(() => {

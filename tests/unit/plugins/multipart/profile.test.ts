@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fastify from 'fastify';
 import { PROFILE_DOCUMENT_MULTIPART_LIMITS } from '@/config/constants';
-import { registerProfileDocumentMultipart } from '@/plugins/multipart/profile';
+import { registerProfileDocumentMultipart } from '@/shared/plugins/multipart/profile';
 
 describe('registerProfileDocumentMultipart', () => {
   it('multipart eklentisini profil belge limitleriyle register eder', async () => {

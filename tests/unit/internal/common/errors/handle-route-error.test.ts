@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyReply } from 'fastify';
-import { AuthError } from '@/internal/auth/errors';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { AuthError } from '@/domains/identity/application/errors';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
-vi.mock('@/internal/common/logging', () => ({
+vi.mock('@/shared/logging', () => ({
   logger: { error: vi.fn() },
 }));
 
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { logger } from '@/internal/common/logging';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { logger } from '@/shared/logging';
 
 const createReply = () => {
   const reply = {

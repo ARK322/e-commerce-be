@@ -4,7 +4,7 @@ import { buildApp } from '@/app/app';
 
 const mockVerifyEmail = vi.fn();
 
-vi.mock('@/features/identity/verify-email/verify-email.service', () => ({
+vi.mock('@/api/auth/verify-email/verify-email.service', () => ({
   verifyEmail: (...args: unknown[]) => mockVerifyEmail(...args),
 }));
 

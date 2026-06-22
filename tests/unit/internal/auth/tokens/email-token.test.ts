@@ -5,7 +5,7 @@ import {
   signPasswordResetToken,
   verifyEmailVerificationToken,
   verifyPasswordResetToken,
-} from '@/internal/auth/tokens/email-token';
+} from '@/domains/identity/application/tokens/email-token';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const jti = '770e8400-e29b-41d4-a716-446655440002';

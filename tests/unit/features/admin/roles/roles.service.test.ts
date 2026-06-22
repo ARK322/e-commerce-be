@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import { AuthError } from '@/internal/auth/errors';
+import { PERMISSIONS } from '@/domains/identity/application/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domains/identity/application/queries/admin-context';
+import { AuthError } from '@/domains/identity/application/errors';
 
 const mockAdminRoleFind = vi.fn();
 
@@ -11,7 +11,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-import { listAdminRoles } from '@/features/admin/roles/roles.service';
+import { listAdminRoles } from '@/api/admin/roles/roles.service';
 
 const ownerCtx: AdminAccessContext = {
   userId: '550e8400-e29b-41d4-a716-446655440000',

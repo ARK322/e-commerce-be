@@ -4,16 +4,16 @@ const mockFindBuyerById = vi.fn();
 const mockUpdateBuyerById = vi.fn();
 const mockUpdateUserById = vi.fn();
 
-vi.mock('@/repositories/buyers/buyer.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/buyer.repository', () => ({
   findBuyerById: (...args: unknown[]) => mockFindBuyerById(...args),
   updateBuyerById: (...args: unknown[]) => mockUpdateBuyerById(...args),
 }));
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
 }));
 
-import { updateBuyerProfile } from '@/internal/auth/profile/buyer';
+import { updateBuyerProfile } from '@/domains/identity/application/profile/buyer';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

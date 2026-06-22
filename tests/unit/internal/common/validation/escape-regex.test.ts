@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { escapeRegex } from '@/internal/common/validation/escape-regex';
+import { escapeRegex } from '@/shared/validation/escape-regex';
 
 describe('escapeRegex', () => {
   it('regex özel karakterlerini kaçırır', () => {

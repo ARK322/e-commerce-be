@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changePasswordSchema } from '@/features/identity/change-password/change-password.schema';
+import { changePasswordSchema } from '@/api/auth/change-password/change-password.schema';
 
 describe('changePasswordSchema', () => {
   it('aynı şifreyi reddeder', () => {

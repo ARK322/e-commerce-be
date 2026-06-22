@@ -4,7 +4,7 @@ import { buildApp } from '@/app/app';
 
 const mockLogin = vi.fn();
 
-vi.mock('@/features/identity/login/login.service', () => ({
+vi.mock('@/api/auth/login/login.service', () => ({
   login: (...args: unknown[]) => mockLogin(...args),
 }));
 

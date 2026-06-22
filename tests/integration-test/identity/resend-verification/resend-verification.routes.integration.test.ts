@@ -4,7 +4,7 @@ import { buildApp } from '@/app/app';
 
 const mockResendVerificationEmail = vi.fn();
 
-vi.mock('@/features/identity/resend-verification/resend-verification.service', () => ({
+vi.mock('@/api/auth/resend-verification/resend-verification.service', () => ({
   resendVerificationEmail: (...args: unknown[]) => mockResendVerificationEmail(...args),
 }));
 

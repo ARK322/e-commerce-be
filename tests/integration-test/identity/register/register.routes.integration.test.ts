@@ -4,7 +4,7 @@ import { buildApp } from '@/app/app';
 
 const mockRegister = vi.fn();
 
-vi.mock('@/features/identity/register/register.service', () => ({
+vi.mock('@/api/auth/register/register.service', () => ({
   register: (...args: unknown[]) => mockRegister(...args),
 }));
 

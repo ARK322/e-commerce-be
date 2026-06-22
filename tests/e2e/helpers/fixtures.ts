@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { expect } from 'vitest';
-import { hashPassword } from '@/internal/common/security';
-import { createUserId } from '@/internal/common/ids';
-import { signEmailVerificationToken } from '@/internal/auth/tokens/email-token';
-import { ensureSystemOwnerRole } from '@/internal/auth/access/admin/system-roles';
+import { hashPassword } from '@/shared/security';
+import { createUserId } from '@/shared/ids';
+import { signEmailVerificationToken } from '@/domains/identity/application/tokens/email-token';
+import { ensureSystemOwnerRole } from '@/domains/identity/application/access/admin/system-roles';
 import { Admin, Category, Product, Seller, User } from '@/integrations/mongo';
 
 export const registerBuyer = async (app: FastifyInstance, email?: string) => {
@@ -49,7 +49,13 @@ export const registerSeller = async (app: FastifyInstance, email?: string) => {
 };
 
 export const verifyUserEmail = async (app: FastifyInstance, userId: string) => {
-  const token = signEmailVerificationToken(userId);
+  const user = await User.findById(userId).lean();
+
+  if (!user?.activeEmailVerifyJti) {
+    throw new Error('activeEmailVerifyJti not found on user — register flow may have failed');
+  }
+
+  const token = signEmailVerificationToken(userId, user.activeEmailVerifyJti);
 
   const response = await app.inject({
     method: 'POST',
@@ -201,7 +207,4 @@ export const buildCompleteSellerProfilePayload = () => ({
   accountHolderName: 'E2E Satıcı A.Ş.',
   companyDescription: 'E2E test satıcı şirketi açıklama metni.',
   companyWebsite: 'https://example.com',
-  taxCertificateUrl: 'https://example.com/tax.pdf',
-  signatureCircularUrl: 'https://example.com/signature.pdf',
-  companyLogoUrl: 'https://example.com/logo.png',
 });

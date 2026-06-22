@@ -3,15 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockUpdateUserById = vi.fn();
 const mockRevokeToken = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
 }));
 
-vi.mock('@/internal/auth/tokens/revoke-token', () => ({
+vi.mock('@/domains/identity/application/tokens/revoke-token', () => ({
   revokeToken: (...args: unknown[]) => mockRevokeToken(...args),
 }));
 
-import { logout, logoutAllSessions } from '@/features/identity/logout/logout.service';
+import { logout, logoutAllSessions } from '@/api/auth/logout/logout.service';
 
 describe('logout', () => {
   beforeEach(() => {

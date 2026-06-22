@@ -1,0 +1,53 @@
+# Arka plan worker'lar\u0131 — HTTP serve etmez, scheduler/queue drain eder.
+# Tek replica (scheduler'lar idempotent claim kullan\u0131r ama \u00e7ift drain'i \u00f6nlemek i\u00e7in 1 \u00f6nerilir).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-worker
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: notification-worker }
+  template:
+    metadata:
+      labels: { app: notification-worker }
+    spec:
+      containers:
+        - name: notification-worker
+          image: ecommerce-be:latest
+          command: ['node', 'dist/app/notification-worker.js']
+          env:
+            - { name: SERVICE_ROLE, value: 'notification-worker' }
+          envFrom:
+            - configMapRef: { name: ecommerce-config }
+            - secretRef: { name: ecommerce-secrets }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-worker
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: payments-worker }
+  template:
+    metadata:
+      labels: { app: payments-worker }
+    spec:
+      containers:
+        - name: payments-worker
+          image: ecommerce-be:latest
+          command: ['node', 'dist/app/server.js']
+          env:
+            - { name: SERVICE_ROLE, value: 'payments-worker' }
+          envFrom:
+            - configMapRef: { name: ecommerce-config }
+            - secretRef: { name: ecommerce-secrets }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 250m, memory: 256Mi }

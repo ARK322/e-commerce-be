@@ -8,23 +8,23 @@ const {
   mockCreditSellerPendingFromPaidOrder: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/payment/payment-split', () => ({
+vi.mock('@/domains/payments/application/payment/payment-split', () => ({
   syncPaymentSplitTransactionIds: (...args: unknown[]) =>
     mockSyncPaymentSplitTransactionIds(...args),
 }));
 
-vi.mock('@/internal/sellers/wallet/credit-pending-from-order', () => ({
+vi.mock('@/domains/payments/application/wallet/credit-pending-from-order', () => ({
   creditSellerPendingFromPaidOrder: (...args: unknown[]) =>
     mockCreditSellerPendingFromPaidOrder(...args),
 }));
 
 const mockEnqueueOpsAlert = vi.fn();
 
-vi.mock('@/internal/common/outbox/ops-alert', () => ({
+vi.mock('@/domains/notifications/application/outbox/ops-alert', () => ({
   enqueueOpsAlert: (...args: unknown[]) => mockEnqueueOpsAlert(...args),
 }));
 
-import { ensurePostPaymentSideEffects } from '@/internal/buyers/payment/post-payment-side-effects';
+import { ensurePostPaymentSideEffects } from '@/domains/payments/application/payment/post-payment-side-effects';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 

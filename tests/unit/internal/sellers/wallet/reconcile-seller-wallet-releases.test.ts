@@ -4,19 +4,19 @@ const mockListApprovedPaymentSplitsLean = vi.fn();
 const mockFindSellerWalletLedgerEntry = vi.fn();
 const mockReleaseSellerAvailableFromSplit = vi.fn();
 
-vi.mock('@/repositories/buyers/payment-split.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/payment-split.repository', () => ({
   listApprovedPaymentSplitsLean: (...args: unknown[]) => mockListApprovedPaymentSplitsLean(...args),
 }));
 
-vi.mock('@/repositories/sellers/seller-wallet.repository', () => ({
+vi.mock('@/domains/payments/infrastructure/repositories/seller-wallet.repository', () => ({
   findSellerWalletLedgerEntry: (...args: unknown[]) => mockFindSellerWalletLedgerEntry(...args),
 }));
 
-vi.mock('@/internal/sellers/wallet/release-available-from-split', () => ({
+vi.mock('@/domains/payments/application/wallet/release-available-from-split', () => ({
   releaseSellerAvailableFromSplit: (...args: unknown[]) => mockReleaseSellerAvailableFromSplit(...args),
 }));
 
-import { reconcileSellerWalletReleases } from '@/internal/sellers/wallet/reconcile-seller-wallet-releases';
+import { reconcileSellerWalletReleases } from '@/domains/payments/application/wallet/reconcile-seller-wallet-releases';
 
 describe('reconcileSellerWalletReleases', () => {
   beforeEach(() => {

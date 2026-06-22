@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { signPasswordResetToken } from '@/internal/auth/tokens/email-token';
+import { signPasswordResetToken } from '@/domains/identity/application/tokens/email-token';
 
 const mockFindOne = vi.fn();
 const mockFindById = vi.fn();
@@ -8,13 +8,13 @@ const mockVerifyAuthOtp = vi.fn();
 const mockInvalidateAuthOtp = vi.fn();
 const mockHashPassword = vi.fn();
 
-vi.mock('@/repositories/auth/user.repository', () => ({
+vi.mock('@/domains/identity/infrastructure/repositories/auth/user.repository', () => ({
   findUserByEmail: (...args: unknown[]) => mockFindOne(...args),
   findUserById: (...args: unknown[]) => mockFindById(...args),
   updateUserById: (...args: unknown[]) => mockFindByIdAndUpdate(...args),
 }));
 
-vi.mock('@/internal/auth/otp/otp', async () => {
+vi.mock('@/domains/identity/application/otp/otp', async () => {
   class OtpError extends Error {
     constructor(
       public statusCode: number,
@@ -31,19 +31,19 @@ vi.mock('@/internal/auth/otp/otp', async () => {
   };
 });
 
-vi.mock('@/internal/common/security', () => ({
+vi.mock('@/shared/security', () => ({
   hashPassword: (...args: unknown[]) => mockHashPassword(...args),
   comparePassword: vi.fn(),
 }));
 
 const mockRevokeAllSessions = vi.fn();
 
-vi.mock('@/internal/auth/tokens/invalidate-all', () => ({
+vi.mock('@/domains/identity/application/tokens/invalidate-all', () => ({
   revokeAllSessions: (...args: unknown[]) => mockRevokeAllSessions(...args),
 }));
 
-import { OtpError } from '@/internal/auth/otp/otp';
-import { resetPassword } from '@/features/identity/reset-password/reset-password.service';
+import { OtpError } from '@/domains/identity/application/otp/otp';
+import { resetPassword } from '@/api/auth/reset-password/reset-password.service';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const tokenJti = '770e8400-e29b-41d4-a716-446655440002';

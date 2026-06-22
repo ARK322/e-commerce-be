@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resendVerificationSchema } from '@/features/identity/resend-verification/resend-verification.schema';
+import { resendVerificationSchema } from '@/api/auth/resend-verification/resend-verification.schema';
 
 describe('resendVerificationSchema', () => {
   it('email zorunludur', () => {

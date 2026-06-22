@@ -1,0 +1,61 @@
+# Catalog pod'u — public, read-heavy. Redis cache backend + agresif HPA.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog
+  namespace: ecommerce
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: catalog }
+  template:
+    metadata:
+      labels: { app: catalog }
+    spec:
+      containers:
+        - name: catalog
+          image: ecommerce-be:latest
+          command: ['node', 'dist/app/catalog-server.js']
+          env:
+            - { name: SERVICE_ROLE, value: 'catalog' }
+            - { name: CATALOG_CACHE_BACKEND, value: 'redis' }
+          envFrom:
+            - configMapRef: { name: ecommerce-config }
+            - secretRef: { name: ecommerce-secrets }
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet: { path: /ready, port: 3000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog
+  namespace: ecommerce
+spec:
+  selector: { app: catalog }
+  ports:
+    - port: 80
+      targetPort: 3000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: catalog
+  namespace: ecommerce
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: catalog }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 65 } }

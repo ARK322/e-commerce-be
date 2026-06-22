@@ -1,0 +1,111 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    # NOT: MongoDB burada SERVICE olarak tanımlanmıyor. GitHub Actions service
+    # container'ları entrypoint sonrası argüman (command) override'ını desteklemez,
+    # bu yüzden `--replSet rs0` veremeyiz. Mongo'yu aşağıda manuel `docker run` ile
+    # başlatıp tek-node replica set'i init ediyoruz (transaction'lar için şart).
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      # E2E helper E2E_MONGO_URI || MONGO_URI okuduğu için ikisini de veriyoruz.
+      MONGO_URI: mongodb://localhost:27017/ecommerce_test?replicaSet=rs0
+      E2E_MONGO_URI: mongodb://localhost:27017/ecommerce_test?replicaSet=rs0
+      # Gateway revocation (Test 3) ve cache için Redis.
+      REDIS_URL: redis://localhost:6379
+      E2E_REDIS_URL: redis://localhost:6379
+      # HS256 legacy fallback + startup doğrulaması (min 32 karakter).
+      JWT_SECRET: test-super-secret-key-for-legacy-hs256
+      PLATFORM_COMMISSION_RATE: '0.10'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Node v24 ↔ dependency-cruiser uyumsuzluğunu Node 22 sabitlemesiyle çözüyoruz.
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # MongoDB tek-node replica set: başlat → rs.initiate → PRIMARY seçilene kadar bekle.
+      - name: Start MongoDB (single-node replica set)
+        run: |
+          docker run -d --name mongo -p 27017:27017 mongo:7.0 --replSet rs0 --bind_ip_all
+
+          echo "Waiting for mongod to accept connections..."
+          until docker exec mongo mongosh --quiet --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
+            sleep 2
+          done
+
+          docker exec mongo mongosh --quiet --eval \
+            "rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] })"
+
+          echo "Waiting for replica set PRIMARY..."
+          until docker exec mongo mongosh --quiet --eval "db.hello().isWritablePrimary" | grep -q true; do
+            sleep 2
+          done
+          echo "MongoDB replica set is ready."
+
+      - name: Run Typecheck
+        run: npm run typecheck
+
+      # Node 22'de dependency-cruiser sorunsuz çalışır (R_OK hatası giderilir).
+      - name: Run Dependency Boundary Check
+        run: npm run lint:deps
+
+      - name: Run Unit Tests (529 tests)
+        run: npm run test:unit
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # İmaj build'ini doğrula + GHA cache'i ısıt (push yok). target=runtime ana imaj.
+      - name: Build Application Image (cache warm, no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime
+          push: false
+          tags: ecommerce-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 8 E2E testi: 5 mevcut akış + 3 gateway-security (spoof / trust / instant revocation).
+      - name: Run E2E Tests (8 tests)
+        run: npm run test:e2e

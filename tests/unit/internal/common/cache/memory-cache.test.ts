@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache, memoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache, memoryCache } from '@/domains/catalog/infrastructure/cache/memory-cache';
 
 describe('memoryCache', () => {
   beforeEach(() => {

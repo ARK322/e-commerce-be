@@ -8,27 +8,27 @@ const mockClaimPendingOutboxEvent = vi.fn();
 const mockMarkOutboxEventProcessed = vi.fn();
 const mockMarkOutboxEventFailed = vi.fn();
 
-vi.mock('@/internal/auth/admin/mail/send-seller-notifications', () => ({
+vi.mock('@/domains/identity/application/admin/mail/send-seller-notifications', () => ({
   sendSellerApprovedEmail: (...args: unknown[]) => mockSendSellerApprovedEmail(...args),
   sendSellerRejectedEmail: (...args: unknown[]) => mockSendSellerRejectedEmail(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/mail/send-order-confirmation', () => ({
+vi.mock('@/domains/commerce/application/orders/mail/send-order-confirmation', () => ({
   sendOrderConfirmationEmail: (...args: unknown[]) => mockSendOrderConfirmationEmail(...args),
 }));
 
-vi.mock('@/internal/common/outbox/send-ops-alert-email', () => ({
+vi.mock('@/domains/notifications/application/outbox/send-ops-alert-email', () => ({
   sendOpsAlertEmail: (...args: unknown[]) => mockSendOpsAlertEmail(...args),
 }));
 
-vi.mock('@/repositories/common/outbox-event.repository', () => ({
+vi.mock('@/domains/notifications/infrastructure/repositories/outbox-event.repository', () => ({
   claimPendingOutboxEvent: (...args: unknown[]) => mockClaimPendingOutboxEvent(...args),
   markOutboxEventProcessed: (...args: unknown[]) => mockMarkOutboxEventProcessed(...args),
   markOutboxEventFailed: (...args: unknown[]) => mockMarkOutboxEventFailed(...args),
 }));
 
-import { OUTBOX_EVENT_TYPES } from '@/internal/common/outbox/enqueue-outbox-event';
-import { processPendingOutboxEvents } from '@/internal/common/outbox/process-outbox-events';
+import { OUTBOX_EVENT_TYPES } from '@/domains/notifications/application/outbox/enqueue-outbox-event';
+import { processPendingOutboxEvents } from '@/domains/notifications/application/outbox/process-outbox-events';
 
 describe('processPendingOutboxEvents', () => {
   beforeEach(() => {
