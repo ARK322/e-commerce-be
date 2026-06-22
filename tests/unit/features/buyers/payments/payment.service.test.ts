@@ -15,6 +15,8 @@ const {
   mockReservePendingOrderStock,
   mockFulfillPaidOrder,
   mockCancelPendingOrder,
+  mockFindSellersByIdsLean,
+  mockFindUsersByIdsLean,
 } = vi.hoisted(() => ({
   mockOrderFindOne: vi.fn(),
   mockOrderFindById: vi.fn(),
@@ -30,6 +32,8 @@ const {
   mockReservePendingOrderStock: vi.fn(),
   mockFulfillPaidOrder: vi.fn(),
   mockCancelPendingOrder: vi.fn(),
+  mockFindSellersByIdsLean: vi.fn(),
+  mockFindUsersByIdsLean: vi.fn(),
 }));
 
 vi.mock('@/integrations/iyzico/initialize-checkout', () => ({
@@ -60,6 +64,18 @@ vi.mock('@/internal/sellers/wallet/credit-pending-from-order', () => ({
 vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
+
+vi.mock('@/repositories/sellers/seller.repository', () => ({
+  findSellersByIdsLean: (...args: unknown[]) => mockFindSellersByIdsLean(...args),
+}));
+
+vi.mock('@/repositories/auth/user.repository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/repositories/auth/user.repository')>();
+  return {
+    ...actual,
+    findUsersByIdsLean: (...args: unknown[]) => mockFindUsersByIdsLean(...args),
+  };
+});
 
 vi.mock('@/internal/catalog/product/assert-purchasable-product', () => ({
   assertPurchasableCatalogProduct: vi.fn().mockResolvedValue({
@@ -159,6 +175,10 @@ const mockApprovedSellersAndStock = () => {
       lean: vi.fn().mockResolvedValue([approvedSeller]),
     }),
   });
+  mockFindSellersByIdsLean.mockResolvedValue([approvedSeller]);
+  mockFindUsersByIdsLean.mockResolvedValue([
+    { _id: sellerId, role: 'seller', isActive: true },
+  ]);
   mockProductFindOne.mockReturnValue({
     lean: vi.fn().mockResolvedValue(productRecord),
   });

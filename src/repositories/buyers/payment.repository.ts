@@ -80,7 +80,7 @@ export const updatePaymentStatusByOrderId = async (
 
 export const failPendingPaymentsByOrderId = async (orderId: string) =>
   Payment.updateMany(
-    { orderId, status: 'pending' },
+    { orderId, status: { $in: ['pending', 'processing'] } },
     { $set: { status: 'failed', updatedAt: new Date() } }
   );
 

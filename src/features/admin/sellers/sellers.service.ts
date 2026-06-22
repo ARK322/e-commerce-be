@@ -252,6 +252,9 @@ export const approveSeller = async (ctx: AdminAccessContext, userId: string) => 
 
   const subMerchantKey = await registerSellerIyzicoSubMerchant(seller, String(user.email), userId);
 
+  seller.iyzicoSubMerchantKey = subMerchantKey;
+  await saveSellerDocument(seller);
+
   const updated = await approveSellerIfPending(userId, {
     approvalStatus: 'approved',
     rejectionReason: null,

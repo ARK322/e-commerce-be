@@ -19,11 +19,13 @@ import {
   listSupportMessagesLean,
 } from '@/repositories/support/support-message.repository';
 import {
-  createSupportTicket,
+  createSupportTicketWithInitialMessage,
   findSupportTicketByIdOrThrow,
+  listSupportTicketsForSellerLean,
   listSupportTicketsLean,
   touchSupportTicketLastMessageAt,
   updateSupportTicketById,
+  type CreateSupportTicketData,
 } from '@/repositories/support/support-ticket.repository';
 
 type TicketRecord = {
@@ -122,8 +124,18 @@ const assertBuyerTicketAccess = (ticket: TicketRecord, buyerId: string) => {
   }
 };
 
-const assertSellerTicketAccess = (ticket: TicketRecord, sellerId: string) => {
-  if (ticket.sellerId !== sellerId) {
+const assertSellerTicketAccess = async (ticket: TicketRecord, sellerId: string) => {
+  if (ticket.sellerId === sellerId) {
+    return;
+  }
+
+  if (!ticket.orderId) {
+    throw new CommerceError(403, 'Bu destek talebine erişim yetkin yok');
+  }
+
+  const order = await findOrderByIdLean(ticket.orderId);
+
+  if (!order?.items.some((item) => item.sellerId === sellerId)) {
     throw new CommerceError(403, 'Bu destek talebine erişim yetkin yok');
   }
 };
@@ -135,12 +147,10 @@ const assertTicketOpenForMessages = (ticket: TicketRecord) => {
 };
 
 const createTicketWithInitialMessage = async (
-  ticketData: Parameters<typeof createSupportTicket>[0],
+  ticketData: CreateSupportTicketData,
   message: { authorUserId: string; authorRole: 'buyer' | 'seller' | 'admin'; body: string; isInternal?: boolean }
 ) => {
-  const ticket = await createSupportTicket(ticketData);
-  const createdMessage = await createSupportMessage({
-    ticketId: String(ticket._id),
+  const { ticket, message: createdMessage } = await createSupportTicketWithInitialMessage(ticketData, {
     authorUserId: message.authorUserId,
     authorRole: message.authorRole,
     body: message.body,
@@ -219,9 +229,9 @@ export const listBuyerSupportTickets = async (buyerId: string, query: ListSuppor
 };
 
 export const listSellerSupportTickets = async (sellerId: string, query: ListSupportTicketsQuery) => {
-  const { items, total } = await listSupportTicketsLean(
+  const { items, total } = await listSupportTicketsForSellerLean(
+    sellerId,
     {
-      sellerId,
       status: query.status,
       orderId: query.orderId,
     },
@@ -245,7 +255,7 @@ export const getBuyerSupportTicket = async (buyerId: string, ticketId: string) =
 
 export const getSellerSupportTicket = async (sellerId: string, ticketId: string) => {
   const ticket = await findSupportTicketByIdOrThrow(ticketId);
-  assertSellerTicketAccess(ticket as TicketRecord, sellerId);
+  await assertSellerTicketAccess(ticket as TicketRecord, sellerId);
   return { ticket: toTicketResponse(ticket as TicketRecord) };
 };
 
@@ -281,7 +291,7 @@ export const listSellerSupportMessages = async (
   query: ListSupportMessagesQuery
 ) => {
   const ticket = await findSupportTicketByIdOrThrow(ticketId);
-  assertSellerTicketAccess(ticket as TicketRecord, sellerId);
+  await assertSellerTicketAccess(ticket as TicketRecord, sellerId);
 
   const { items, total } = await listSupportMessagesLean(
     {
@@ -328,7 +338,7 @@ export const postSellerSupportMessage = async (
   input: PostSupportMessageInput
 ) => {
   const ticket = await findSupportTicketByIdOrThrow(ticketId);
-  assertSellerTicketAccess(ticket as TicketRecord, sellerId);
+  await assertSellerTicketAccess(ticket as TicketRecord, sellerId);
   assertTicketOpenForMessages(ticket as TicketRecord);
 
   const message = await createSupportMessage({

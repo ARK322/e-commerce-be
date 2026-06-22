@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockFindSellersByIdsLean = vi.fn();
+const mockFindUsersByIdsLean = vi.fn();
 const mockUpsertPaymentSplit = vi.fn();
 const mockFindPendingPaymentSplitsForOrder = vi.fn();
 const mockApproveIyzicoPaymentItem = vi.fn();
 
 vi.mock('@/repositories/sellers/seller.repository', () => ({
   findSellersByIdsLean: (...args: unknown[]) => mockFindSellersByIdsLean(...args),
+}));
+
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUsersByIdsLean: (...args: unknown[]) => mockFindUsersByIdsLean(...args),
 }));
 
 vi.mock('@/repositories/buyers/payment-split.repository', () => ({
@@ -52,6 +57,13 @@ describe('buildPaymentSplitsForOrder', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpsertPaymentSplit.mockResolvedValue({});
+    mockFindUsersByIdsLean.mockResolvedValue([
+      {
+        _id: sellerId,
+        role: 'seller',
+        isActive: true,
+      },
+    ]);
   });
 
   it('onaylı ve iyzico key’li satıcı için split üretir', async () => {

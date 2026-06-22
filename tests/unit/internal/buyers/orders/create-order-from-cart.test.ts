@@ -14,6 +14,8 @@ const {
   mockReservePendingOrderStock,
   mockCancelPendingOrder,
   mockRestoreCartItemsForBuyer,
+  mockFindSellersByIdsLean,
+  mockFindUsersByIdsLean,
 } = vi.hoisted(() => {
   const mockWithTransaction = vi.fn();
   const mockEndSession = vi.fn().mockResolvedValue(undefined);
@@ -36,6 +38,8 @@ const {
     mockReservePendingOrderStock: vi.fn(),
     mockCancelPendingOrder: vi.fn(),
     mockRestoreCartItemsForBuyer: vi.fn(),
+    mockFindSellersByIdsLean: vi.fn(),
+    mockFindUsersByIdsLean: vi.fn(),
   };
 });
 
@@ -87,6 +91,14 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
+vi.mock('@/repositories/sellers/seller.repository', () => ({
+  findSellersByIdsLean: (...args: unknown[]) => mockFindSellersByIdsLean(...args),
+}));
+
+vi.mock('@/repositories/auth/user.repository', () => ({
+  findUsersByIdsLean: (...args: unknown[]) => mockFindUsersByIdsLean(...args),
+}));
+
 vi.mock('@/internal/common/ids', () => ({
   createUserId: () => '8c9e6679-7425-40de-944b-e07fc1f90ae8',
 }));
@@ -134,6 +146,10 @@ describe('createOrderFromCartForBuyer', () => {
         lean: vi.fn().mockResolvedValue([approvedSeller]),
       }),
     });
+    mockFindSellersByIdsLean.mockResolvedValue([approvedSeller]);
+    mockFindUsersByIdsLean.mockResolvedValue([
+      { _id: sellerId, role: 'seller', isActive: true },
+    ]);
     mockWithTransaction.mockImplementation(async (callback: () => Promise<void>) => {
       await callback();
     });
