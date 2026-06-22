@@ -1,4 +1,4 @@
-import { AdminAuditLog, type AdminAuditAction } from '@/integrations/mongo';
+import { AdminAuditLog, type AdminAuditAction } from '@/infrastructure/mongo';
 
 export type CreateAdminAuditLogData = {
   _id: string;

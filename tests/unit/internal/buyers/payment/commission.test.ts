@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { calcItemSplit, getPlatformCommissionRate } from '@/internal/buyers/payment/commission';
+import { calcItemSplit, getPlatformCommissionRate } from '@/domain/payment/commission';
 
 describe('getPlatformCommissionRate', () => {
   afterEach(() => {

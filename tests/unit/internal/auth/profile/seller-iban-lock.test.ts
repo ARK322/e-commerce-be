@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { AuthError } from '@/internal/auth/errors';
+import { AuthError } from '@/domain/auth/errors';
 import {
   assertIbanUpdateAllowed,
   omitUnchangedLockedIban,
-} from '@/internal/auth/profile/seller-iban-lock';
+} from '@/domain/auth/profile/seller-iban-lock';
 
 describe('seller-iban-lock', () => {
   it('IBAN yokken güncellemeye izin verir', () => {

@@ -5,7 +5,7 @@ const mockCartCreate = vi.fn();
 const mockProductFind = vi.fn();
 const mockAssertPurchasableCatalogProduct = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   Cart: {
     findById: (...args: unknown[]) => mockCartFindById(...args),
     create: (...args: unknown[]) => mockCartCreate(...args),
@@ -15,7 +15,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/catalog/product/assert-purchasable-product', () => ({
+vi.mock('@/domain/catalog/product/assert-purchasable-product', () => ({
   assertPurchasableCatalogProduct: (...args: unknown[]) =>
     mockAssertPurchasableCatalogProduct(...args),
 }));
@@ -68,7 +68,7 @@ describe('addToCart', () => {
   });
 
   it('kategorisiz (orphan) ürün sepete eklenemez', async () => {
-    const { CommerceError } = await import('@/internal/common/errors/commerce-error');
+    const { CommerceError } = await import('@/shared/errors/commerce-error');
     mockAssertPurchasableCatalogProduct.mockRejectedValue(
       new CommerceError(404, 'Ürün bulunamadı')
     );
@@ -85,7 +85,7 @@ describe('addToCart', () => {
   });
 
   it('aktif ürün yoksa 404 fırlatır', async () => {
-    const { CommerceError } = await import('@/internal/common/errors/commerce-error');
+    const { CommerceError } = await import('@/shared/errors/commerce-error');
     mockAssertPurchasableCatalogProduct.mockRejectedValue(
       new CommerceError(404, 'Ürün bulunamadı')
     );

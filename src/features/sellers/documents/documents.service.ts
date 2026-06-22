@@ -1,7 +1,7 @@
 import type { FastifyRequest } from 'fastify';
-import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
-import { AuthError } from '@/internal/auth/errors';
-import { uploadSellerDocument } from '@/internal/auth/profile/documents';
+import type { AuthTokenPayload } from '@/domain/auth/tokens/access-token';
+import { AuthError } from '@/domain/auth/errors';
+import { uploadSellerDocument } from '@/domain/auth/profile/documents';
 
 export const uploadSellerDocumentFromRequest = async (
   auth: AuthTokenPayload,

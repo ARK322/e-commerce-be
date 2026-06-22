@@ -11,8 +11,8 @@ vi.mock('@/repositories/auth/user.repository', () => ({
   findUsersByIdsLean: (...args: unknown[]) => mockFindUsersByIdsLean(...args),
 }));
 
-import { assertSellersReadyForOrder } from '@/internal/buyers/orders/order-item-validation';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { assertSellersReadyForOrder } from '@/domain/orders/order-item-validation';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 

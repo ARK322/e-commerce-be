@@ -11,7 +11,7 @@ vi.mock('@/repositories/buyers/order.repository', () => ({
   findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
 }));
 
-import { restoreCartFromOrder } from '@/internal/buyers/orders/restore-cart-from-order';
+import { restoreCartFromOrder } from '@/domain/orders/restore-cart-from-order';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';

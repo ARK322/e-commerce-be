@@ -1,4 +1,4 @@
-import { SellerWallet, SellerWalletLedger } from '@/integrations/mongo';
+import { SellerWallet, SellerWalletLedger } from '@/infrastructure/mongo';
 
 export const findSellerWalletById = async (sellerId: string) => SellerWallet.findById(sellerId);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 import {
   canCreateAdmin,
   canDeleteAdmin,
@@ -9,7 +9,7 @@ import {
   canUpdateAdminRoleId,
   canViewAdmin,
   hasPermission,
-} from '@/internal/auth/access/admin/permissions';
+} from '@/domain/auth/access/admin/permissions';
 
 const ownerId = '550e8400-e29b-41d4-a716-446655440000';
 const otherId = '550e8400-e29b-41d4-a716-446655440001';

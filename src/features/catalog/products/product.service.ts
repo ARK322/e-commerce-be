@@ -1,4 +1,4 @@
 export {
   getPublicProductById,
   listPublicProducts,
-} from '@/internal/catalog/product/public-products';
+} from '@/domain/catalog/product/public-products';

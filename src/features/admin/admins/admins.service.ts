@@ -3,18 +3,18 @@ import {
   canDeleteAdmin,
   canUpdateAdminRoleId,
   canViewAdmin,
-} from '@/internal/auth/access/admin/permissions';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { assertPermission } from '@/internal/auth/access/admin/permissions';
+} from '@/domain/auth/access/admin/permissions';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { assertPermission } from '@/domain/auth/access/admin/permissions';
 import {
   assertAssignableRoleId,
   countOwnerAdmins,
   getRoleSummariesByIds,
   isOwnerRoleId,
-} from '@/internal/auth/access/admin/role-queries';
-import { formatAdminResponse } from '@/internal/auth/responses/admin.response';
-import { hashPassword } from '@/internal/common/security';
-import { createUserId } from '@/internal/common/ids';
+} from '@/domain/auth/access/admin/role-queries';
+import { formatAdminResponse } from '@/domain/auth/responses/admin.response';
+import { hashPassword } from '@/shared/security';
+import { createUserId } from '@/shared/ids';
 import {
   createAdmin as createAdminRecord,
   deleteAdminById,
@@ -29,16 +29,16 @@ import {
   findUserById,
   findUsersByIdsLean,
 } from '@/repositories/auth/user.repository';
-import { AuthError, isDuplicateKeyError } from '@/internal/auth/errors';
-import { recordAdminAction } from '@/internal/auth/admin/admin-audit';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { AuthError, isDuplicateKeyError } from '@/domain/auth/errors';
+import { recordAdminAction } from '@/domain/auth/admin/admin-audit';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 import type { CreateAdminInput } from '@/features/admin/admins/create-admin.schema';
 import type { UpdateAdminInput } from '@/features/admin/admins/update-admin.schema';
 import type { SetUserActiveStatusInput } from '@/features/admin/common/set-user-active.schema';
 import {
   applyUserActiveStatus,
   recordUserActiveStatusChange,
-} from '@/internal/auth/admin/user-active-status';
+} from '@/domain/auth/admin/user-active-status';
 
 const findAdminRecord = async (targetUserId: string) => {
   const targetAdmin = await findAdminById(targetUserId);

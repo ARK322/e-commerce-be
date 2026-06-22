@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 
 const mockListAdminOrdersLean = vi.fn();
 const mockFindOrderByIdLean = vi.fn();
@@ -16,7 +16,7 @@ vi.mock('@/repositories/buyers/payment.repository', () => ({
 }));
 
 import { getAdminOrderById, listAdminOrders } from '@/features/admin/orders/orders.service';
-import { AuthError } from '@/internal/auth/errors';
+import { AuthError } from '@/domain/auth/errors';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 

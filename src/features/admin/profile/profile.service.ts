@@ -1,14 +1,14 @@
-import { canUpdateAdminProfile, canViewAdmin } from '@/internal/auth/access/admin/permissions';
-import { getRoleSummariesByIds } from '@/internal/auth/access/admin/role-queries';
-import { formatAdminResponse } from '@/internal/auth/responses/admin.response';
+import { canUpdateAdminProfile, canViewAdmin } from '@/domain/auth/access/admin/permissions';
+import { getRoleSummariesByIds } from '@/domain/auth/access/admin/role-queries';
+import { formatAdminResponse } from '@/domain/auth/responses/admin.response';
 import {
   findAdminById,
   updateAdminById,
 } from '@/repositories/auth/admin.repository';
 import { findUserById } from '@/repositories/auth/user.repository';
-import { AuthError } from '@/internal/auth/errors';
-import { recordAdminAction } from '@/internal/auth/admin/admin-audit';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { AuthError } from '@/domain/auth/errors';
+import { recordAdminAction } from '@/domain/auth/admin/admin-audit';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 import type { AdminProfileUpdateInput } from '@/features/admin/profile/profile.schema';
 
 const findAdminWithUser = async (targetUserId: string) => {

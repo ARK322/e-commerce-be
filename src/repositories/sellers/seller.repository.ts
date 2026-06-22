@@ -1,4 +1,4 @@
-import { Seller, type SellerApprovalStatus } from '@/integrations/mongo';
+import { Seller, type SellerApprovalStatus } from '@/infrastructure/mongo';
 
 export const findSellerById = async (sellerId: string) => Seller.findById(sellerId);
 

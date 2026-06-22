@@ -7,7 +7,7 @@ const mockFindSellerByIdLean = vi.fn();
 const mockUpdateSellerById = vi.fn();
 const mockGetSellerContext = vi.fn();
 
-vi.mock('@/integrations/supabase/supabase', () => ({
+vi.mock('@/infrastructure/supabase/supabase', () => ({
   uploadToSellerStorage: (...args: unknown[]) => mockUpload(...args),
   deleteFromSellerStorage: (...args: unknown[]) => mockDelete(...args),
   getSupabaseConfig: () => ({ bucket: 'seller-documents' }),
@@ -23,15 +23,15 @@ vi.mock('@/repositories/sellers/seller.repository', () => ({
   updateSellerById: (...args: unknown[]) => mockUpdateSellerById(...args),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domain/auth/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-vi.mock('@/internal/auth/profile/seller', () => ({
+vi.mock('@/domain/auth/profile/seller', () => ({
   updateSellerProfile: (...args: unknown[]) => mockUpdateSellerProfile(...args),
 }));
 
-import { uploadSellerDocument } from '@/internal/auth/profile/documents';
+import { uploadSellerDocument } from '@/domain/auth/profile/documents';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const pdfBuffer = Buffer.from('%PDF-1.4 test');

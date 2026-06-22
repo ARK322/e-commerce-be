@@ -1,4 +1,4 @@
-import { Product } from '@/integrations/mongo';
+import { Product } from '@/infrastructure/mongo';
 
 export const findActiveCatalogProductLean = async (productId: string) =>
   Product.findOne({

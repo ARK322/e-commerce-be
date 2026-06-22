@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { validateBody } from '@/middleware/validation/validate-body';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { productIdParamSchema } from '@/internal/common/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { productIdParamSchema } from '@/shared/validation/param-schemas';
 import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-guards';
 import {
   addToCartSchema,

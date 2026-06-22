@@ -1,4 +1,4 @@
-import { AuthEmailCooldown } from '@/integrations/mongo';
+import { AuthEmailCooldown } from '@/infrastructure/mongo';
 
 export const findAuthEmailCooldownById = async (id: string) => AuthEmailCooldown.findById(id);
 

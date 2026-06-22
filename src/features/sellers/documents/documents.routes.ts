@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { registerProfileDocumentMultipart } from '@/plugins/multipart/profile';
 import { requireAuth } from '@/middleware/auth/require-auth';
 import { requireEmailVerified } from '@/middleware/auth/require-email-verified';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
 import { uploadSellerDocumentFromRequest } from '@/features/sellers/documents/documents.service';
 
 export default async function documentsRoutes(fastify: FastifyInstance) {

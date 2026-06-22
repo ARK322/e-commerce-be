@@ -2,8 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { adminOnly } from '@/middleware/presets/admin-route-guards';
 import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
-import { userIdParamSchema } from '@/internal/common/validation/param-schemas';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
+import { userIdParamSchema } from '@/shared/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
 import {
   adminProfileUpdateSchema,
   type AdminProfileUpdateInput,

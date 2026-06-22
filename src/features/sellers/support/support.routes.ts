@@ -8,9 +8,9 @@ import {
 import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { validateQuery } from '@/middleware/validation/validate-query';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import { ticketIdParamSchema } from '@/internal/common/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { SELLER_PERMISSIONS } from '@/domain/auth/access/seller/permission-keys';
+import { ticketIdParamSchema } from '@/shared/validation/param-schemas';
 import {
   createSupportTicketSchema,
   postSupportMessageSchema,

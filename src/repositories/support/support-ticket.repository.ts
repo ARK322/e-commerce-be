@@ -2,10 +2,10 @@ import type {
   SupportAuthorRole,
   SupportTicketCategory,
   SupportTicketStatus,
-} from '@/integrations/mongo';
-import { Order, SupportMessage, SupportTicket } from '@/integrations/mongo';
-import { createUserId } from '@/internal/common/ids';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+} from '@/infrastructure/mongo';
+import { Order, SupportMessage, SupportTicket } from '@/infrastructure/mongo';
+import { createUserId } from '@/shared/ids';
+import { CommerceError } from '@/shared/errors/commerce-error';
 import mongoose from 'mongoose';
 import type { CreateSupportMessageData } from '@/repositories/support/support-message.repository';
 

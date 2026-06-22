@@ -3,7 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 const mockUserFindById = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   User: {
     findById: (...args: unknown[]) => mockUserFindById(...args),
   },

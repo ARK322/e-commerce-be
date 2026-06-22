@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 
 const mockFindOrderByIdLean = vi.fn();
 const mockCreateSupportTicketWithInitialMessage = vi.fn();
@@ -30,7 +30,7 @@ vi.mock('@/repositories/support/support-message.repository', () => ({
   listSupportMessagesLean: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 }));
 
-vi.mock('@/internal/auth/admin/admin-audit', () => ({
+vi.mock('@/domain/auth/admin/admin-audit', () => ({
   recordAdminAction: (...args: unknown[]) => mockRecordAdminAction(...args),
 }));
 
@@ -40,8 +40,8 @@ import {
   listAdminSupportTickets,
   postBuyerSupportMessage,
 } from '@/features/support/ticket.service';
-import { AuthError } from '@/internal/auth/errors';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { AuthError } from '@/domain/auth/errors';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const ticketId = '660e8400-e29b-41d4-a716-446655440000';

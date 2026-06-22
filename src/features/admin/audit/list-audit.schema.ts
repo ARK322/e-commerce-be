@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ADMIN_AUDIT_ACTIONS } from '@/integrations/mongo';
-import { uuidSchema } from '@/internal/common/validation/common-schemas';
+import { ADMIN_AUDIT_ACTIONS } from '@/infrastructure/mongo';
+import { uuidSchema } from '@/shared/validation/common-schemas';
 
 export const listAdminAuditLogsQuerySchema = z.object({
   action: z.enum(ADMIN_AUDIT_ACTIONS).optional(),

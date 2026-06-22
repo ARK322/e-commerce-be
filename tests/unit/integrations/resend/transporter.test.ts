@@ -12,13 +12,13 @@ describe('mail transporter lazy init', () => {
   it('modül import edilirken SMTP_PASS olmadan çökmez', async () => {
     delete process.env.SMTP_PASS;
 
-    await expect(import('@/integrations/resend/transporter')).resolves.toBeDefined();
+    await expect(import('@/infrastructure/resend/transporter')).resolves.toBeDefined();
   });
 
   it('getResend SMTP_PASS olmadan çağrılınca hata verir', async () => {
     delete process.env.SMTP_PASS;
 
-    const { getResend } = await import('@/integrations/resend/transporter');
+    const { getResend } = await import('@/infrastructure/resend/transporter');
 
     expect(() => getResend()).toThrow('SMTP_PASS');
   });

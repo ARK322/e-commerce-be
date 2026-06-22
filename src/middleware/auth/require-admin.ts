@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import type { PermissionKey } from '@/internal/auth/access/admin/permission-keys';
-import { hasPermission } from '@/internal/auth/access/admin/permissions';
-import { getAdminContext, type AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import type { PermissionKey } from '@/domain/auth/access/admin/permission-keys';
+import { hasPermission } from '@/domain/auth/access/admin/permissions';
+import { getAdminContext, type AdminAccessContext } from '@/domain/auth/queries/admin-context';
 
 declare module 'fastify' {
   interface FastifyRequest {

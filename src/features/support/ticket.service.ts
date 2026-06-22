@@ -1,8 +1,8 @@
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { assertPermission } from '@/internal/auth/access/admin/permissions';
-import { recordAdminAction } from '@/internal/auth/admin/admin-audit';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { assertPermission } from '@/domain/auth/access/admin/permissions';
+import { recordAdminAction } from '@/domain/auth/admin/admin-audit';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
+import { CommerceError } from '@/shared/errors/commerce-error';
 import type {
   AdminPostSupportMessageInput,
   CreateSupportTicketInput,

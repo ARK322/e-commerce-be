@@ -1,9 +1,9 @@
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { assertPermission } from '@/internal/auth/access/admin/permissions';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { assertPermission } from '@/domain/auth/access/admin/permissions';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 import { listPaymentAuditLogsByOrderIdLean } from '@/repositories/buyers/payment-audit-log.repository';
 import type { ListPaymentAuditLogsQuery } from '@/features/admin/payment-audit/list-payment-audit.schema';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 const toPaymentAuditLogResponse = (log: {
   _id: unknown;

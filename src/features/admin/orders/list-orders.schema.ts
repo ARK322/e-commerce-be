@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ORDER_STATUSES } from '@/integrations/mongo';
-import { uuidSchema } from '@/internal/common/validation/common-schemas';
+import { ORDER_STATUSES } from '@/infrastructure/mongo';
+import { uuidSchema } from '@/shared/validation/common-schemas';
 
 export const listAdminOrdersQuerySchema = z.object({
   status: z.enum(ORDER_STATUSES).optional(),

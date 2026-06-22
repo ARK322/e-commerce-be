@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { uuidSchema } from '@/internal/common/validation/common-schemas';
+import { uuidSchema } from '@/shared/validation/common-schemas';
 
 export const addToCartSchema = z.object({
   productId: uuidSchema,

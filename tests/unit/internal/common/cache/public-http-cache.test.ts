@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PUBLIC_HTTP_CACHE,
   setPublicCacheControl,
-} from '@/internal/common/cache/public-http-cache';
+} from '@/shared/cache/public-http-cache';
 
 describe('public-http-cache', () => {
   it('Cache-Control preset değerlerini tanımlar', () => {

@@ -2,8 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-guards';
 import { validateBody } from '@/middleware/validation/validate-body';
 import { validateQuery } from '@/middleware/validation/validate-query';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { ticketIdParamSchema } from '@/internal/common/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { ticketIdParamSchema } from '@/shared/validation/param-schemas';
 import {
   createSupportTicketSchema,
   postSupportMessageSchema,

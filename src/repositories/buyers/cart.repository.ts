@@ -1,5 +1,5 @@
 import type { ClientSession } from 'mongoose';
-import { Cart } from '@/integrations/mongo';
+import { Cart } from '@/infrastructure/mongo';
 
 export const findCartByBuyerId = async (buyerId: string) => Cart.findById(buyerId);
 

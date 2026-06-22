@@ -12,11 +12,11 @@ vi.mock('@/repositories/sellers/seller-wallet.repository', () => ({
   findSellerWalletLedgerEntry: (...args: unknown[]) => mockFindSellerWalletLedgerEntry(...args),
 }));
 
-vi.mock('@/internal/sellers/wallet/release-available-from-split', () => ({
+vi.mock('@/domain/sellers/wallet/release-available-from-split', () => ({
   releaseSellerAvailableFromSplit: (...args: unknown[]) => mockReleaseSellerAvailableFromSplit(...args),
 }));
 
-import { reconcileSellerWalletReleases } from '@/internal/sellers/wallet/reconcile-seller-wallet-releases';
+import { reconcileSellerWalletReleases } from '@/domain/sellers/wallet/reconcile-seller-wallet-releases';
 
 describe('reconcileSellerWalletReleases', () => {
   beforeEach(() => {

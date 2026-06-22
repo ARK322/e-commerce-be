@@ -34,31 +34,31 @@ vi.mock('@/repositories/buyers/order.repository', () => ({
   findOrderByIdLean: (...args: unknown[]) => mockFindOrderByIdLean(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/fulfill-order', () => ({
+vi.mock('@/domain/orders/fulfill-order', () => ({
   fulfillPaidOrder: (...args: unknown[]) => mockFulfillPaidOrder(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/post-payment-side-effects', () => ({
+vi.mock('@/domain/payment/post-payment-side-effects', () => ({
   ensurePostPaymentSideEffects: (...args: unknown[]) => mockEnsurePostPaymentSideEffects(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/refund-captured-payment', () => ({
+vi.mock('@/domain/payment/refund-captured-payment', () => ({
   refundCapturedIyzicoPayment: (...args: unknown[]) => mockRefundCapturedIyzicoPayment(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+vi.mock('@/domain/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/enqueue-order-confirmation', () => ({
+vi.mock('@/domain/orders/enqueue-order-confirmation', () => ({
   enqueueOrderConfirmationEmail: (...args: unknown[]) => mockEnqueueOrderConfirmationEmail(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/payment-audit', () => ({
+vi.mock('@/domain/payment/payment-audit', () => ({
   logPaymentTransition: vi.fn(),
 }));
 
-import { finalizeSuccessfulIyzicoCheckout } from '@/internal/buyers/payment/finalize-checkout-payment';
+import { finalizeSuccessfulIyzicoCheckout } from '@/domain/payment/finalize-checkout-payment';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';

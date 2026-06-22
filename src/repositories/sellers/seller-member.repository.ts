@@ -1,4 +1,4 @@
-import { SellerMember } from '@/integrations/mongo';
+import { SellerMember } from '@/infrastructure/mongo';
 
 export const findSellerMemberById = async (memberId: string) => SellerMember.findById(memberId);
 

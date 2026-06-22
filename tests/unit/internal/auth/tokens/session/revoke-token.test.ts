@@ -9,7 +9,7 @@ vi.mock('@/repositories/auth/revoked-token.repository', () => ({
   upsertRevokedToken: (...args: unknown[]) => mockUpsertRevokedToken(...args),
 }));
 
-import { isTokenRevoked, revokeToken } from '@/internal/auth/tokens/revoke-token';
+import { isTokenRevoked, revokeToken } from '@/domain/auth/tokens/revoke-token';
 
 describe('revoke-token', () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import type { ZodSchema } from 'zod';
-import { sanitizeRequestBody } from '@/internal/common/validation/sanitize';
-import type { UserRole } from '@/internal/auth/tokens/access-token';
+import { sanitizeRequestBody } from '@/shared/validation/sanitize';
+import type { UserRole } from '@/domain/auth/tokens/access-token';
 
 type RoleBodySchemas = Partial<Record<UserRole, ZodSchema>> & {
   buyer: ZodSchema;

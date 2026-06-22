@@ -1,4 +1,4 @@
-import { Category } from '@/integrations/mongo';
+import { Category } from '@/infrastructure/mongo';
 
 export const findAllCategoryGraphNodesLean = async () =>
   Category.find().select('_id parentIds childIds isActive isLeaf').lean();

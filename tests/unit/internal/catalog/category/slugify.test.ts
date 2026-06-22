@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { slugify } from '@/internal/catalog/category/slugify';
+import { slugify } from '@/domain/catalog/category/slugify';
 
 describe('slugify', () => {
   it('Türkçe karakterleri dönüştürür', () => {

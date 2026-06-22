@@ -14,7 +14,7 @@ vi.mock('@/config/env', async (importOriginal) => {
   };
 });
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   connectDB: (...args: unknown[]) => mockConnectDB(...args),
 }));
 
@@ -22,39 +22,39 @@ vi.mock('@/app/app', () => ({
   buildApp: (...args: unknown[]) => mockBuildApp(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/expire-pending-orders', () => ({
+vi.mock('@/domain/orders/expire-pending-orders', () => ({
   startPendingOrderExpiryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/reconcile-payments', () => ({
+vi.mock('@/domain/orders/reconcile-payments', () => ({
   startPaymentReconciliationScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/recover-stuck-payments', () => ({
+vi.mock('@/domain/orders/recover-stuck-payments', () => ({
   startStuckPaymentRecoveryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/retry-payment-split-sync', () => ({
+vi.mock('@/domain/orders/retry-payment-split-sync', () => ({
   startPaymentSplitSyncRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/buyers/orders/retry-failed-payment-splits', () => ({
+vi.mock('@/domain/orders/retry-failed-payment-splits', () => ({
   startPaymentSplitApprovalRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/sellers/wallet/retry-missing-wallet-credits', () => ({
+vi.mock('@/domain/sellers/wallet/retry-missing-wallet-credits', () => ({
   startMissingSellerWalletCreditRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/common/outbox/process-outbox-events', () => ({
+vi.mock('@/shared/outbox/process-outbox-events', () => ({
   startOutboxProcessorScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/register/expire-unverified-users', () => ({
+vi.mock('@/domain/auth/register/expire-unverified-users', () => ({
   startUnverifiedUserExpiryScheduler: vi.fn(),
 }));
 
-vi.mock('@/internal/common/logging', () => ({
+vi.mock('@/shared/logging', () => ({
   logger: {
     info: (...args: unknown[]) => mockLoggerInfo(...args),
     error: (...args: unknown[]) => mockLoggerError(...args),

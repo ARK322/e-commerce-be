@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import { AuthError } from '@/internal/auth/errors';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
+import { AuthError } from '@/domain/auth/errors';
 
 const mockAdminRoleFind = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   AdminRole: {
     find: (...args: unknown[]) => mockAdminRoleFind(...args),
   },

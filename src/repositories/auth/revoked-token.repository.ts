@@ -1,4 +1,4 @@
-import { RevokedToken } from '@/integrations/mongo';
+import { RevokedToken } from '@/infrastructure/mongo';
 
 export const revokedTokenExists = async (tokenHash: string) =>
   RevokedToken.exists({ _id: tokenHash });

@@ -7,8 +7,8 @@ vi.mock('@/repositories/buyers/payment-audit-log.repository', () => ({
     mockListPaymentAuditLogsByOrderIdLean(...args),
 }));
 
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 import { listPaymentAuditLogs } from '@/features/admin/payment-audit/payment-audit.service';
 
 const adminCtx: AdminAccessContext = {

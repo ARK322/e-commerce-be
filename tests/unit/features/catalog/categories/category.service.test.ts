@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache } from '@/shared/cache/memory-cache';
 
 const mockCategoryFind = vi.fn();
 const mockCategoryFindById = vi.fn();
@@ -9,7 +9,7 @@ const mockCategoryUpdateMany = vi.fn();
 const mockProductCountDocuments = vi.fn();
 const mockProductUpdateMany = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   Category: {
     find: (...args: unknown[]) => mockCategoryFind(...args),
     findById: (...args: unknown[]) => mockCategoryFindById(...args),
@@ -23,7 +23,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '7c9e6679-7425-40de-944b-e07fc1f90ae7',
 }));
 

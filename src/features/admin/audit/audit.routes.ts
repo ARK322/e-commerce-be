@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { adminOnly } from '@/middleware/presets/admin-route-guards';
 import { validateQuery } from '@/middleware/validation/validate-query';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
 import { listAdminAuditLogs } from '@/features/admin/audit/audit.service';
 import {
   listAdminAuditLogsQuerySchema,

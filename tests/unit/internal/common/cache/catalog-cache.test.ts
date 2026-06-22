@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache } from '@/shared/cache/memory-cache';
 import {
   invalidateCatalogProductDetail,
   invalidateCatalogProductStock,
-} from '@/internal/common/cache/catalog-cache';
-import { catalogCacheKeys } from '@/internal/common/cache/catalog-keys';
-import { memoryCache } from '@/internal/common/cache/memory-cache';
+} from '@/shared/cache/catalog-cache';
+import { catalogCacheKeys } from '@/shared/cache/catalog-keys';
+import { memoryCache } from '@/shared/cache/memory-cache';
 
 describe('catalog-cache invalidation', () => {
   afterEach(() => {
@@ -48,7 +48,7 @@ describe('catalog cache env', () => {
   it('CATALOG_CACHE_ENABLED=false iken cache kapalı', async () => {
     vi.stubEnv('CATALOG_CACHE_ENABLED', 'false');
 
-    const { catalogCacheConfig } = await import('@/internal/common/cache/catalog-cache-config');
+    const { catalogCacheConfig } = await import('@/shared/cache/catalog-cache-config');
 
     expect(catalogCacheConfig.enabled).toBe(false);
   });

@@ -1,7 +1,7 @@
 import type { ClientSession } from 'mongoose';
-import type { OrderCurrency, OrderStatus } from '@/integrations/mongo';
-import { Order } from '@/integrations/mongo';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import type { OrderCurrency, OrderStatus } from '@/infrastructure/mongo';
+import { Order } from '@/infrastructure/mongo';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 type CreateOrderData = {
   items: Array<{

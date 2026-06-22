@@ -3,8 +3,8 @@ import {
   assertSellerItemStatusTransition,
   computeAggregateOrderStatus,
   computeSellerSubtotal,
-} from '@/internal/buyers/orders/order-fulfillment';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+} from '@/domain/orders/order-fulfillment';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 describe('order-fulfillment', () => {
   it('tüm kalemler delivered ise sipariş delivered olur', () => {

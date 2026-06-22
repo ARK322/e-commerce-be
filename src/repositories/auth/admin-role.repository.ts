@@ -1,4 +1,4 @@
-import { AdminRole } from '@/integrations/mongo';
+import { AdminRole } from '@/infrastructure/mongo';
 
 export const findAdminRoleById = async (roleId: string) => AdminRole.findById(roleId);
 

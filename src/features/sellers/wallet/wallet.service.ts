@@ -1,4 +1,4 @@
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { CommerceError } from '@/shared/errors/commerce-error';
 import {
   findSellerWalletById,
   listSellerWalletLedgerBySellerIdLean,

@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { sellerTeamBase } from '@/middleware/presets/seller-route-guards';
 import { requireSellerPermission } from '@/middleware/sellers/require-approved-seller';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { SELLER_PERMISSIONS } from '@/domain/auth/access/seller/permission-keys';
 import { getSellerWalletForCompany } from '@/features/sellers/wallet/wallet.service';
 
 export default async function walletRoutes(fastify: FastifyInstance) {

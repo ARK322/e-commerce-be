@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { passwordSchema } from '@/internal/auth/schemas/password.schema';
+import { passwordSchema } from '@/domain/auth/schemas/password.schema';
 
 describe('passwordSchema', () => {
   it('zayıf şifreyi reddeder', () => {

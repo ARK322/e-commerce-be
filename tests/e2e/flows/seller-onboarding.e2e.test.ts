@@ -1,7 +1,7 @@
 import '../helpers/mocks';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { Seller } from '@/integrations/mongo';
+import { Seller } from '@/infrastructure/mongo';
 import { createE2EContext, destroyE2EContext } from '../helpers/setup';
 import { isE2EEnabled } from '../helpers/env';
 import {

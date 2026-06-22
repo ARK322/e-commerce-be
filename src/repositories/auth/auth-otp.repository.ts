@@ -1,5 +1,5 @@
-import type { AuthOtpPurpose } from '@/integrations/mongo';
-import { AuthOtp } from '@/integrations/mongo';
+import type { AuthOtpPurpose } from '@/infrastructure/mongo';
+import { AuthOtp } from '@/infrastructure/mongo';
 
 export const upsertAuthOtp = async (
   id: string,

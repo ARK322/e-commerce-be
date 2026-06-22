@@ -6,4 +6,4 @@ export {
   listAdminCategories,
   unlinkCategory,
   updateCategory,
-} from '@/internal/catalog/category/admin-categories';
+} from '@/domain/catalog/category/admin-categories';

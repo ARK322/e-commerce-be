@@ -1,13 +1,13 @@
-import type { ItemFulfillmentStatus, OrderStatus } from '@/integrations/mongo';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
-import { approvePaymentSplitsForSeller } from '@/internal/buyers/payment/payment-split';
-import { cancelPendingOrder } from '@/internal/buyers/orders/cancel-pending-order';
-import { createOrderFromCartForBuyer } from '@/internal/buyers/orders/create-order-from-cart';
+import type { ItemFulfillmentStatus, OrderStatus } from '@/infrastructure/mongo';
+import { CommerceError } from '@/shared/errors/commerce-error';
+import { approvePaymentSplitsForSeller } from '@/domain/payment/payment-split';
+import { cancelPendingOrder } from '@/domain/orders/cancel-pending-order';
+import { createOrderFromCartForBuyer } from '@/domain/orders/create-order-from-cart';
 import {
   assertSellerItemStatusTransition,
   computeAggregateOrderStatus,
   computeSellerSubtotal,
-} from '@/internal/buyers/orders/order-fulfillment';
+} from '@/domain/orders/order-fulfillment';
 import type { CreateOrderInput } from '@/features/buyers/orders/create-order.schema';
 import type { UpdateOrderStatusInput } from '@/features/buyers/orders/update-order-status.schema';
 import {

@@ -1,6 +1,6 @@
 import type { FastifyRequest } from 'fastify';
-import { parseCreateProductRequest } from '@/internal/catalog/product/parse-create-product-request';
-import { createProductSchema } from '@/internal/catalog/product/product-seller.schema';
+import { parseCreateProductRequest } from '@/domain/catalog/product/parse-create-product-request';
+import { createProductSchema } from '@/domain/catalog/product/product-seller.schema';
 import {
   addProductImage,
   createProductWithImages,
@@ -8,7 +8,7 @@ import {
   listSellerProducts,
   removeProductImage,
   updateProduct,
-} from '@/internal/catalog/product/seller-products';
+} from '@/domain/catalog/product/seller-products';
 
 export {
   addProductImage,
@@ -18,7 +18,7 @@ export {
   listSellerProducts,
   removeProductImage,
   updateProduct,
-} from '@/internal/catalog/product/seller-products';
+} from '@/domain/catalog/product/seller-products';
 
 export const createProductFromRequest = async (sellerId: string, request: FastifyRequest) => {
   const { input, images } = await parseCreateProductRequest(request, createProductSchema);

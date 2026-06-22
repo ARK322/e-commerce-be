@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
 
 const mockGetAdminContext = vi.fn();
 
-vi.mock('@/internal/auth/queries/admin-context', () => ({
+vi.mock('@/domain/auth/queries/admin-context', () => ({
   getAdminContext: (...args: unknown[]) => mockGetAdminContext(...args),
 }));
 

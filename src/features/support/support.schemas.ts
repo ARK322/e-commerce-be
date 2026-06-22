@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { SUPPORT_TICKET_CATEGORIES } from '@/integrations/mongo';
-import { safeString, uuidSchema } from '@/internal/common/validation/common-schemas';
+import { SUPPORT_TICKET_CATEGORIES } from '@/infrastructure/mongo';
+import { safeString, uuidSchema } from '@/shared/validation/common-schemas';
 
 export const createSupportTicketSchema = z.object({
   subject: safeString({ min: 3, max: 200, label: 'Konu' }),

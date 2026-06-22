@@ -1,4 +1,4 @@
 export {
   linkCategorySchema,
   type LinkCategoryInput,
-} from '@/internal/catalog/category/category-admin.schema';
+} from '@/domain/catalog/category/category-admin.schema';

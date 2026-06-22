@@ -1,11 +1,11 @@
-import { canManageSellerApproval, canReadSellers } from '@/internal/auth/access/admin/permissions';
+import { canManageSellerApproval, canReadSellers } from '@/domain/auth/access/admin/permissions';
 import {
   sendSellerApprovedEmail,
   sendSellerRejectedEmail,
-} from '@/internal/auth/admin/mail/send-seller-notifications';
-import { isSellerProfileComplete } from '@/internal/auth/profile/profile-completion';
-import { createLogger } from '@/internal/common/logging';
-import type { SellerApprovalStatus } from '@/integrations/mongo';
+} from '@/domain/auth/admin/mail/send-seller-notifications';
+import { isSellerProfileComplete } from '@/domain/auth/profile/profile-completion';
+import { createLogger } from '@/shared/logging';
+import type { SellerApprovalStatus } from '@/infrastructure/mongo';
 import {
   approveSellerIfPending,
   findSellerById,
@@ -18,21 +18,21 @@ import {
   findUserByIdLean,
   findUsersByIdsLean,
 } from '@/repositories/auth/user.repository';
-import { AuthError } from '@/internal/auth/errors';
-import { recordAdminAction } from '@/internal/auth/admin/admin-audit';
+import { AuthError } from '@/domain/auth/errors';
+import { recordAdminAction } from '@/domain/auth/admin/admin-audit';
 import { getSellerWalletSummary } from '@/features/sellers/wallet/wallet.service';
 import {
   applyUserActiveStatus,
   recordUserActiveStatusChange,
-} from '@/internal/auth/admin/user-active-status';
-import { HttpError } from '@/internal/common/errors';
+} from '@/domain/auth/admin/user-active-status';
+import { HttpError } from '@/shared/errors';
 import type { SetUserActiveStatusInput } from '@/features/admin/common/set-user-active.schema';
 import {
   enqueueOutboxEvent,
   OUTBOX_EVENT_TYPES,
-} from '@/internal/common/outbox/enqueue-outbox-event';
-import { createIyzicoSubMerchant } from '@/integrations/iyzico/create-submerchant';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+} from '@/shared/outbox/enqueue-outbox-event';
+import { createIyzicoSubMerchant } from '@/infrastructure/iyzico/create-submerchant';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 
 const assertCanManageSellerApproval = (ctx: AdminAccessContext) => {
   if (!canManageSellerApproval(ctx)) {

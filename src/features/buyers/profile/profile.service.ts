@@ -1,8 +1,8 @@
-import type { AuthTokenPayload } from '@/internal/auth/tokens/access-token';
-import { AuthError } from '@/internal/auth/errors';
-import { buildAuthUserFields } from '@/internal/auth/responses/user.response';
-import { updateBuyerProfile } from '@/internal/auth/profile/buyer';
-import { updateSellerProfile } from '@/internal/auth/profile/seller';
+import type { AuthTokenPayload } from '@/domain/auth/tokens/access-token';
+import { AuthError } from '@/domain/auth/errors';
+import { buildAuthUserFields } from '@/domain/auth/responses/user.response';
+import { updateBuyerProfile } from '@/domain/auth/profile/buyer';
+import { updateSellerProfile } from '@/domain/auth/profile/seller';
 import { findUserById } from '@/repositories/auth/user.repository';
 import { findBuyerByIdLean } from '@/repositories/buyers/buyer.repository';
 import { findSellerByIdLean } from '@/repositories/sellers/seller.repository';

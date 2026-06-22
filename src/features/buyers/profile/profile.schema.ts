@@ -5,7 +5,7 @@ import {
   phoneSchema,
   safeString,
   safeUrlSchema,
-} from '@/internal/common/validation/common-schemas';
+} from '@/shared/validation/common-schemas';
 
 const nationalIdSchema = safeString({
   min: 11,

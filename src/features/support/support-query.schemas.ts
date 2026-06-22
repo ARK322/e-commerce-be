@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { SUPPORT_TICKET_STATUSES } from '@/integrations/mongo';
-import { uuidSchema } from '@/internal/common/validation/common-schemas';
+import { SUPPORT_TICKET_STATUSES } from '@/infrastructure/mongo';
+import { uuidSchema } from '@/shared/validation/common-schemas';
 
 export const listSupportTicketsQuerySchema = z.object({
   status: z.enum(SUPPORT_TICKET_STATUSES).optional(),

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { safeUrlSchema } from '@/internal/common/validation/common-schemas';
+import { safeUrlSchema } from '@/shared/validation/common-schemas';
 
 export const deleteProductImageSchema = z.object({
   url: safeUrlSchema,

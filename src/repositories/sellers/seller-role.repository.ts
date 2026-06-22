@@ -1,4 +1,4 @@
-import { SellerRole } from '@/integrations/mongo';
+import { SellerRole } from '@/infrastructure/mongo';
 
 export const findSellerRoleByIdLean = async (roleId: string) => SellerRole.findById(roleId).lean();
 

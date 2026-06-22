@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { otpCodeSchema } from '@/internal/auth/schemas/otp-code.schema';
+import { otpCodeSchema } from '@/domain/auth/schemas/otp-code.schema';
 
 describe('otpCodeSchema', () => {
   it('6 hane ister', () => {

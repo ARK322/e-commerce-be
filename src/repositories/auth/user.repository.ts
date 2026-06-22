@@ -1,4 +1,4 @@
-import { User } from '@/integrations/mongo';
+import { User } from '@/infrastructure/mongo';
 
 export const findUserByEmail = async (email: string) =>
   User.findOne({ email: email.toLowerCase() });

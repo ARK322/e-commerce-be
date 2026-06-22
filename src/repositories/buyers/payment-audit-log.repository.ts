@@ -1,5 +1,5 @@
-import type { PaymentStatus } from '@/integrations/mongo';
-import { PaymentAuditLog } from '@/integrations/mongo';
+import type { PaymentStatus } from '@/infrastructure/mongo';
+import { PaymentAuditLog } from '@/infrastructure/mongo';
 
 export const createPaymentAuditLog = async (data: {
   _id: string;

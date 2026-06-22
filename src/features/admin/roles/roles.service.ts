@@ -3,14 +3,14 @@ import {
   OWNER_ONLY_PERMISSIONS,
   PERMISSION_LABELS,
   type PermissionKey,
-} from '@/internal/auth/access/admin/permission-keys';
+} from '@/domain/auth/access/admin/permission-keys';
 import {
   assertIsOwner,
   canDeleteAdminRoles,
   canReadAdminRoles,
   canWriteAdminRoles,
-} from '@/internal/auth/access/admin/permissions';
-import { SYSTEM_OWNER_ROLE_SLUG } from '@/integrations/mongo';
+} from '@/domain/auth/access/admin/permissions';
+import { SYSTEM_OWNER_ROLE_SLUG } from '@/infrastructure/mongo';
 import {
   countAdminsByRoleId,
 } from '@/repositories/auth/admin.repository';
@@ -24,10 +24,10 @@ import {
   listAssignableAdminRolesLean,
   saveAdminRoleDocument,
 } from '@/repositories/auth/admin-role.repository';
-import { AuthError, isDuplicateKeyError } from '@/internal/auth/errors';
-import { recordAdminAction } from '@/internal/auth/admin/admin-audit';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import { createUserId } from '@/internal/common/ids';
+import { AuthError, isDuplicateKeyError } from '@/domain/auth/errors';
+import { recordAdminAction } from '@/domain/auth/admin/admin-audit';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
+import { createUserId } from '@/shared/ids';
 import type { CreateAdminRoleInput } from '@/features/admin/roles/create-role.schema';
 import type { UpdateAdminRoleInput } from '@/features/admin/roles/create-role.schema';
 
@@ -215,7 +215,7 @@ export {
   getRoleSummariesByIds,
   isOwnerRoleId,
   type RoleSummary,
-} from '@/internal/auth/access/admin/role-queries';
+} from '@/domain/auth/access/admin/role-queries';
 
 export const listAssignableRoles = async (ctx: AdminAccessContext) => {
   assertIsOwner(ctx, 'Rol listesini görüntüleme yetkisi sadece owner\'da');

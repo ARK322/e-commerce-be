@@ -3,17 +3,17 @@ import {
   SELLER_OWNER_ONLY_PERMISSIONS,
   SELLER_PERMISSION_LABELS,
   type SellerPermissionKey,
-} from '@/internal/auth/access/seller/permission-keys';
+} from '@/domain/auth/access/seller/permission-keys';
 import {
   assertSellerOwner,
   canDeleteSellerRoles,
   canReadSellerRoles,
   canWriteSellerRoles,
-} from '@/internal/auth/access/seller/permissions';
-import { SELLER_SYSTEM_OWNER_ROLE_SLUG } from '@/integrations/mongo';
-import { AuthError, isDuplicateKeyError } from '@/internal/auth/errors';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { createUserId } from '@/internal/common/ids';
+} from '@/domain/auth/access/seller/permissions';
+import { SELLER_SYSTEM_OWNER_ROLE_SLUG } from '@/infrastructure/mongo';
+import { AuthError, isDuplicateKeyError } from '@/domain/auth/errors';
+import type { SellerAccessContext } from '@/domain/auth/queries/seller-context';
+import { createUserId } from '@/shared/ids';
 import type {
   CreateSellerRoleInput,
   UpdateSellerRoleInput,
@@ -186,7 +186,7 @@ export {
   getSellerRoleSummariesByIds,
   isOwnerSellerRoleId,
   type SellerRoleSummary,
-} from '@/internal/auth/access/seller/role-queries';
+} from '@/domain/auth/access/seller/role-queries';
 
 export const listAssignableSellerRoles = async (ctx: SellerAccessContext) => {
   assertSellerOwner(ctx, 'Rol listesini görüntüleme yetkisi sadece şirket sahibinde');

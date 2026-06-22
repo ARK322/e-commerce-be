@@ -3,7 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 const mockGetSellerContext = vi.fn();
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domain/auth/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 

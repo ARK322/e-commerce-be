@@ -6,9 +6,9 @@
   "reporters": ["html", "clear-text", "progress"],
   "coverageAnalysis": "off",
   "mutate": [
-    "src/internal/buyers/payment/finalize-checkout-payment.ts",
-    "src/internal/buyers/orders/fulfill-order.ts",
-    "src/internal/buyers/orders/reserve-order-stock.ts"
+    "src/domain/payment/finalize-checkout-payment.ts",
+    "src/domain/orders/fulfill-order.ts",
+    "src/domain/orders/reserve-order-stock.ts"
   ],
   "vitest": {
     "configFile": "vitest.config.ts"

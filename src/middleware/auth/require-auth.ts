@@ -1,13 +1,13 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { verifyAuthToken, type AuthTokenPayload } from '@/internal/auth/tokens/access-token';
+import { verifyAuthToken, type AuthTokenPayload } from '@/domain/auth/tokens/access-token';
 import { findUserByIdLean } from '@/repositories/auth/user.repository';
 import {
   isTokenIssuedBefore,
   PASSWORD_CHANGED_MESSAGE,
   SESSIONS_REVOKED_MESSAGE,
-} from '@/internal/auth/tokens/invalidate-all';
-import { isTokenRevoked } from '@/internal/auth/tokens/revoke-token';
+} from '@/domain/auth/tokens/invalidate-all';
+import { isTokenRevoked } from '@/domain/auth/tokens/revoke-token';
 
 declare module 'fastify' {
   interface FastifyRequest {

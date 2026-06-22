@@ -1,7 +1,7 @@
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { assertPermission } from '@/internal/auth/access/admin/permissions';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { assertPermission } from '@/domain/auth/access/admin/permissions';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
+import { CommerceError } from '@/shared/errors/commerce-error';
 import type { ListAdminOrdersQuery } from '@/features/admin/orders/list-orders.schema';
 import {
   findOrderByIdLean,

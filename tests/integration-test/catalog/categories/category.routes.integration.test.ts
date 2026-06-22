@@ -67,7 +67,7 @@ describe('category routes integration', () => {
   });
 
   it('GET /categories/:id pasif kategori için 404 döner', async () => {
-    const { CommerceError } = await import('@/internal/common/errors/commerce-error');
+    const { CommerceError } = await import('@/shared/errors/commerce-error');
     mockGetPublicCategoryById.mockRejectedValue(new CommerceError(404, 'Kategori bulunamadı'));
 
     const response = await app.inject({ method: 'GET', url: `/categories/${categoryId}` });

@@ -1,4 +1,4 @@
-import { Buyer } from '@/integrations/mongo';
+import { Buyer } from '@/infrastructure/mongo';
 import { findUserByIdLean } from '@/repositories/auth/user.repository';
 
 export const findBuyerShippingProfileLean = async (buyerId: string) =>

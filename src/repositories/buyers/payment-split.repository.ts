@@ -1,4 +1,4 @@
-import { PaymentSplit } from '@/integrations/mongo';
+import { PaymentSplit } from '@/infrastructure/mongo';
 
 export const upsertPaymentSplit = async (
   orderId: string,

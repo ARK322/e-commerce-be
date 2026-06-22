@@ -29,9 +29,9 @@ vi.mock('@/repositories/sellers/seller.repository', () => ({
   deleteSellerById: (...args: unknown[]) => mockDeleteSellerById(...args),
 }));
 
-vi.mock('@/internal/auth/otp/otp', async () => {
-  const actual = await vi.importActual<typeof import('@/internal/auth/otp/otp')>(
-    '@/internal/auth/otp/otp'
+vi.mock('@/domain/auth/otp/otp', async () => {
+  const actual = await vi.importActual<typeof import('@/domain/auth/otp/otp')>(
+    '@/domain/auth/otp/otp'
   );
   return {
     ...actual,
@@ -39,7 +39,7 @@ vi.mock('@/internal/auth/otp/otp', async () => {
   };
 });
 
-import { deleteUnverifiedUser, getVerificationExpiresAt } from '@/internal/auth/register/unverified-user';
+import { deleteUnverifiedUser, getVerificationExpiresAt } from '@/domain/auth/register/unverified-user';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

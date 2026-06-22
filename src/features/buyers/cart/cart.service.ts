@@ -1,18 +1,18 @@
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { CommerceError } from '@/shared/errors/commerce-error';
 import type { AddToCartInput } from '@/features/buyers/cart/add-to-cart.schema';
 import {
   assertCartItemQuantity,
   resolveMinOrderQuantity,
-} from '@/internal/catalog/product/product-order-quantity';
+} from '@/domain/catalog/product/product-order-quantity';
 import {
   findPurchasableCatalogProductLean,
-} from '@/internal/catalog/product/assert-purchasable-product';
+} from '@/domain/catalog/product/assert-purchasable-product';
 import {
   clearBuyerCartItems,
   ensureCartDocument,
   saveCartDocumentItems,
 } from '@/repositories/buyers/cart.repository';
-import { assertPurchasableCatalogProduct } from '@/internal/catalog/product/assert-purchasable-product';
+import { assertPurchasableCatalogProduct } from '@/domain/catalog/product/assert-purchasable-product';
 
 type CartItemRecord = {
   productId: string;

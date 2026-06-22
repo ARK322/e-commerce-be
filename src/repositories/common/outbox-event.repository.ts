@@ -1,4 +1,4 @@
-import { OutboxEvent } from '@/integrations/mongo';
+import { OutboxEvent } from '@/infrastructure/mongo';
 
 export const createOutboxEvent = async (data: {
   _id: string;

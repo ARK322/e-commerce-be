@@ -18,15 +18,15 @@ vi.mock('@/repositories/sellers/seller.repository', () => ({
   findSellerByIdLean: (...args: unknown[]) => mockSellerFindByIdLean(...args),
 }));
 
-vi.mock('@/internal/auth/profile/buyer', () => ({
+vi.mock('@/domain/auth/profile/buyer', () => ({
   updateBuyerProfile: (...args: unknown[]) => mockUpdateBuyerProfile(...args),
 }));
 
-vi.mock('@/internal/auth/profile/seller', () => ({
+vi.mock('@/domain/auth/profile/seller', () => ({
   updateSellerProfile: (...args: unknown[]) => mockUpdateSellerProfile(...args),
 }));
 
-vi.mock('@/internal/auth/responses/user.response', () => ({
+vi.mock('@/domain/auth/responses/user.response', () => ({
   buildAuthUserFields: vi.fn(async (user: { _id: unknown; role: string; isActive?: boolean }) => {
     if (user.role === 'buyer') {
       return {

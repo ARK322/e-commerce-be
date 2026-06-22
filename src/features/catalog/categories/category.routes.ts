@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { validateParams } from '@/middleware/validation/validate-params';
-import { categoryIdParamSchema } from '@/internal/common/validation/param-schemas';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { setPublicCacheControl } from '@/internal/common/cache/public-http-cache';
+import { categoryIdParamSchema } from '@/shared/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { setPublicCacheControl } from '@/shared/cache/public-http-cache';
 import {
   getPublicCategoryById,
   getCategoryPaths,

@@ -35,11 +35,11 @@ const {
   };
 });
 
-vi.mock('@/internal/buyers/orders/create-order-from-cart', () => ({
+vi.mock('@/domain/orders/create-order-from-cart', () => ({
   createOrderFromCartForBuyer: (...args: unknown[]) => mockCreateOrderFromCartForBuyer(...args),
 }));
 
-vi.mock('@/internal/catalog/product/assert-purchasable-product', () => ({
+vi.mock('@/domain/catalog/product/assert-purchasable-product', () => ({
   assertPurchasableCatalogProduct: (...args: unknown[]) =>
     mockAssertPurchasableCatalogProduct(...args),
 }));
@@ -50,7 +50,7 @@ vi.mock('mongoose', () => ({
   },
 }));
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   Cart: {
     findOneAndUpdate: (...args: unknown[]) => mockCartFindOneAndUpdate(...args),
   },
@@ -70,11 +70,11 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/buyers/payment/payment-split', () => ({
+vi.mock('@/domain/payment/payment-split', () => ({
   approvePaymentSplitsForSeller: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '8c9e6679-7425-40de-944b-e07fc1f90ae8',
 }));
 
@@ -82,7 +82,7 @@ import {
   createOrderFromCart,
   updateOrderStatus,
 } from '@/features/buyers/orders/order.service';
-import { approvePaymentSplitsForSeller } from '@/internal/buyers/payment/payment-split';
+import { approvePaymentSplitsForSeller } from '@/domain/payment/payment-split';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerId = '660e8400-e29b-41d4-a716-446655440001';

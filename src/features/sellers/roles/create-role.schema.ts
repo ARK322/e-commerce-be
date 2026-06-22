@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
   ASSIGNABLE_SELLER_PERMISSIONS,
   isSellerPermissionKey,
-} from '@/internal/auth/access/seller/permission-keys';
+} from '@/domain/auth/access/seller/permission-keys';
 
 const slugSchema = z
   .string()

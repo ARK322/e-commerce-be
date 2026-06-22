@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { getPaymentConfig } from '@/integrations/iyzico/config';
+import { getPaymentConfig } from '@/infrastructure/iyzico/config';
 
 const originalEnv = { ...process.env };
 

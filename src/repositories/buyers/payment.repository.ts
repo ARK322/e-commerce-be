@@ -1,6 +1,6 @@
-import type { PaymentCurrency, PaymentStatus } from '@/integrations/mongo';
-import { Payment } from '@/integrations/mongo';
-import { createUserId } from '@/internal/common/ids';
+import type { PaymentCurrency, PaymentStatus } from '@/infrastructure/mongo';
+import { Payment } from '@/infrastructure/mongo';
+import { createUserId } from '@/shared/ids';
 
 export const findOrderIdByCheckoutToken = async (token: string): Promise<string | null> => {
   const payment = await Payment.findOne({ externalId: token }).select('orderId').lean();

@@ -13,7 +13,7 @@ vi.mock('@/repositories/auth/user.repository', () => ({
   updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
 }));
 
-import { updateBuyerProfile } from '@/internal/auth/profile/buyer';
+import { updateBuyerProfile } from '@/domain/auth/profile/buyer';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 

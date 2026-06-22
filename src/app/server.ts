@@ -1,17 +1,8 @@
-import type { FastifyInstance } from 'fastify';
-import { connectDB } from '@/integrations/mongo';
 import { buildApp } from '@/app/app';
 import { env, validateEnvAtStartup } from '@/config/env';
-import { logger } from '@/internal/common/logging';
-import { startPendingOrderExpiryScheduler } from '@/internal/buyers/orders/expire-pending-orders';
-import { startPaymentReconciliationScheduler } from '@/internal/buyers/orders/reconcile-payments';
-import { startPaymentSplitSyncRetryScheduler } from '@/internal/buyers/orders/retry-payment-split-sync';
-import { startStuckPaymentRecoveryScheduler } from '@/internal/buyers/orders/recover-stuck-payments';
-import { startOutboxProcessorScheduler } from '@/internal/common/outbox/process-outbox-events';
-import { startPaymentSplitApprovalRetryScheduler } from '@/internal/buyers/orders/retry-failed-payment-splits';
-import { startMissingSellerWalletCreditRetryScheduler } from '@/internal/sellers/wallet/retry-missing-wallet-credits';
-import { startSellerWalletReconciliationScheduler } from '@/internal/sellers/wallet/reconcile-seller-wallet-releases';
-import { startUnverifiedUserExpiryScheduler } from '@/internal/auth/register/expire-unverified-users';
+import { logger } from '@/shared/logging';
+import { registerDb } from '@/bootstrap/register-db';
+import { startSchedulers } from '@/bootstrap/start-schedulers';
 
 export const getPort = (): number => env.port;
 
@@ -49,18 +40,10 @@ const registerProcessHandlers = (closeApp: () => Promise<void>): void => {
 export const start = async (): Promise<void> => {
   try {
     validateEnvAtStartup();
-    await connectDB();
+    await registerDb();
     logger.info('MongoDB bağlantısı başarılı');
 
-    startPendingOrderExpiryScheduler();
-    startPaymentReconciliationScheduler();
-    startPaymentSplitSyncRetryScheduler();
-    startStuckPaymentRecoveryScheduler();
-    startPaymentSplitApprovalRetryScheduler();
-    startMissingSellerWalletCreditRetryScheduler();
-    startSellerWalletReconciliationScheduler();
-    startOutboxProcessorScheduler();
-    startUnverifiedUserExpiryScheduler();
+    startSchedulers();
 
     const app = await buildApp();
     const port = getPort();

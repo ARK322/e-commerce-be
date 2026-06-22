@@ -5,17 +5,17 @@ const mockUserFindById = vi.fn();
 const mockIsTokenRevoked = vi.fn();
 const mockVerifyAuthToken = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   User: {
     findById: (...args: unknown[]) => mockUserFindById(...args),
   },
 }));
 
-vi.mock('@/internal/auth/tokens/revoke-token', () => ({
+vi.mock('@/domain/auth/tokens/revoke-token', () => ({
   isTokenRevoked: (...args: unknown[]) => mockIsTokenRevoked(...args),
 }));
 
-vi.mock('@/internal/auth/tokens/access-token', () => ({
+vi.mock('@/domain/auth/tokens/access-token', () => ({
   verifyAuthToken: (...args: unknown[]) => mockVerifyAuthToken(...args),
 }));
 

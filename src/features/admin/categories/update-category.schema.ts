@@ -1,4 +1,4 @@
 export {
   updateCategorySchema,
   type UpdateCategoryInput,
-} from '@/internal/catalog/category/category-admin.schema';
+} from '@/domain/catalog/category/category-admin.schema';

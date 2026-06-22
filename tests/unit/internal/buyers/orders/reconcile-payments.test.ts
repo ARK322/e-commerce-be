@@ -10,16 +10,16 @@ const mockListCompleted = vi.fn();
 const mockListProcessing = vi.fn();
 const mockUpdatePaymentById = vi.fn();
 
-vi.mock('@/integrations/iyzico/retrieve-checkout', () => ({
+vi.mock('@/infrastructure/iyzico/retrieve-checkout', () => ({
   completeIyzicoCheckout: (...args: unknown[]) => mockCompleteIyzicoCheckout(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/finalize-checkout-payment', () => ({
+vi.mock('@/domain/payment/finalize-checkout-payment', () => ({
   finalizeSuccessfulIyzicoCheckout: (...args: unknown[]) => mockFinalizeSuccessful(...args),
   finalizeFailedIyzicoCheckout: (...args: unknown[]) => mockFinalizeFailed(...args),
 }));
 
-vi.mock('@/internal/buyers/payment/refund-captured-payment', () => ({
+vi.mock('@/domain/payment/refund-captured-payment', () => ({
   refundCapturedIyzicoPayment: (...args: unknown[]) => mockRefundCaptured(...args),
 }));
 
@@ -34,7 +34,7 @@ vi.mock('@/repositories/buyers/payment.repository', () => ({
   updatePaymentById: (...args: unknown[]) => mockUpdatePaymentById(...args),
 }));
 
-import { reconcilePaymentOrderMismatches } from '@/internal/buyers/orders/reconcile-payments';
+import { reconcilePaymentOrderMismatches } from '@/domain/orders/reconcile-payments';
 
 const paymentId = 'pay-1';
 const orderId = 'order-1';

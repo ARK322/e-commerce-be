@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ZodSchema } from 'zod';
-import { sanitizeRequestBody } from '@/internal/common/validation/sanitize';
+import { sanitizeRequestBody } from '@/shared/validation/sanitize';
 
 export const validateQuery = <T extends ZodSchema>(schema: T) => {
   return async (request: FastifyRequest, reply: FastifyReply) => {

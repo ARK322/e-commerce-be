@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import type { AdminAccessContext } from '@/internal/auth/queries/admin-context';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 
 const mockAdminFindById = vi.fn();
 const mockUserFindById = vi.fn();
@@ -26,7 +26,7 @@ vi.mock('@/repositories/auth/user.repository', () => ({
   findUsersByIdsLean: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/access/admin/role-queries', () => ({
+vi.mock('@/domain/auth/access/admin/role-queries', () => ({
   getRoleSummariesByIds: (...args: unknown[]) => mockGetRoleSummariesByIds(...args),
   assertAssignableRoleId: (...args: unknown[]) => mockAssertAssignableRoleId(...args),
   countOwnerAdmins: (...args: unknown[]) => mockCountOwnerAdmins(...args),

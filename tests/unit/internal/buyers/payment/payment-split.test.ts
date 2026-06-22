@@ -20,26 +20,26 @@ vi.mock('@/repositories/buyers/payment-split.repository', () => ({
   savePaymentSplitDocument: (split: { save: () => Promise<unknown> }) => split.save(),
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => 'split-id-001',
 }));
 
-vi.mock('@/integrations/iyzico/approve-payment-item', () => ({
+vi.mock('@/infrastructure/iyzico/approve-payment-item', () => ({
   approveIyzicoPaymentItem: (...args: unknown[]) => mockApproveIyzicoPaymentItem(...args),
 }));
 
-vi.mock('@/internal/sellers/wallet/release-available-from-split', () => ({
+vi.mock('@/domain/sellers/wallet/release-available-from-split', () => ({
   releaseSellerAvailableFromSplit: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/internal/common/outbox/ops-alert', () => ({
+vi.mock('@/shared/outbox/ops-alert', () => ({
   enqueueOpsAlert: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.stubEnv('PLATFORM_COMMISSION_RATE', '0.10');
 
-import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/internal/buyers/payment/payment-split';
-import { CommerceError } from '@/internal/common/errors/commerce-error';
+import { buildPaymentSplitsForOrder, approvePaymentSplitsForOrder } from '@/domain/payment/payment-split';
+import { CommerceError } from '@/shared/errors/commerce-error';
 
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
 const sellerId = '660e8400-e29b-41d4-a716-446655440000';

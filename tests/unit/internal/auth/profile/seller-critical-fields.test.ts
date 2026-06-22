@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hasCriticalSellerFieldChanges } from '@/internal/auth/profile/seller-critical-fields';
+import { hasCriticalSellerFieldChanges } from '@/domain/auth/profile/seller-critical-fields';
 
 describe('hasCriticalSellerFieldChanges', () => {
   it('kritik alan değişince true döner', () => {

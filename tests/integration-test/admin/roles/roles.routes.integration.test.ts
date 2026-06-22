@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { signAuthToken } from '@/domain/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListAdminRoles = vi.fn();
@@ -20,12 +20,12 @@ vi.mock('@/features/admin/roles/roles.service', () => ({
   deleteAdminRole: vi.fn(),
 }));
 
-vi.mock('@/internal/auth/queries/admin-context', () => ({
+vi.mock('@/domain/auth/queries/admin-context', () => ({
   getAdminContext: (...args: unknown[]) => mockGetAdminContext(...args),
 }));
 
-vi.mock('@/integrations/mongo', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/integrations/mongo')>();
+vi.mock('@/infrastructure/mongo', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/infrastructure/mongo')>();
   return {
     ...actual,
     User: {

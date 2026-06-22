@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { SELLER_PERMISSIONS } from '@/domain/auth/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domain/auth/queries/seller-context';
+import { signAuthToken } from '@/domain/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockListPublicProducts = vi.fn();
@@ -26,12 +26,12 @@ vi.mock('@/features/sellers/products/seller-products.service', () => ({
   deleteProduct: (...args: unknown[]) => mockDeleteProduct(...args),
 }));
 
-vi.mock('@/internal/auth/queries/seller-context', () => ({
+vi.mock('@/domain/auth/queries/seller-context', () => ({
   getSellerContext: (...args: unknown[]) => mockGetSellerContext(...args),
 }));
 
-vi.mock('@/integrations/mongo', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/integrations/mongo')>();
+vi.mock('@/infrastructure/mongo', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/infrastructure/mongo')>();
   return {
     ...actual,
     User: {

@@ -3,4 +3,4 @@ export {
   getCategoryPaths,
   getPublicCategoryById,
   listPublicCategories,
-} from '@/internal/catalog/category/public-categories';
+} from '@/domain/catalog/category/public-categories';

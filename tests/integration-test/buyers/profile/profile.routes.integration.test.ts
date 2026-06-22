@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { signAuthToken } from '@/internal/auth/tokens/access-token';
+import { signAuthToken } from '@/domain/auth/tokens/access-token';
 import { buildApp } from '@/app/app';
 
 const mockGetProfile = vi.fn();
@@ -13,8 +13,8 @@ vi.mock('@/features/buyers/profile/profile.service', () => ({
   updateProfile: (...args: unknown[]) => mockUpdateProfile(...args),
 }));
 
-vi.mock('@/integrations/mongo', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/integrations/mongo')>();
+vi.mock('@/infrastructure/mongo', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/infrastructure/mongo')>();
   return {
     ...actual,
     User: {

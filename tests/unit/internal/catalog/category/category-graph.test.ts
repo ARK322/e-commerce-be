@@ -6,7 +6,7 @@ import {
   collectLeafIdsInSubtree,
   filterCategoriesWithActiveAncestors,
   wouldCreateCycle,
-} from '@/internal/catalog/category/category-graph';
+} from '@/domain/catalog/category/category-graph';
 
 const graphNodes = [
   {

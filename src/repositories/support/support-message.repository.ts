@@ -1,6 +1,6 @@
-import type { SupportAuthorRole } from '@/integrations/mongo';
-import { SupportMessage } from '@/integrations/mongo';
-import { createUserId } from '@/internal/common/ids';
+import type { SupportAuthorRole } from '@/infrastructure/mongo';
+import { SupportMessage } from '@/infrastructure/mongo';
+import { createUserId } from '@/shared/ids';
 
 export type CreateSupportMessageData = {
   ticketId: string;

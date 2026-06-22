@@ -4,9 +4,9 @@ import { requirePermission } from '@/middleware/auth/require-admin';
 import { validateBody } from '@/middleware/validation/validate-body';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { validateQuery } from '@/middleware/validation/validate-query';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { ticketIdParamSchema } from '@/internal/common/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { ticketIdParamSchema } from '@/shared/validation/param-schemas';
 import {
   adminListSupportTicketsQuerySchema,
   type AdminListSupportTicketsQuery,

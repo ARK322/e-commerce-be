@@ -3,9 +3,9 @@ import { adminOnly } from '@/middleware/presets/admin-route-guards';
 import { requirePermission } from '@/middleware/auth/require-admin';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { validateQuery } from '@/middleware/validation/validate-query';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { PERMISSIONS } from '@/internal/auth/access/admin/permission-keys';
-import { orderIdParamSchema } from '@/internal/common/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { PERMISSIONS } from '@/domain/auth/access/admin/permission-keys';
+import { orderIdParamSchema } from '@/shared/validation/param-schemas';
 import {
   listAdminOrdersQuerySchema,
   type ListAdminOrdersQuery,

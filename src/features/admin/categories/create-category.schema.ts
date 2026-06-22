@@ -1,4 +1,4 @@
 export {
   createCategorySchema,
   type CreateCategoryInput,
-} from '@/internal/catalog/category/category-admin.schema';
+} from '@/domain/catalog/category/category-admin.schema';

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMemoryCache } from '@/internal/common/cache/memory-cache';
+import { clearMemoryCache } from '@/shared/cache/memory-cache';
 
 const mockAssertProductCategory = vi.fn();
 const mockGetCategoryProductFilterIds = vi.fn();
 
-vi.mock('@/internal/catalog/category/visible-categories', () => ({
+vi.mock('@/domain/catalog/category/visible-categories', () => ({
   getPublicVisibleCategoryIds: vi.fn().mockResolvedValue(
     new Set(['660e8400-e29b-41d4-a716-446655440001', 'leaf-category-id'])
   ),
@@ -12,15 +12,15 @@ vi.mock('@/internal/catalog/category/visible-categories', () => ({
   invalidateVisibleCategoryIdsCache: vi.fn(),
 }));
 
-vi.mock('@/internal/catalog/category/product-category-validation', () => ({
+vi.mock('@/domain/catalog/category/product-category-validation', () => ({
   assertProductCategory: (...args: unknown[]) => mockAssertProductCategory(...args),
 }));
 
-vi.mock('@/internal/catalog/category/product-category-filters', () => ({
+vi.mock('@/domain/catalog/category/product-category-filters', () => ({
   getCategoryProductFilterIds: (...args: unknown[]) => mockGetCategoryProductFilterIds(...args),
 }));
 
-vi.mock('@/internal/catalog/product/product-images', () => ({
+vi.mock('@/domain/catalog/product/product-images', () => ({
   deleteProductImagesFromStorage: vi.fn().mockResolvedValue(undefined),
   uploadProductImage: vi.fn(),
 }));
@@ -32,7 +32,7 @@ const mockProductCreate = vi.fn();
 const mockProductCountDocuments = vi.fn();
 const mockProductFindByIdAndDelete = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   Product: {
     find: (...args: unknown[]) => mockProductFind(...args),
     findOne: (...args: unknown[]) => mockProductFindOne(...args),
@@ -43,7 +43,7 @@ vi.mock('@/integrations/mongo', () => ({
   },
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '7c9e6679-7425-40de-944b-e07fc1f90ae7',
 }));
 
@@ -57,7 +57,7 @@ import {
   deleteProduct,
   updateProduct,
 } from '@/features/sellers/products/seller-products.service';
-import { uploadProductImage } from '@/internal/catalog/product/product-images';
+import { uploadProductImage } from '@/domain/catalog/product/product-images';
 
 const sellerId = '550e8400-e29b-41d4-a716-446655440000';
 const categoryId = '660e8400-e29b-41d4-a716-446655440001';

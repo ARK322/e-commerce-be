@@ -1,10 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import { expect } from 'vitest';
-import { hashPassword } from '@/internal/common/security';
-import { createUserId } from '@/internal/common/ids';
-import { signEmailVerificationToken } from '@/internal/auth/tokens/email-token';
-import { ensureSystemOwnerRole } from '@/internal/auth/access/admin/system-roles';
-import { Admin, Category, Product, Seller, User } from '@/integrations/mongo';
+import { hashPassword } from '@/shared/security';
+import { createUserId } from '@/shared/ids';
+import { signEmailVerificationToken } from '@/domain/auth/tokens/email-token';
+import { ensureSystemOwnerRole } from '@/domain/auth/access/admin/system-roles';
+import { Admin, Category, Product, Seller, User } from '@/infrastructure/mongo';
 
 export const registerBuyer = async (app: FastifyInstance, email?: string) => {
   const resolvedEmail = email ?? `buyer-e2e-${Date.now()}@test.local`;

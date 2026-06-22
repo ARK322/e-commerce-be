@@ -43,16 +43,16 @@ const {
   };
 });
 
-vi.mock('@/internal/catalog/product/assert-purchasable-product', () => ({
+vi.mock('@/domain/catalog/product/assert-purchasable-product', () => ({
   assertPurchasableCatalogProduct: (...args: unknown[]) =>
     mockAssertPurchasableCatalogProduct(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/reserve-order-stock', () => ({
+vi.mock('@/domain/orders/reserve-order-stock', () => ({
   reservePendingOrderStock: (...args: unknown[]) => mockReservePendingOrderStock(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+vi.mock('@/domain/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
@@ -72,7 +72,7 @@ vi.mock('mongoose', () => ({
   },
 }));
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   Cart: {
     findOneAndUpdate: (...args: unknown[]) => mockCartFindOneAndUpdate(...args),
   },
@@ -99,11 +99,11 @@ vi.mock('@/repositories/auth/user.repository', () => ({
   findUsersByIdsLean: (...args: unknown[]) => mockFindUsersByIdsLean(...args),
 }));
 
-vi.mock('@/internal/common/ids', () => ({
+vi.mock('@/shared/ids', () => ({
   createUserId: () => '8c9e6679-7425-40de-944b-e07fc1f90ae8',
 }));
 
-import { createOrderFromCartForBuyer } from '@/internal/buyers/orders/create-order-from-cart';
+import { createOrderFromCartForBuyer } from '@/domain/orders/create-order-from-cart';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerId = '660e8400-e29b-41d4-a716-446655440001';

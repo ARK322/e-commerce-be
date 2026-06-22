@@ -14,11 +14,11 @@ vi.mock('@/repositories/buyers/payment.repository', () => ({
   failStalePendingPayments: (...args: unknown[]) => mockFailStalePendingPayments(...args),
 }));
 
-vi.mock('@/internal/buyers/orders/cancel-pending-order', () => ({
+vi.mock('@/domain/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
-import { expirePendingOrders } from '@/internal/buyers/orders/expire-pending-orders';
+import { expirePendingOrders } from '@/domain/orders/expire-pending-orders';
 
 describe('expirePendingOrders', () => {
   beforeEach(() => {

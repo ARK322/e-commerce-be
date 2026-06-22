@@ -4,19 +4,19 @@ import {
   canUpdateSellerMemberRole,
   canViewSellerMember,
   assertSellerPermission,
-} from '@/internal/auth/access/seller/permissions';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
+} from '@/domain/auth/access/seller/permissions';
+import { SELLER_PERMISSIONS } from '@/domain/auth/access/seller/permission-keys';
 import {
   assertAssignableSellerRoleId,
   countOwnerSellerMembers,
   getSellerRoleSummariesByIds,
   isOwnerSellerRoleId,
-} from '@/internal/auth/access/seller/role-queries';
-import { hashPassword } from '@/internal/common/security';
-import { createUserId } from '@/internal/common/ids';
-import { AuthError, isDuplicateKeyError } from '@/internal/auth/errors';
-import { sendSellerMemberInviteEmail } from '@/internal/auth/mail/send-member-invite';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
+} from '@/domain/auth/access/seller/role-queries';
+import { hashPassword } from '@/shared/security';
+import { createUserId } from '@/shared/ids';
+import { AuthError, isDuplicateKeyError } from '@/domain/auth/errors';
+import { sendSellerMemberInviteEmail } from '@/domain/auth/mail/send-member-invite';
+import type { SellerAccessContext } from '@/domain/auth/queries/seller-context';
 import type { CreateSellerMemberInput } from '@/features/sellers/members/create-member.schema';
 import type {
   UpdateSellerMemberProfileInput,

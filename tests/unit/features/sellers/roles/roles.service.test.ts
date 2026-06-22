@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SELLER_PERMISSIONS } from '@/internal/auth/access/seller/permission-keys';
-import type { SellerAccessContext } from '@/internal/auth/queries/seller-context';
-import { AuthError } from '@/internal/auth/errors';
+import { SELLER_PERMISSIONS } from '@/domain/auth/access/seller/permission-keys';
+import type { SellerAccessContext } from '@/domain/auth/queries/seller-context';
+import { AuthError } from '@/domain/auth/errors';
 
 const mockSellerRoleFind = vi.fn();
 
-vi.mock('@/integrations/mongo', () => ({
+vi.mock('@/infrastructure/mongo', () => ({
   SellerRole: {
     find: (...args: unknown[]) => mockSellerRoleFind(...args),
   },

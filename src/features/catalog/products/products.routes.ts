@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { validateParams } from '@/middleware/validation/validate-params';
 import { validateQuery } from '@/middleware/validation/validate-query';
-import { productIdParamSchema } from '@/internal/common/validation/param-schemas';
-import { handleRouteError } from '@/internal/common/errors/handle-route-error';
-import { setPublicCacheControl } from '@/internal/common/cache/public-http-cache';
+import { productIdParamSchema } from '@/shared/validation/param-schemas';
+import { handleRouteError } from '@/shared/errors/handle-route-error';
+import { setPublicCacheControl } from '@/shared/cache/public-http-cache';
 import {
   listProductsQuerySchema,
   type ListProductsQuery,
