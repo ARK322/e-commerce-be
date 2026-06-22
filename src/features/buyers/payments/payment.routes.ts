@@ -10,10 +10,13 @@ import {
   type CreatePaymentInput,
 } from '@/features/buyers/payments/create-payment.schema';
 import {
+  buildPaymentRedirectUrl,
   createPaymentForOrder,
   getPaymentByOrderId,
   handlePaymentCallback,
 } from '@/features/buyers/payments/payment.service';
+import { disabledRouteRateLimit } from '@/middleware/presets/rate-limit';
+import { logger } from '@/internal/common/logging';
 
 const buyerWithOrderId = buyerWithParams(orderIdParamSchema);
 
@@ -45,10 +48,20 @@ export default async function paymentRoutes(fastify: FastifyInstance) {
   await fastify.register(async (callbackScope) => {
     await registerScopedRateLimit(callbackScope, PAYMENT_CALLBACK_RATE_LIMIT);
 
-    callbackScope.post('/callback', async (req, reply) => {
-      const redirectUrl = await handlePaymentCallback(req.body);
-      return reply.redirect(redirectUrl);
-    });
+    callbackScope.post(
+      '/callback',
+      { config: disabledRouteRateLimit },
+      async (req, reply) => {
+        try {
+          const redirectUrl = await handlePaymentCallback(req.body);
+          return reply.redirect(redirectUrl, 303);
+        } catch (error) {
+          logger.error({ err: error }, 'Ödeme callback işleyicisi beklenmeyen hata verdi');
+
+          return reply.redirect(buildPaymentRedirectUrl('failed'), 303);
+        }
+      }
+    );
   });
 
   fastify.get('/order/:orderId', buyerWithOrderId, async (req, reply) => {

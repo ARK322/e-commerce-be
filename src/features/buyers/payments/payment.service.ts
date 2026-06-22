@@ -229,6 +229,8 @@ export const handlePaymentCallback = async (body: unknown): Promise<string> => {
     const form = parseIyzicoCallbackBody(body);
     checkoutToken = form.token?.trim();
 
+    logger.info({ hasToken: Boolean(checkoutToken) }, 'Iyzico ödeme callback alındı');
+
     if (!checkoutToken) {
       return buildPaymentRedirectUrl('failed');
     }
@@ -241,7 +243,18 @@ export const handlePaymentCallback = async (body: unknown): Promise<string> => {
 
     return buildPaymentRedirectUrl('success', result.payment.orderId);
   } catch (error) {
-    const orderId = checkoutToken ? await findOrderIdByCheckoutToken(checkoutToken) : null;
+    let orderId: string | null = null;
+
+    if (checkoutToken) {
+      try {
+        orderId = await findOrderIdByCheckoutToken(checkoutToken);
+      } catch (lookupError) {
+        logger.error(
+          { err: lookupError, checkoutToken },
+          'Callback hata anında orderId çözümlenemedi'
+        );
+      }
+    }
 
     logger.error(
       { err: error, orderId, hasToken: Boolean(checkoutToken) },

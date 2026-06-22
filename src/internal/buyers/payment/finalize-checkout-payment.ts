@@ -9,15 +9,27 @@ import {
 import type { CompleteCheckoutResult } from '@/integrations/iyzico/types';
 import { CommerceError } from '@/internal/common/errors/commerce-error';
 import { logger } from '@/internal/common/logging';
-import {
-  buildPaymentSplitsForOrder,
-} from '@/internal/buyers/payment/payment-split';
 import { ensurePostPaymentSideEffects } from '@/internal/buyers/payment/post-payment-side-effects';
 import { logPaymentTransition } from '@/internal/buyers/payment/payment-audit';
 import { refundCapturedIyzicoPayment } from '@/internal/buyers/payment/refund-captured-payment';
 import { cancelPendingOrder } from '@/internal/buyers/orders/cancel-pending-order';
 import { enqueueOrderConfirmationEmail } from '@/internal/buyers/orders/enqueue-order-confirmation';
 import { fulfillPaidOrder } from '@/internal/buyers/orders/fulfill-order';
+
+type ItemTransactionRecord = Array<{ itemId: string; paymentTransactionId: string }>;
+
+const scheduleDeferredPostPaymentWork = (
+  orderId: string,
+  itemTransactions: ItemTransactionRecord
+): void => {
+  void ensurePostPaymentSideEffects(orderId, itemTransactions).catch((error) => {
+    logger.error({ err: error, orderId }, 'Ödeme sonrası yan etkiler arka planda başarısız');
+  });
+
+  void enqueueOrderConfirmationEmail(orderId).catch((error) => {
+    logger.error({ err: error, orderId }, 'Sipariş onay e-postası arka planda başarısız');
+  });
+};
 
 const AMOUNT_TOLERANCE = 0.01;
 const FINAL_ORDER_STATUSES = new Set(['paid', 'shipped', 'delivered']);
@@ -78,8 +90,6 @@ const markPaymentCompleted = async (
     reason: 'iyzico_checkout_verified',
   });
 };
-
-const runPostPaymentSideEffects = ensurePostPaymentSideEffects;
 
 const handleFulfillmentFailure = async (
   payment: {
@@ -181,7 +191,7 @@ const finalizeProcessingPayment = async (
 
       if (isFinalOrderStatus(refreshed?.status)) {
         await markPaymentCompleted(payment, result.externalId);
-        await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+        scheduleDeferredPostPaymentWork(result.orderId, result.itemTransactions);
 
         return {
           payment: toPaymentResponse(payment.toObject()),
@@ -194,8 +204,7 @@ const finalizeProcessingPayment = async (
   }
 
   await markPaymentCompleted(payment, result.externalId);
-  await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
-  await enqueueOrderConfirmationEmail(result.orderId);
+  scheduleDeferredPostPaymentWork(result.orderId, result.itemTransactions);
 
   return {
     payment: toPaymentResponse(payment.toObject()),
@@ -216,7 +225,7 @@ export const finalizeSuccessfulIyzicoCheckout = async (
     const order = await findOrderByIdLean(result.orderId);
 
     if (isFinalOrderStatus(order?.status)) {
-      await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+      scheduleDeferredPostPaymentWork(result.orderId, result.itemTransactions);
 
       return {
         payment: toPaymentResponse(payment.toObject() as PaymentRecord),
@@ -236,7 +245,7 @@ export const finalizeSuccessfulIyzicoCheckout = async (
       await markPaymentCompleted(payment, result.externalId);
     }
 
-    await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+    scheduleDeferredPostPaymentWork(result.orderId, result.itemTransactions);
 
     return {
       payment: toPaymentResponse(payment.toObject() as PaymentRecord),
@@ -289,7 +298,7 @@ export const finalizeSuccessfulIyzicoCheckout = async (
       payment = latestPayment;
 
       if (payment.status === 'completed') {
-        await runPostPaymentSideEffects(result.orderId, result.itemTransactions);
+        scheduleDeferredPostPaymentWork(result.orderId, result.itemTransactions);
 
         return {
           payment: toPaymentResponse(payment.toObject() as PaymentRecord),

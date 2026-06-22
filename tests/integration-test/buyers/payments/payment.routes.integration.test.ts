@@ -13,6 +13,13 @@ vi.mock('@/features/buyers/payments/payment.service', () => ({
   handlePaymentCallback: (...args: unknown[]) => mockHandlePaymentCallback(...args),
   createPaymentForOrder: (...args: unknown[]) => mockCreatePaymentForOrder(...args),
   getPaymentByOrderId: (...args: unknown[]) => mockGetPaymentByOrderId(...args),
+  buildPaymentRedirectUrl: (outcome: string, orderId?: string | null) => {
+    const base = 'http://localhost:3000';
+    if (orderId) {
+      return `${base}/orders/${orderId}?payment=${outcome}`;
+    }
+    return `${base}/checkout?payment=${outcome}`;
+  },
 }));
 
 vi.mock('@/integrations/mongo', async (importOriginal) => {
@@ -70,7 +77,7 @@ describe('payment routes integration', () => {
       payload: '',
     });
 
-    expect(response.statusCode).toBe(302);
+    expect(response.statusCode).toBe(303);
     expect(response.headers.location).toContain('/checkout?payment=failed');
   });
 
@@ -86,7 +93,7 @@ describe('payment routes integration', () => {
       payload: 'token=checkout-token-123',
     });
 
-    expect(response.statusCode).toBe(302);
+    expect(response.statusCode).toBe(303);
     expect(response.headers.location).toContain(`/orders/${orderId}?payment=failed`);
   });
 
@@ -102,7 +109,7 @@ describe('payment routes integration', () => {
       payload: 'token=checkout-token-123',
     });
 
-    expect(response.statusCode).toBe(302);
+    expect(response.statusCode).toBe(303);
     expect(response.headers.location).toContain(`/orders/${orderId}?payment=success`);
     expect(mockHandlePaymentCallback).toHaveBeenCalledWith(
       expect.objectContaining({ token: 'checkout-token-123' })
@@ -119,7 +126,21 @@ describe('payment routes integration', () => {
       payload: 'token=invalid-token',
     });
 
-    expect(response.statusCode).toBe(302);
+    expect(response.statusCode).toBe(303);
+    expect(response.headers.location).toContain('payment=failed');
+  });
+
+  it('POST /payments/callback beklenmeyen hata olsa bile failed redirect döner', async () => {
+    mockHandlePaymentCallback.mockRejectedValue(new Error('unexpected'));
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/payments/callback',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      payload: 'token=checkout-token-123',
+    });
+
+    expect(response.statusCode).toBe(303);
     expect(response.headers.location).toContain('payment=failed');
   });
 
