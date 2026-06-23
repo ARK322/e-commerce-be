@@ -1,6 +1,6 @@
 import { createLogger } from '@/shared/logging';
-import { enqueueOpsAlert } from '@/shared/outbox/ops-alert';
-import { OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
+import { enqueueOpsAlert } from '@/domain/notification/outbox/ops-alert';
+import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
 import { syncPaymentSplitTransactionIds } from '@/domain/payment/payment-split';
 import { creditSellerPendingFromPaidOrder } from '@/domain/sellers/wallet/credit-pending-from-order';
 

@@ -5,8 +5,8 @@ import {
 } from '@/domain/auth/admin/mail/send-seller-notifications';
 import { sendOrderConfirmationEmail } from '@/domain/orders/mail/send-order-confirmation';
 import { logger } from '@/shared/logging';
-import { OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
-import { sendOpsAlertEmail } from '@/shared/outbox/send-ops-alert-email';
+import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
+import { sendOpsAlertEmail } from '@/domain/notification/outbox/send-ops-alert-email';
 import {
   claimPendingOutboxEvent,
   markOutboxEventFailed,

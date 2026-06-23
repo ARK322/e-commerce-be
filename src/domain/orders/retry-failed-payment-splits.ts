@@ -1,6 +1,6 @@
 import { createLogger } from '@/shared/logging';
-import { enqueueOpsAlert } from '@/shared/outbox/ops-alert';
-import { OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
+import { enqueueOpsAlert } from '@/domain/notification/outbox/ops-alert';
+import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
 import { approvePaymentSplitsForSeller } from '@/domain/payment/payment-split';
 import { findOrderByIdLean } from '@/repositories/buyers/order.repository';
 import {

@@ -1,5 +1,8 @@
 import { createLogger } from '@/shared/logging';
-import { enqueueOutboxEvent, OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
+import {
+  enqueueOutboxEvent,
+  OUTBOX_EVENT_TYPES,
+} from '@/domain/notification/outbox/enqueue-outbox-event';
 
 const log = createLogger({ module: 'ops-alert' });
 

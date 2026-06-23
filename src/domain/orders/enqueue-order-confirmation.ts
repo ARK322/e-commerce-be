@@ -4,7 +4,7 @@ import { createLogger } from '@/shared/logging';
 import {
   enqueueOutboxEvent,
   OUTBOX_EVENT_TYPES,
-} from '@/shared/outbox/enqueue-outbox-event';
+} from '@/domain/notification/outbox/enqueue-outbox-event';
 import { sendOrderConfirmationEmail } from '@/domain/orders/mail/send-order-confirmation';
 
 const log = createLogger({ module: 'order-confirmation' });

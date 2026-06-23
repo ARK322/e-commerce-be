@@ -1,7 +1,7 @@
 import { env } from '@/config/env';
 import { sendMail } from '@/infrastructure/resend/send';
 import { createLogger } from '@/shared/logging';
-import { OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
+import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
 
 const log = createLogger({ module: 'ops-alert-mail' });
 

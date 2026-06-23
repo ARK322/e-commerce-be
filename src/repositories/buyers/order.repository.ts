@@ -1,7 +1,6 @@
 import type { ClientSession } from 'mongoose';
 import type { OrderCurrency, OrderStatus } from '@/infrastructure/mongo';
 import { Order } from '@/infrastructure/mongo';
-import { CommerceError } from '@/shared/errors/commerce-error';
 
 type CreateOrderData = {
   items: Array<{
@@ -28,28 +27,14 @@ type CreateOrderData = {
   status: OrderStatus;
 };
 
-export const findBuyerOrder = async (buyerId: string, orderId: string) => {
-  const order = await Order.findOne({ _id: orderId, buyerId }).lean();
+export const findBuyerOrder = async (buyerId: string, orderId: string) =>
+  Order.findOne({ _id: orderId, buyerId }).lean();
 
-  if (!order) {
-    throw new CommerceError(404, 'Sipariş bulunamadı');
-  }
-
-  return order;
-};
-
-export const findSellerOrderLean = async (sellerId: string, orderId: string) => {
-  const order = await Order.findOne({
+export const findSellerOrderLean = async (sellerId: string, orderId: string) =>
+  Order.findOne({
     _id: orderId,
     'items.sellerId': sellerId,
   }).lean();
-
-  if (!order) {
-    throw new CommerceError(404, 'Sipariş bulunamadı');
-  }
-
-  return order;
-};
 
 export const findSellerOrderForUpdate = async (sellerId: string, orderId: string) =>
   Order.findOne({

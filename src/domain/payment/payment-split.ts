@@ -4,8 +4,8 @@ import { CommerceError } from '@/shared/errors/commerce-error';
 import { assertSellersReadyForOrder } from '@/domain/orders/order-item-validation';
 import { approveIyzicoPaymentItem } from '@/infrastructure/iyzico/approve-payment-item';
 import { releaseSellerAvailableFromSplit } from '@/domain/sellers/wallet/release-available-from-split';
-import { enqueueOpsAlert } from '@/shared/outbox/ops-alert';
-import { OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
+import { enqueueOpsAlert } from '@/domain/notification/outbox/ops-alert';
+import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
 import type { InitializeCheckoutItem } from '@/infrastructure/iyzico/types';
 import {
   findPendingPaymentSplitsForOrder,

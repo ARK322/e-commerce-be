@@ -17,7 +17,7 @@ vi.mock('@/domain/orders/mail/send-order-confirmation', () => ({
   sendOrderConfirmationEmail: (...args: unknown[]) => mockSendOrderConfirmationEmail(...args),
 }));
 
-vi.mock('@/shared/outbox/send-ops-alert-email', () => ({
+vi.mock('@/domain/notification/outbox/send-ops-alert-email', () => ({
   sendOpsAlertEmail: (...args: unknown[]) => mockSendOpsAlertEmail(...args),
 }));
 
@@ -27,8 +27,8 @@ vi.mock('@/repositories/common/outbox-event.repository', () => ({
   markOutboxEventFailed: (...args: unknown[]) => mockMarkOutboxEventFailed(...args),
 }));
 
-import { OUTBOX_EVENT_TYPES } from '@/shared/outbox/enqueue-outbox-event';
-import { processPendingOutboxEvents } from '@/shared/outbox/process-outbox-events';
+import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
+import { processPendingOutboxEvents } from '@/domain/notification/outbox/process-outbox-events';
 
 describe('processPendingOutboxEvents', () => {
   beforeEach(() => {

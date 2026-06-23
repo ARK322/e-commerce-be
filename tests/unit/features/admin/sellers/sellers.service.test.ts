@@ -32,7 +32,7 @@ vi.mock('@/domain/auth/admin/admin-audit', () => ({
   recordAdminAction: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/shared/outbox/enqueue-outbox-event', () => ({
+vi.mock('@/domain/notification/outbox/enqueue-outbox-event', () => ({
   enqueueOutboxEvent: vi.fn().mockResolvedValue(undefined),
   OUTBOX_EVENT_TYPES: {
     EMAIL_SELLER_APPROVED: 'email.seller.approved',

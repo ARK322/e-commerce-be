@@ -5,7 +5,7 @@ import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 const mockFindOrderByIdLean = vi.fn();
 const mockCreateSupportTicketWithInitialMessage = vi.fn();
 const mockCreateSupportMessage = vi.fn();
-const mockFindSupportTicketByIdOrThrow = vi.fn();
+const mockFindSupportTicketByIdLean = vi.fn();
 const mockListSupportTicketsLean = vi.fn();
 const mockListSupportTicketsForSellerLean = vi.fn();
 const mockRecordAdminAction = vi.fn();
@@ -17,7 +17,7 @@ vi.mock('@/repositories/buyers/order.repository', () => ({
 vi.mock('@/repositories/support/support-ticket.repository', () => ({
   createSupportTicketWithInitialMessage: (...args: unknown[]) =>
     mockCreateSupportTicketWithInitialMessage(...args),
-  findSupportTicketByIdOrThrow: (...args: unknown[]) => mockFindSupportTicketByIdOrThrow(...args),
+  findSupportTicketByIdLean: (...args: unknown[]) => mockFindSupportTicketByIdLean(...args),
   listSupportTicketsLean: (...args: unknown[]) => mockListSupportTicketsLean(...args),
   listSupportTicketsForSellerLean: (...args: unknown[]) =>
     mockListSupportTicketsForSellerLean(...args),
@@ -181,7 +181,7 @@ describe('getSellerSupportTicket', () => {
   });
 
   it('çok satıcılı sipariş talebine ilgili satıcı erişebilir', async () => {
-    mockFindSupportTicketByIdOrThrow.mockResolvedValue({
+    mockFindSupportTicketByIdLean.mockResolvedValue({
       _id: ticketId,
       buyerId,
       sellerId: null,
@@ -202,7 +202,7 @@ describe('getSellerSupportTicket', () => {
 describe('postBuyerSupportMessage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFindSupportTicketByIdOrThrow.mockResolvedValue({
+    mockFindSupportTicketByIdLean.mockResolvedValue({
       _id: ticketId,
       buyerId,
       status: 'open',
@@ -226,7 +226,7 @@ describe('postBuyerSupportMessage', () => {
   });
 
   it('kapalı talebe mesaj gönderilemez', async () => {
-    mockFindSupportTicketByIdOrThrow.mockResolvedValue({
+    mockFindSupportTicketByIdLean.mockResolvedValue({
       _id: ticketId,
       buyerId,
       status: 'closed',

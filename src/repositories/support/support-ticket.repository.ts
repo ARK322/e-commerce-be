@@ -5,7 +5,6 @@ import type {
 } from '@/infrastructure/mongo';
 import { Order, SupportMessage, SupportTicket } from '@/infrastructure/mongo';
 import { createUserId } from '@/shared/ids';
-import { CommerceError } from '@/shared/errors/commerce-error';
 import mongoose from 'mongoose';
 import type { CreateSupportMessageData } from '@/repositories/support/support-message.repository';
 
@@ -75,7 +74,7 @@ export const createSupportTicketWithInitialMessage = async (
     });
 
     if (!ticketDoc || !messageDoc) {
-      throw new CommerceError(500, 'Destek talebi oluşturulamadı');
+      throw new Error('Support ticket transaction incomplete');
     }
 
     return { ticket: ticketDoc, message: messageDoc };
@@ -86,16 +85,6 @@ export const createSupportTicketWithInitialMessage = async (
 
 export const findSupportTicketByIdLean = async (ticketId: string) =>
   SupportTicket.findById(ticketId).lean();
-
-export const findSupportTicketByIdOrThrow = async (ticketId: string) => {
-  const ticket = await findSupportTicketByIdLean(ticketId);
-
-  if (!ticket) {
-    throw new CommerceError(404, 'Destek talebi bulunamadı');
-  }
-
-  return ticket;
-};
 
 export type ListSupportTicketsFilters = {
   status?: SupportTicketStatus;

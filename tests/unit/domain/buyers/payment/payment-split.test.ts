@@ -32,7 +32,7 @@ vi.mock('@/domain/sellers/wallet/release-available-from-split', () => ({
   releaseSellerAvailableFromSplit: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/shared/outbox/ops-alert', () => ({
+vi.mock('@/domain/notification/outbox/ops-alert', () => ({
   enqueueOpsAlert: vi.fn().mockResolvedValue(undefined),
 }));
 

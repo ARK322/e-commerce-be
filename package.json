@@ -13,6 +13,7 @@
     "test:e2e": "vitest run -c vitest.e2e.config.ts",
     "test:load": "node scripts/load-test/checkout-load.mjs",
     "test:mutation": "stryker run",
+    "check:imports": "node scripts/check-imports.mjs",
     "seed:owner": "ts-node --project tsconfig.scripts.json -r tsconfig-paths/register scripts/seed-owner.ts"
   },
   "repository": {

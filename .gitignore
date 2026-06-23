@@ -18,4 +18,5 @@ npm-debug.log*
 # Dokümantasyon (local / frontend paylaşımı)
 docs/
 
-scripts/
+scripts/*
+!scripts/check-imports.mjs

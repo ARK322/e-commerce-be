@@ -64,7 +64,15 @@ const toOrderResponse = (order: OrderRecord) => ({
   updatedAt: order.updatedAt,
 });
 
-export const getBuyerOrder = findBuyerOrder;
+export const getBuyerOrder = async (buyerId: string, orderId: string) => {
+  const order = await findBuyerOrder(buyerId, orderId);
+
+  if (!order) {
+    throw new CommerceError(404, 'Sipariş bulunamadı');
+  }
+
+  return order;
+};
 
 export const createOrderFromCart = async (
   buyerId: string,
@@ -105,6 +113,11 @@ export const listSellerOrders = async (sellerId: string) => {
 
 export const getSellerOrderById = async (sellerId: string, orderId: string) => {
   const order = await findSellerOrderLean(sellerId, orderId);
+
+  if (!order) {
+    throw new CommerceError(404, 'Sipariş bulunamadı');
+  }
+
   const sellerItems = order.items.filter((item) => item.sellerId === sellerId);
 
   return {
@@ -164,7 +177,7 @@ export const updateOrderStatus = async (
 };
 
 export const cancelBuyerPendingOrder = async (buyerId: string, orderId: string) => {
-  const order = await findBuyerOrder(buyerId, orderId);
+  const order = await getBuyerOrder(buyerId, orderId);
 
   if (order.status !== 'pending') {
     throw new CommerceError(400, 'Yalnızca bekleyen sipariş iptal edilebilir');

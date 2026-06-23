@@ -20,7 +20,7 @@ vi.mock('@/domain/sellers/wallet/credit-pending-from-order', () => ({
 
 const mockEnqueueOpsAlert = vi.fn();
 
-vi.mock('@/shared/outbox/ops-alert', () => ({
+vi.mock('@/domain/notification/outbox/ops-alert', () => ({
   enqueueOpsAlert: (...args: unknown[]) => mockEnqueueOpsAlert(...args),
 }));
 

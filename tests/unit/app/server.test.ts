@@ -46,7 +46,7 @@ vi.mock('@/domain/sellers/wallet/retry-missing-wallet-credits', () => ({
   startMissingSellerWalletCreditRetryScheduler: vi.fn(),
 }));
 
-vi.mock('@/shared/outbox/process-outbox-events', () => ({
+vi.mock('@/domain/notification/outbox/process-outbox-events', () => ({
   startOutboxProcessorScheduler: vi.fn(),
 }));
 
