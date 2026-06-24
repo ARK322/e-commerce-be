@@ -8,6 +8,9 @@ import rolesRoutes from '@/features/admin/roles/roles.routes';
 import sellersRoutes from '@/features/admin/sellers/sellers.routes';
 import ordersRoutes from '@/features/admin/orders/orders.routes';
 import supportAdminRoutes from '@/features/admin/support/support.routes';
+import buyersRoutes from '@/features/admin/buyers/buyers.routes';
+import financeRoutes from '@/features/admin/finance/finance.routes';
+import returnsRoutes from '@/features/admin/returns/returns.routes';
 
 export default async function adminRoutes(fastify: FastifyInstance) {
   await fastify.register(profileRoutes, { prefix: '/profile' });
@@ -19,4 +22,7 @@ export default async function adminRoutes(fastify: FastifyInstance) {
   await fastify.register(sellersRoutes, { prefix: '/sellers' });
   await fastify.register(ordersRoutes, { prefix: '/orders' });
   await fastify.register(supportAdminRoutes, { prefix: '/support' });
+  await fastify.register(buyersRoutes, { prefix: '/buyers' });
+  await fastify.register(financeRoutes, { prefix: '/finance' });
+  await fastify.register(returnsRoutes, { prefix: '/returns' });
 }

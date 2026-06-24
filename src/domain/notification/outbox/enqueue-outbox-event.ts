@@ -8,6 +8,10 @@ export const OUTBOX_EVENT_TYPES = {
   EMAIL_SELLER_APPROVED: 'email.seller.approved',
   EMAIL_SELLER_REJECTED: 'email.seller.rejected',
   EMAIL_ORDER_CONFIRMATION: 'email.order.confirmation',
+  EMAIL_ORDER_SHIPPED: 'email.order.shipped',
+  EMAIL_ORDER_DELIVERED: 'email.order.delivered',
+  EMAIL_RETURN_REQUESTED: 'email.return.requested',
+  EMAIL_RETURN_RESOLVED: 'email.return.resolved',
   OPS_PAYMENT_SIDE_EFFECTS_FAILED: 'ops.payment.side_effects_failed',
   OPS_PAYMENT_SPLIT_APPROVAL_FAILED: 'ops.payment.split_approval_failed',
 } as const;

@@ -66,6 +66,23 @@ export {
 } from '@/infrastructure/mongo/models/ecommerce/payment-audit-log.model';
 
 export {
+  Shipment,
+  SHIPMENT_CARRIERS,
+  SHIPMENT_STATUSES,
+} from '@/infrastructure/mongo/models/ecommerce/shipment.model';
+export type { ShipmentCarrier, ShipmentStatus } from '@/infrastructure/mongo/models/ecommerce/shipment.model';
+
+export {
+  ReturnRequest,
+  RETURN_REQUEST_TYPES,
+  RETURN_REQUEST_STATUSES,
+} from '@/infrastructure/mongo/models/ecommerce/return-request.model';
+export type {
+  ReturnRequestType,
+  ReturnRequestStatus,
+} from '@/infrastructure/mongo/models/ecommerce/return-request.model';
+
+export {
   OutboxEvent,
   OUTBOX_EVENT_STATUSES,
 } from '@/infrastructure/mongo/models/common/outbox-event.model';

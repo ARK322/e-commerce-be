@@ -56,6 +56,17 @@ vi.mock('@/domain/orders/cancel-pending-order', () => ({
   cancelPendingOrder: (...args: unknown[]) => mockCancelPendingOrder(...args),
 }));
 
+vi.mock('@/domain/buyers/addresses', () => ({
+  resolveBuyerShippingAddress: vi.fn().mockResolvedValue({
+    firstName: 'Ali',
+    lastName: 'Veli',
+    phone: '+905551112233',
+    country: 'Türkiye',
+    city: 'İstanbul',
+    address: 'Kadıköy Mah. No:1',
+  }),
+}));
+
 vi.mock('@/repositories/buyers/cart.repository', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/repositories/buyers/cart.repository')>();
 

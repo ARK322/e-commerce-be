@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { createUserId } from '@/shared/ids';
 import { CommerceError } from '@/shared/errors/commerce-error';
+import { resolveBuyerShippingAddress } from '@/domain/buyers/addresses';
 import { cancelPendingOrder } from '@/domain/orders/cancel-pending-order';
 import { reservePendingOrderStock } from '@/domain/orders/reserve-order-stock';
 import {
@@ -9,7 +10,6 @@ import {
   resolveOrderUnitPrice,
 } from '@/domain/orders/order-item-validation';
 import { assertPurchasableCatalogProduct } from '@/domain/catalog/product/assert-purchasable-product';
-import { findBuyerShippingProfileLean } from '@/repositories/buyers/buyer.repository';
 import {
   clearNonEmptyCartInSession,
   restoreCartItemsForBuyer,
@@ -48,29 +48,10 @@ export type CreatedOrderRecord = {
   updatedAt?: Date;
 };
 
-const buildShippingAddress = async (buyerId: string): Promise<ShippingAddressRecord> => {
-  const buyer = await findBuyerShippingProfileLean(buyerId);
-
-  if (
-    !buyer?.firstName ||
-    !buyer.lastName ||
-    !buyer.phone ||
-    !buyer.country ||
-    !buyer.city ||
-    !buyer.deliveryAddress
-  ) {
-    throw new CommerceError(400, 'Sipariş için profil bilgileri eksik');
-  }
-
-  return {
-    firstName: buyer.firstName,
-    lastName: buyer.lastName,
-    phone: buyer.phone,
-    country: buyer.country,
-    city: buyer.city,
-    address: buyer.deliveryAddress,
-  };
-};
+const buildShippingAddress = async (
+  buyerId: string,
+  addressId?: string
+): Promise<ShippingAddressRecord> => resolveBuyerShippingAddress(buyerId, addressId);
 
 const PRICE_TOLERANCE = 0.001;
 
@@ -148,9 +129,9 @@ const buildOrderItemsFromCart = async (
 
 export const createOrderFromCartForBuyer = async (
   buyerId: string,
-  options?: { acceptPriceChanges?: boolean }
+  options?: { acceptPriceChanges?: boolean; addressId?: string }
 ): Promise<CreatedOrderRecord> => {
-  const shippingAddress = await buildShippingAddress(buyerId);
+  const shippingAddress = await buildShippingAddress(buyerId, options?.addressId);
   const orderId = createUserId();
   const session = await mongoose.startSession();
 

@@ -16,6 +16,7 @@ import forgotPasswordRoutes from '@/features/auth/forgot-password/forgot-passwor
 import resetPasswordRoutes from '@/features/auth/reset-password/reset-password.routes';
 import meRoutes from '@/features/auth/me/me.routes';
 import profileRoutes from '@/features/buyers/profile/profile.routes';
+import addressesRoutes from '@/features/buyers/profile/addresses.routes';
 import documentsRoutes from '@/features/sellers/documents/documents.routes';
 
 export const registerAuthRoutes = async (app: FastifyInstance): Promise<void> => {
@@ -44,6 +45,7 @@ export const registerAuthRoutes = async (app: FastifyInstance): Promise<void> =>
 
         await authenticatedAuth.register(meRoutes, { prefix: '/me' });
         await authenticatedAuth.register(profileRoutes, { prefix: '/profile' });
+        await authenticatedAuth.register(addressesRoutes, { prefix: '/profile/addresses' });
         await authenticatedAuth.register(documentsRoutes, { prefix: '/profile/documents' });
         await authenticatedAuth.register(changePasswordRoutes, { prefix: '/change-password' });
         await authenticatedAuth.register(logoutRoutes, { prefix: '/logout' });

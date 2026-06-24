@@ -52,10 +52,12 @@ Routes handle HTTP concerns only: `preHandler`, `validateBody`, `handleRouteErro
 ```
 domain/
 ├── auth/
+├── buyers/         (address book)
 ├── cart/
 ├── catalog/
+├── finance/        (commission reports)
 ├── notification/   (outbox, email side effects)
-├── orders/
+├── orders/         (shipments, returns, fulfillment)
 ├── payment/
 ├── sellers/
 └── support/

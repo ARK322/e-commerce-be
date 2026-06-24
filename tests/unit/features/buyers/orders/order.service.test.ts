@@ -74,6 +74,17 @@ vi.mock('@/domain/payment/payment-split', () => ({
   approvePaymentSplitsForSeller: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('@/repositories/buyers/buyer.repository', () => ({
+  findBuyerPaymentProfileLean: vi.fn().mockResolvedValue({ user: null, buyer: null }),
+}));
+
+vi.mock('@/domain/notification/outbox/enqueue-outbox-event', () => ({
+  enqueueOutboxEvent: vi.fn().mockResolvedValue(undefined),
+  OUTBOX_EVENT_TYPES: {
+    EMAIL_ORDER_DELIVERED: 'email.order.delivered',
+  },
+}));
+
 vi.mock('@/shared/ids', () => ({
   createUserId: () => '8c9e6679-7425-40de-944b-e07fc1f90ae8',
 }));
@@ -212,6 +223,7 @@ describe('updateOrderStatus', () => {
 
     const orderDoc = {
       _id: orderId,
+      buyerId,
       status: 'shipped',
       items: [{ sellerId, fulfillmentStatus: 'shipped' }],
       save: vi.fn().mockImplementation(async () => {
@@ -243,6 +255,7 @@ describe('updateOrderStatus', () => {
   it('split onayı başarısız olursa sipariş kaydedilmiş kalır', async () => {
     const orderDoc = {
       _id: orderId,
+      buyerId,
       status: 'shipped',
       items: [{ sellerId, fulfillmentStatus: 'shipped' }],
       save: vi.fn().mockResolvedValue(undefined),

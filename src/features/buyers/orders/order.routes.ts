@@ -17,12 +17,29 @@ import {
   type UpdateOrderStatusInput,
 } from '@/features/buyers/orders/update-order-status.schema';
 import {
+  createReturnRequestSchema,
+  type CreateReturnRequestBody,
+} from '@/features/buyers/orders/create-return-request.schema';
+import {
+  createShipmentSchema,
+  type CreateShipmentInput,
+} from '@/features/buyers/orders/create-shipment.schema';
+import {
+  orderItemParamsSchema,
+  updateOrderItemStatusSchema,
+  type UpdateOrderItemStatusInput,
+} from '@/features/buyers/orders/update-order-item-status.schema';
+import {
   cancelBuyerPendingOrder,
   createOrderFromCart,
+  createOrderShipment,
+  createReturnRequest,
   getBuyerOrderById,
   getSellerOrderById,
   listBuyerOrders,
+  listReturnRequests,
   listSellerOrders,
+  updateOrderItemStatus,
   updateOrderStatus,
 } from '@/features/buyers/orders/order.service';
 
@@ -60,6 +77,13 @@ const sellerWithOrderIdWrite = {
   ],
 };
 
+const sellerWithOrderItemWrite = {
+  preHandler: [
+    ...sellerOrdersWrite.preHandler,
+    validateParams(orderItemParamsSchema),
+  ],
+};
+
 export default async function orderRoutes(fastify: FastifyInstance) {
   fastify.get('/', buyerOnly, async (req, reply) => {
     try {
@@ -67,6 +91,15 @@ export default async function orderRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({ orders });
     } catch (error) {
       return handleRouteError(reply, error, 'Sipariş işlemi sırasında bir hata oluştu');
+    }
+  });
+
+  fastify.get('/returns', buyerOnly, async (req, reply) => {
+    try {
+      const returns = await listReturnRequests(req.auth!.userId);
+      return reply.status(200).send({ returns });
+    } catch (error) {
+      return handleRouteError(reply, error, 'İade talebi işlemi sırasında bir hata oluştu');
     }
   });
 
@@ -129,6 +162,82 @@ export default async function orderRoutes(fastify: FastifyInstance) {
       return handleRouteError(reply, error, 'Sipariş işlemi sırasında bir hata oluştu');
     }
   });
+
+  fastify.post(
+    '/:orderId/returns',
+    {
+      preHandler: [...buyerWithOrderId.preHandler, validateBody(createReturnRequestSchema)],
+    },
+    async (req, reply) => {
+      try {
+        const { orderId } = req.params as { orderId: string };
+        const returnRequest = await createReturnRequest(
+          req.auth!.userId,
+          orderId,
+          req.body as CreateReturnRequestBody
+        );
+
+        return reply.status(201).send({
+          message: 'Talep oluşturuldu',
+          returnRequest,
+        });
+      } catch (error) {
+        return handleRouteError(reply, error, 'İade talebi işlemi sırasında bir hata oluştu');
+      }
+    }
+  );
+
+  fastify.post(
+    '/:orderId/shipments',
+    {
+      preHandler: [...sellerWithOrderIdWrite.preHandler, validateBody(createShipmentSchema)],
+    },
+    async (req, reply) => {
+      try {
+        const { orderId } = req.params as { orderId: string };
+        const shipment = await createOrderShipment(
+          req.sellerContext!.companyId,
+          orderId,
+          req.body as CreateShipmentInput
+        );
+
+        return reply.status(201).send({
+          message: 'Kargo bilgisi eklendi',
+          shipment,
+        });
+      } catch (error) {
+        return handleRouteError(reply, error, 'Kargo işlemi sırasında bir hata oluştu');
+      }
+    }
+  );
+
+  fastify.patch(
+    '/:orderId/items/:productId/status',
+    {
+      preHandler: [
+        ...sellerWithOrderItemWrite.preHandler,
+        validateBody(updateOrderItemStatusSchema),
+      ],
+    },
+    async (req, reply) => {
+      try {
+        const { orderId, productId } = req.params as { orderId: string; productId: string };
+        const order = await updateOrderItemStatus(
+          req.sellerContext!.companyId,
+          orderId,
+          productId,
+          req.body as UpdateOrderItemStatusInput
+        );
+
+        return reply.status(200).send({
+          message: 'Sipariş kalemi güncellendi',
+          order,
+        });
+      } catch (error) {
+        return handleRouteError(reply, error, 'Sipariş işlemi sırasında bir hata oluştu');
+      }
+    }
+  );
 
   fastify.patch(
     '/:orderId/status',

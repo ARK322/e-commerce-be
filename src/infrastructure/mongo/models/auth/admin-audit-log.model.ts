@@ -15,6 +15,8 @@ export const ADMIN_AUDIT_ACTIONS = [
   'user.reactivated',
   'support.ticket_updated',
   'support.message_posted',
+  'return_request.approved',
+  'return_request.rejected',
 ] as const;
 
 export type AdminAuditAction = (typeof ADMIN_AUDIT_ACTIONS)[number];

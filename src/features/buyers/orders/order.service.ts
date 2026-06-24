@@ -1,23 +1,32 @@
 import type { ItemFulfillmentStatus, OrderStatus } from '@/infrastructure/mongo';
 import { CommerceError } from '@/shared/errors/commerce-error';
-import { approvePaymentSplitsForSeller } from '@/domain/payment/payment-split';
 import { cancelPendingOrder } from '@/domain/orders/cancel-pending-order';
 import { createOrderFromCartForBuyer } from '@/domain/orders/create-order-from-cart';
 import {
-  assertSellerItemStatusTransition,
-  computeAggregateOrderStatus,
-  computeSellerSubtotal,
-} from '@/domain/orders/order-fulfillment';
+  createBuyerReturnRequest,
+  listBuyerReturnRequests,
+  type CreateReturnRequestInput,
+} from '@/domain/orders/return-requests';
+import {
+  createSellerShipment,
+  listOrderShipments,
+  listSellerOrderShipments,
+  type CreateShipmentInput,
+} from '@/domain/orders/shipment';
+import { computeSellerSubtotal } from '@/domain/orders/order-fulfillment';
+import {
+  updateSellerOrderItemStatus,
+  updateSellerOrderStatusBulk,
+  type UpdateOrderItemStatusInput,
+} from '@/domain/orders/update-fulfillment';
 import type { CreateOrderInput } from '@/features/buyers/orders/create-order.schema';
 import type { UpdateOrderStatusInput } from '@/features/buyers/orders/update-order-status.schema';
 import {
   findBuyerOrder,
   findOrderByIdLean,
-  findSellerOrderForUpdate,
   findSellerOrderLean,
   listBuyerOrdersLean,
   listSellerOrdersLean,
-  saveOrderDocument,
 } from '@/repositories/buyers/order.repository';
 import { failPendingPaymentsByOrderId } from '@/repositories/buyers/payment.repository';
 
@@ -80,6 +89,7 @@ export const createOrderFromCart = async (
 ) => {
   const createdOrder = await createOrderFromCartForBuyer(buyerId, {
     acceptPriceChanges: input.acceptPriceChanges,
+    addressId: input.addressId,
   });
 
   return toOrderResponse(createdOrder as OrderRecord);
@@ -93,8 +103,12 @@ export const listBuyerOrders = async (buyerId: string) => {
 
 export const getBuyerOrderById = async (buyerId: string, orderId: string) => {
   const order = await getBuyerOrder(buyerId, orderId);
+  const shipments = await listOrderShipments(orderId);
 
-  return toOrderResponse(order as OrderRecord);
+  return {
+    ...toOrderResponse(order as OrderRecord),
+    shipments,
+  };
 };
 
 export const listSellerOrders = async (sellerId: string) => {
@@ -119,11 +133,13 @@ export const getSellerOrderById = async (sellerId: string, orderId: string) => {
   }
 
   const sellerItems = order.items.filter((item) => item.sellerId === sellerId);
+  const shipments = await listSellerOrderShipments(orderId, sellerId);
 
   return {
     ...toOrderResponse(order as OrderRecord),
     items: sellerItems,
     totalAmount: computeSellerSubtotal(order.items, sellerId),
+    shipments,
   };
 };
 
@@ -132,49 +148,25 @@ export const updateOrderStatus = async (
   orderId: string,
   input: UpdateOrderStatusInput
 ) => {
-  const order = await findSellerOrderForUpdate(sellerId, orderId);
-
-  if (!order) {
-    throw new CommerceError(404, 'Sipariş bulunamadı');
-  }
-
-  if (order.status !== 'paid' && order.status !== 'shipped') {
-    throw new CommerceError(400, 'Sipariş bu durumda güncellenemez');
-  }
-
-  let sellerItemsUpdated = false;
-
-  for (const item of order.items) {
-    if (item.sellerId !== sellerId) {
-      continue;
-    }
-
-    const currentStatus = (item.fulfillmentStatus ?? 'pending') as ItemFulfillmentStatus;
-    assertSellerItemStatusTransition(currentStatus, input.status);
-    sellerItemsUpdated = true;
-  }
-
-  if (!sellerItemsUpdated) {
-    throw new CommerceError(404, 'Sipariş bulunamadı');
-  }
-
-  for (const item of order.items) {
-    if (item.sellerId !== sellerId) {
-      continue;
-    }
-
-    item.fulfillmentStatus = input.status;
-  }
-
-  order.status = computeAggregateOrderStatus(order.items);
-  await saveOrderDocument(order);
-
-  if (input.status === 'delivered') {
-    await approvePaymentSplitsForSeller(orderId, sellerId);
-  }
-
-  return toOrderResponse(order.toObject() as OrderRecord);
+  const order = await updateSellerOrderStatusBulk(sellerId, orderId, input);
+  return toOrderResponse(order as OrderRecord);
 };
+
+export const updateOrderItemStatus = async (
+  sellerId: string,
+  orderId: string,
+  productId: string,
+  input: UpdateOrderItemStatusInput
+) => {
+  const order = await updateSellerOrderItemStatus(sellerId, orderId, productId, input);
+  return toOrderResponse(order as OrderRecord);
+};
+
+export const createOrderShipment = async (
+  sellerId: string,
+  orderId: string,
+  input: CreateShipmentInput
+) => createSellerShipment(sellerId, orderId, input);
 
 export const cancelBuyerPendingOrder = async (buyerId: string, orderId: string) => {
   const order = await getBuyerOrder(buyerId, orderId);
@@ -195,3 +187,12 @@ export const cancelBuyerPendingOrder = async (buyerId: string, orderId: string) 
 
   return toOrderResponse(updatedOrder as OrderRecord);
 };
+
+export const createReturnRequest = async (
+  buyerId: string,
+  orderId: string,
+  input: CreateReturnRequestInput
+) => createBuyerReturnRequest(buyerId, orderId, input);
+
+export const listReturnRequests = async (buyerId: string) =>
+  listBuyerReturnRequests(buyerId);
