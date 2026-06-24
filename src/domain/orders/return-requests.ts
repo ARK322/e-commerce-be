@@ -7,9 +7,16 @@ import { recordAdminAction } from '@/domain/auth/admin/admin-audit';
 import type { AdminAccessContext } from '@/domain/auth/queries/admin-context';
 import { refundCapturedIyzicoPayment } from '@/domain/payment/refund-captured-payment';
 import { enqueueOutboxEvent, OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
+import {
+  calculateReturnRefundAmount,
+  isFullOrderReturn,
+} from '@/domain/orders/return-refund-amount';
 import { findBuyerPaymentProfileLean } from '@/repositories/buyers/buyer.repository';
-import { findBuyerOrder, saveOrderDocument } from '@/repositories/buyers/order.repository';
-import { Order } from '@/infrastructure/mongo';
+import {
+  findBuyerOrder,
+  findOrderByIdForUpdate,
+  saveOrderDocument,
+} from '@/repositories/buyers/order.repository';
 import { findPaymentByOrderId } from '@/repositories/buyers/payment.repository';
 import {
   createReturnRequest,
@@ -37,6 +44,7 @@ const toReturnResponse = (record: {
   adminNote?: string | null;
   reviewedByAdminId?: string | null;
   reviewedAt?: Date | null;
+  refundAmount?: number | null;
   createdAt?: Date;
   updatedAt?: Date;
 }) => ({
@@ -54,6 +62,7 @@ const toReturnResponse = (record: {
   adminNote: record.adminNote ?? null,
   reviewedByAdminId: record.reviewedByAdminId ?? null,
   reviewedAt: record.reviewedAt ?? null,
+  refundAmount: record.refundAmount ?? null,
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,
 });
@@ -228,7 +237,7 @@ export const reviewAdminReturnRequest = async (
     });
   }
 
-  const order = await Order.findById(request.orderId);
+  const order = await findOrderByIdForUpdate(request.orderId);
 
   if (!order) {
     throw new CommerceError(404, 'Sipariş bulunamadı');
@@ -240,10 +249,31 @@ export const reviewAdminReturnRequest = async (
     throw new CommerceError(400, 'İade için uygun ödeme kaydı bulunamadı');
   }
 
+  const refundAmount = calculateReturnRefundAmount(
+    {
+      items: order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        subtotal: item.subtotal,
+      })),
+      totalAmount: order.totalAmount,
+    },
+    request.items.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    })),
+    request.type,
+    {
+      amount: payment.amount,
+      refundedAmount: payment.refundedAmount,
+    }
+  );
+
   const refunded = await refundCapturedIyzicoPayment(
     payment,
     payment.externalId,
-    `return_request_${requestId}`
+    `return_request_${requestId}`,
+    refundAmount
   );
 
   if (!refunded) {
@@ -255,10 +285,29 @@ export const reviewAdminReturnRequest = async (
   request.reviewedByAdminId = ctx.userId;
   request.reviewedAt = new Date();
   request.refundPaymentId = String(payment._id);
+  request.refundAmount = refundAmount;
   request.updatedAt = new Date();
   await saveReturnRequestDocument(request);
 
+  const fullReturn =
+    request.type === 'cancellation' ||
+    isFullOrderReturn(
+      order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        subtotal: item.subtotal,
+      })),
+      request.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }))
+    );
+
   if (request.type === 'cancellation' && order.status !== 'cancelled') {
+    order.status = 'cancelled';
+    order.updatedAt = new Date();
+    await saveOrderDocument(order);
+  } else if (fullReturn && payment.refundedAmount && payment.refundedAmount >= payment.amount - 0.001) {
     order.status = 'cancelled';
     order.updatedAt = new Date();
     await saveOrderDocument(order);
@@ -269,7 +318,11 @@ export const reviewAdminReturnRequest = async (
     action: 'return_request.approved',
     resourceType: 'return_request',
     resourceId: requestId,
-    metadata: { orderId: request.orderId, refundPaymentId: String(payment._id) },
+    metadata: {
+      orderId: request.orderId,
+      refundPaymentId: String(payment._id),
+      refundAmount,
+    },
   });
 
   const profile = await findBuyerPaymentProfileLean(request.buyerId);
@@ -278,6 +331,7 @@ export const reviewAdminReturnRequest = async (
       email: profile.user.email,
       orderId: request.orderId,
       status: 'refunded',
+      refundAmount,
     });
   }
 
@@ -296,6 +350,7 @@ export const reviewAdminReturnRequest = async (
     adminNote: request.adminNote,
     reviewedByAdminId: request.reviewedByAdminId,
     reviewedAt: request.reviewedAt,
+    refundAmount: request.refundAmount,
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,
   });

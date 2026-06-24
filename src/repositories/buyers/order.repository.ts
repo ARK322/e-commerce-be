@@ -44,6 +44,8 @@ export const findSellerOrderForUpdate = async (sellerId: string, orderId: string
 
 export const findOrderByIdLean = async (orderId: string) => Order.findById(orderId).lean();
 
+export const findOrderByIdForUpdate = async (orderId: string) => Order.findById(orderId);
+
 export const listBuyerOrdersLean = async (buyerId: string) =>
   Order.find({ buyerId }).sort({ createdAt: -1 }).lean();
 

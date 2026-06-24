@@ -36,6 +36,7 @@ const returnRequestSchema = new Schema(
     reviewedByAdminId: { type: String, default: null },
     reviewedAt: { type: Date, default: null },
     refundPaymentId: { type: String, default: null },
+    refundAmount: { type: Number, default: null, min: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

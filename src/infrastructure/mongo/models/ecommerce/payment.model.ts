@@ -22,6 +22,7 @@ const paymentSchema = new Schema(
     provider: { type: String, trim: true, maxlength: 100, default: null },
     externalId: { type: String, trim: true, maxlength: 500, default: null },
     status: { type: String, enum: PAYMENT_STATUSES, default: 'pending' },
+    refundedAmount: { type: Number, default: 0, min: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
