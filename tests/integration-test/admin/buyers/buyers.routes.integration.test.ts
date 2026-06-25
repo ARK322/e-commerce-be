@@ -38,7 +38,7 @@ vi.mock('@/infrastructure/mongo', async (importOriginal) => {
 const adminId = '550e8400-e29b-41d4-a716-446655440000';
 const buyerUserId = '660e8400-e29b-41d4-a716-446655440001';
 
-const mockAdminAuth = (permissions = new Set([PERMISSIONS.BUYERS_READ])) => {
+const mockAdminAuth = (permissions: Set<string> = new Set([PERMISSIONS.BUYERS_READ])) => {
   mockUserFindById.mockImplementation((id: string) => {
     if (id === adminId) {
       return {
