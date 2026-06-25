@@ -90,6 +90,12 @@ export const canReadSupport = (ctx: AdminAccessContext) =>
 export const canWriteSupport = (ctx: AdminAccessContext) =>
   hasPermission(ctx, PERMISSIONS.SUPPORT_WRITE);
 
+export const canReadReturns = (ctx: AdminAccessContext) =>
+  hasPermission(ctx, PERMISSIONS.RETURNS_READ);
+
+export const canWriteReturns = (ctx: AdminAccessContext) =>
+  hasPermission(ctx, PERMISSIONS.RETURNS_WRITE);
+
 export const canReadBuyers = (ctx: AdminAccessContext) =>
   hasPermission(ctx, PERMISSIONS.BUYERS_READ);
 

@@ -8,13 +8,13 @@ import { buyerOnly, buyerWithParams } from '@/middleware/presets/buyer-route-gua
 import {
   createPaymentSchema,
   type CreatePaymentInput,
-} from '@/features/buyers/payment/create-payment.schema';
+} from '@/features/payment/create-payment.schema';
 import {
   buildPaymentRedirectUrl,
   createPaymentForOrder,
   getPaymentByOrderId,
   handlePaymentCallback,
-} from '@/features/buyers/payment/payment.service';
+} from '@/features/payment/payment.service';
 import { disabledRouteRateLimit } from '@/middleware/presets/rate-limit';
 import { logger } from '@/shared/logging';
 

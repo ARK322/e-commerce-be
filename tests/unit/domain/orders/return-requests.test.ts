@@ -50,6 +50,10 @@ vi.mock('@/repositories/buyers/buyer.repository', () => ({
   findBuyerPaymentProfileLean: (...args: unknown[]) => mockFindBuyerProfile(...args),
 }));
 
+vi.mock('@/domain/orders/reverse-return-settlement', () => ({
+  reverseSettlementForReturn: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('@/domain/auth/admin/admin-audit', () => ({
   recordAdminAction: (...args: unknown[]) => mockRecordAdminAction(...args),
 }));
@@ -70,7 +74,7 @@ const adminCtx: AdminAccessContext = {
   roleId: 'role-1',
   roleSlug: 'support',
   roleName: 'Support',
-  permissions: new Set([PERMISSIONS.SUPPORT_WRITE]),
+  permissions: new Set([PERMISSIONS.RETURNS_WRITE]),
   isOwner: false,
 };
 

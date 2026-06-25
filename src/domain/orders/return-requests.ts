@@ -11,6 +11,7 @@ import {
   calculateReturnRefundAmount,
   isFullOrderReturn,
 } from '@/domain/orders/return-refund-amount';
+import { reverseSettlementForReturn } from '@/domain/orders/reverse-return-settlement';
 import { findBuyerPaymentProfileLean } from '@/repositories/buyers/buyer.repository';
 import {
   findBuyerOrder,
@@ -163,7 +164,7 @@ export const listAdminReturnRequests = async (
   ctx: AdminAccessContext,
   query: { status?: ReturnRequestStatus; page: number; limit: number }
 ) => {
-  assertPermission(ctx, PERMISSIONS.SUPPORT_READ, 'Destek taleplerini görüntüleme yetkin yok');
+  assertPermission(ctx, PERMISSIONS.RETURNS_READ, 'İade taleplerini görüntüleme yetkin yok');
 
   const result = await listReturnRequestsLean(query);
 
@@ -180,7 +181,7 @@ export const reviewAdminReturnRequest = async (
   requestId: string,
   input: { decision: 'approved' | 'rejected'; adminNote?: string }
 ) => {
-  assertPermission(ctx, PERMISSIONS.SUPPORT_WRITE, 'İade taleplerini yönetme yetkin yok');
+  assertPermission(ctx, PERMISSIONS.RETURNS_WRITE, 'İade taleplerini yönetme yetkin yok');
 
   const request = await findReturnRequestForUpdate(requestId);
 
@@ -279,6 +280,18 @@ export const reviewAdminReturnRequest = async (
   if (!refunded) {
     throw new CommerceError(502, 'Ödeme iadesi başarısız oldu');
   }
+
+  await reverseSettlementForReturn(
+    request.orderId,
+    order.items.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    })),
+    request.items.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }))
+  );
 
   request.status = 'refunded';
   request.adminNote = input.adminNote ?? null;

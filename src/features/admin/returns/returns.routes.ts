@@ -28,7 +28,7 @@ export default async function adminReturnsRoutes(fastify: FastifyInstance) {
     {
       preHandler: [
         ...adminOnly.preHandler,
-        requirePermission(PERMISSIONS.SUPPORT_READ),
+        requirePermission(PERMISSIONS.RETURNS_READ),
         validateQuery(listReturnRequestsQuerySchema),
       ],
     },
@@ -50,7 +50,7 @@ export default async function adminReturnsRoutes(fastify: FastifyInstance) {
     {
       preHandler: [
         ...adminOnly.preHandler,
-        requirePermission(PERMISSIONS.SUPPORT_WRITE),
+        requirePermission(PERMISSIONS.RETURNS_WRITE),
         validateParams(returnIdParamSchema),
         validateBody(reviewReturnRequestSchema),
       ],

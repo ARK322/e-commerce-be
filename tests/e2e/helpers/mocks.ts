@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 
 export const mockCompleteIyzicoCheckout = vi.fn();
+export const mockRefundIyzicoPayment = vi.fn().mockResolvedValue(true);
 
 vi.mock('@/domain/auth/mail/send-verification', () => ({
   sendUserVerificationEmail: vi.fn().mockResolvedValue(undefined),
@@ -21,6 +22,10 @@ vi.mock('@/infrastructure/iyzico/initialize-checkout', () => ({
 
 vi.mock('@/infrastructure/iyzico/retrieve-checkout', () => ({
   completeIyzicoCheckout: (...args: unknown[]) => mockCompleteIyzicoCheckout(...args),
+}));
+
+vi.mock('@/infrastructure/iyzico/refund-payment', () => ({
+  refundIyzicoPayment: (...args: unknown[]) => mockRefundIyzicoPayment(...args),
 }));
 
 vi.mock('@/infrastructure/iyzico/create-submerchant', () => ({

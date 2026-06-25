@@ -15,6 +15,9 @@ npm-debug.log*
 .idea/
 .DS_Store
 
+# Test coverage çıktısı
+coverage/
+
 # Dokümantasyon (local / frontend paylaşımı)
 docs/
 

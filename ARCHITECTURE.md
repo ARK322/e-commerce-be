@@ -47,6 +47,25 @@ export const addToCart = (buyerId: string, input: AddToCartInput) =>
 
 Routes handle HTTP concerns only: `preHandler`, `validateBody`, `handleRouteError`, status codes.
 
+## HTTP routing
+
+```
+app/register-routes.ts
+├── registerPublicRoutes      → /health, /ready, /metrics, catalog
+├── registerAuthRoutes        → /auth/*
+├── registerAdminRoutes       → /auth/admin/*
+├── registerSellerRoutes      → /auth/seller/*
+└── registerCommerceRoutes    → /cart, /orders, /payments, /support
+```
+
+Buyer checkout lives in `features/payment/` (not under `features/buyers/`). Routes use `buyerOnly` guards.
+
+## Observability
+
+- `x-request-id` on every request (plugin)
+- `GET /metrics` — basic Prometheus-style counters
+- `GET /ready` — Mongo + `outboxPending` count
+
 ## Domain module layout
 
 ```
@@ -57,11 +76,36 @@ domain/
 ├── catalog/
 ├── finance/        (commission reports)
 ├── notification/   (outbox, email side effects)
-├── orders/         (shipments, returns, fulfillment)
+├── orders/         (shipments, returns, fulfillment, settlement reversal)
 ├── payment/
 ├── sellers/
 └── support/
 ```
+
+## Feature modules (HTTP)
+
+```
+features/
+├── payment/        (buyer checkout — /payments)
+├── buyers/         (cart, orders, support routes)
+├── auth/
+├── admin/
+├── sellers/
+├── catalog/
+└── support/        (ticket schemas + thin service)
+```
+
+## Scale roadmap (post-MVP)
+
+When traffic or team size grows:
+
+1. Redis — rate limit, session, catalog cache
+2. Event bus — evolve Mongo outbox → Redis Streams / RabbitMQ
+3. WebSocket — live support / order notifications
+4. First microservice split — auth or payment (strangler + BFF)
+5. Kubernetes — multi-service orchestration
+
+Not required for current single Railway deployment.
 
 ## Events (outbox)
 

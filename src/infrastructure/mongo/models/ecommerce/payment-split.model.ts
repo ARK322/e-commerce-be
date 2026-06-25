@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-export const PAYMENT_SPLIT_APPROVAL_STATUSES = ['pending', 'approved', 'failed'] as const;
+export const PAYMENT_SPLIT_APPROVAL_STATUSES = ['pending', 'approved', 'failed', 'reversed'] as const;
 export type PaymentSplitApprovalStatus = (typeof PAYMENT_SPLIT_APPROVAL_STATUSES)[number];
 
 const paymentSplitSchema = new Schema(
@@ -19,6 +19,8 @@ const paymentSplitSchema = new Schema(
       default: 'pending',
     },
     approvedAt: { type: Date, default: null },
+    reversedSellerShare: { type: Number, default: 0, min: 0 },
+    reversedCommissionAmount: { type: Number, default: 0, min: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

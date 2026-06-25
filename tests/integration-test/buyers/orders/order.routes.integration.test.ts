@@ -10,6 +10,12 @@ const mockCreateOrderFromCart = vi.fn();
 const mockListSellerOrders = vi.fn();
 const mockUpdateOrderStatus = vi.fn();
 const mockCancelBuyerPendingOrder = vi.fn();
+const mockCreateReturnRequest = vi.fn();
+const mockListReturnRequests = vi.fn();
+const mockCreateOrderShipment = vi.fn();
+const mockUpdateOrderItemStatus = vi.fn();
+const mockGetBuyerOrderById = vi.fn();
+const mockGetSellerOrderById = vi.fn();
 const mockGetSellerContext = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
@@ -17,11 +23,15 @@ const mockRevokedTokenExists = vi.fn();
 vi.mock('@/features/buyers/orders/order.service', () => ({
   createOrderFromCart: (...args: unknown[]) => mockCreateOrderFromCart(...args),
   listBuyerOrders: vi.fn().mockResolvedValue([]),
-  getBuyerOrderById: vi.fn(),
+  getBuyerOrderById: (...args: unknown[]) => mockGetBuyerOrderById(...args),
   listSellerOrders: (...args: unknown[]) => mockListSellerOrders(...args),
-  getSellerOrderById: vi.fn(),
+  getSellerOrderById: (...args: unknown[]) => mockGetSellerOrderById(...args),
   updateOrderStatus: (...args: unknown[]) => mockUpdateOrderStatus(...args),
   cancelBuyerPendingOrder: (...args: unknown[]) => mockCancelBuyerPendingOrder(...args),
+  createReturnRequest: (...args: unknown[]) => mockCreateReturnRequest(...args),
+  listReturnRequests: (...args: unknown[]) => mockListReturnRequests(...args),
+  createOrderShipment: (...args: unknown[]) => mockCreateOrderShipment(...args),
+  updateOrderItemStatus: (...args: unknown[]) => mockUpdateOrderItemStatus(...args),
 }));
 
 vi.mock('@/domain/auth/queries/seller-context', () => ({
@@ -46,6 +56,7 @@ vi.mock('@/infrastructure/mongo', async (importOriginal) => {
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerId = '660e8400-e29b-41d4-a716-446655440000';
 const orderId = '8c9e6679-7425-40de-944b-e07fc1f90ae8';
+const productId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 
 const sellerContext: SellerAccessContext = {
   userId: sellerId,
@@ -188,6 +199,38 @@ describe('order routes integration', () => {
     expect(response.json()).toEqual({ orders: [{ id: orderId, status: 'pending' }] });
   });
 
+  it('GET /orders/:orderId buyer sipariş detayı döner', async () => {
+    const token = signAuthToken(buyerId, 'buyer');
+    mockActiveBuyer();
+    mockGetBuyerOrderById.mockResolvedValue({ id: orderId, status: 'paid', items: [] });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/orders/${orderId}`,
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ order: { id: orderId, status: 'paid', items: [] } });
+    expect(mockGetBuyerOrderById).toHaveBeenCalledWith(buyerId, orderId);
+  });
+
+  it('GET /orders/seller/:orderId satıcı sipariş detayı döner', async () => {
+    const token = signAuthToken(sellerId, 'seller');
+    mockApprovedSeller();
+    mockGetSellerOrderById.mockResolvedValue({ id: orderId, status: 'paid', items: [] });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/orders/seller/${orderId}`,
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ order: { id: orderId, status: 'paid', items: [] } });
+    expect(mockGetSellerOrderById).toHaveBeenCalledWith(sellerId, orderId);
+  });
+
   it('PATCH /orders/:orderId/status sipariş durumunu günceller', async () => {
     const token = signAuthToken(sellerId, 'seller');
     mockApprovedSeller();
@@ -224,5 +267,108 @@ describe('order routes integration', () => {
       order: { id: orderId, status: 'cancelled' },
     });
     expect(mockCancelBuyerPendingOrder).toHaveBeenCalledWith(buyerId, orderId);
+  });
+
+  it('GET /orders/returns buyer iade talepleri döner', async () => {
+    const token = signAuthToken(buyerId, 'buyer');
+    mockActiveBuyer();
+    mockListReturnRequests.mockResolvedValue([{ id: 'ret-1', orderId, status: 'pending' }]);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/orders/returns',
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      returns: [{ id: 'ret-1', orderId, status: 'pending' }],
+    });
+  });
+
+  it('POST /orders/:orderId/returns iade talebi oluşturur', async () => {
+    const token = signAuthToken(buyerId, 'buyer');
+    mockActiveBuyer();
+    mockCreateReturnRequest.mockResolvedValue({
+      id: 'ret-1',
+      orderId,
+      status: 'pending',
+      type: 'return',
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/orders/${orderId}/returns`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: {
+        type: 'return',
+        items: [{ productId, quantity: 1, reason: 'Hasarlı ürün' }],
+        buyerNote: 'Kutu ezilmiş',
+      },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      message: 'Talep oluşturuldu',
+      returnRequest: { type: 'return' },
+    });
+    expect(mockCreateReturnRequest).toHaveBeenCalledWith(
+      buyerId,
+      orderId,
+      expect.objectContaining({ type: 'return' })
+    );
+  });
+
+  it('POST /orders/:orderId/shipments kargo bilgisi ekler', async () => {
+    const token = signAuthToken(sellerId, 'seller');
+    mockApprovedSeller();
+    mockCreateOrderShipment.mockResolvedValue({
+      id: 'ship-1',
+      trackingNumber: 'TRK-001',
+      carrier: 'yurtici',
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/orders/${orderId}/shipments`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: {
+        trackingNumber: 'TRK-001',
+        carrier: 'yurtici',
+      },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      message: 'Kargo bilgisi eklendi',
+      shipment: { trackingNumber: 'TRK-001' },
+    });
+  });
+
+  it('PATCH /orders/:orderId/items/:productId/status kalem durumunu günceller', async () => {
+    const token = signAuthToken(sellerId, 'seller');
+    mockApprovedSeller();
+    mockUpdateOrderItemStatus.mockResolvedValue({
+      id: orderId,
+      items: [{ productId, fulfillmentStatus: 'shipped' }],
+    });
+
+    const response = await app.inject({
+      method: 'PATCH',
+      url: `/orders/${orderId}/items/${productId}/status`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { status: 'shipped' },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      message: 'Sipariş kalemi güncellendi',
+    });
+    expect(mockUpdateOrderItemStatus).toHaveBeenCalledWith(
+      sellerId,
+      orderId,
+      productId,
+      { status: 'shipped' }
+    );
   });
 });

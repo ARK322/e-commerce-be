@@ -56,3 +56,6 @@ export const markOutboxEventFailed = async (
       },
     }
   );
+
+export const countPendingOutboxEventsLean = async () =>
+  OutboxEvent.countDocuments({ status: { $in: ['pending', 'failed'] } });

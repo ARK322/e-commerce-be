@@ -112,7 +112,7 @@ import {
   completePaymentFromCheckoutToken,
   createPaymentForOrder,
   getPaymentByOrderId,
-} from '@/features/buyers/payment/payment.service';
+} from '@/features/payment/payment.service';
 
 const buyerId = '550e8400-e29b-41d4-a716-446655440000';
 const sellerId = '660e8400-e29b-41d4-a716-446655440001';

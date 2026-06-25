@@ -9,7 +9,7 @@ const mockGetPaymentByOrderId = vi.fn();
 const mockUserFindById = vi.fn();
 const mockRevokedTokenExists = vi.fn();
 
-vi.mock('@/features/buyers/payment/payment.service', () => ({
+vi.mock('@/features/payment/payment.service', () => ({
   handlePaymentCallback: (...args: unknown[]) => mockHandlePaymentCallback(...args),
   createPaymentForOrder: (...args: unknown[]) => mockCreatePaymentForOrder(...args),
   getPaymentByOrderId: (...args: unknown[]) => mockGetPaymentByOrderId(...args),

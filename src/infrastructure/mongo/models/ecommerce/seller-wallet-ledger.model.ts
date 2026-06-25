@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 export const SELLER_WALLET_LEDGER_ENTRY_TYPES = [
   'pending_credit',
   'available_release',
+  'return_reversal',
 ] as const;
 
 export type SellerWalletLedgerEntryType = (typeof SELLER_WALLET_LEDGER_ENTRY_TYPES)[number];

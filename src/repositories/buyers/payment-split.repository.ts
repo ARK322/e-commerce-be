@@ -94,3 +94,6 @@ export const paymentSplitWithNullTransactionExists = async (orderId: string) =>
     orderId,
     paymentTransactionId: null,
   });
+
+export const findPaymentSplitByOrderAndProduct = async (orderId: string, productId: string) =>
+  PaymentSplit.findOne({ orderId, productId });
