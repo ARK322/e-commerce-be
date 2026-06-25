@@ -218,10 +218,6 @@ export const env = {
     return trim(process.env.API_BASE_URL);
   },
 
-  get opsAlertEmail(): string | undefined {
-    return trim(process.env.OPS_ALERT_EMAIL);
-  },
-
   get platformCommissionRate(): number {
     return parseCommissionRate(process.env.PLATFORM_COMMISSION_RATE);
   },

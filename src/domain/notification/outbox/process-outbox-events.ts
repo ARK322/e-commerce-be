@@ -12,7 +12,6 @@ import {
 } from '@/domain/orders/mail/send-order-status-emails';
 import { logger } from '@/shared/logging';
 import { OUTBOX_EVENT_TYPES } from '@/domain/notification/outbox/enqueue-outbox-event';
-import { sendOpsAlertEmail } from '@/domain/notification/outbox/send-ops-alert-email';
 import {
   claimPendingOutboxEvent,
   markOutboxEventFailed,
@@ -77,7 +76,6 @@ const processOutboxEvent = async (event: {
         },
         'Operasyon uyarısı işlendi — manuel müdahale gerekebilir'
       );
-      await sendOpsAlertEmail(event.eventType, event.payload);
     } else {
       throw new Error(`Unsupported outbox event type: ${event.eventType}`);
     }

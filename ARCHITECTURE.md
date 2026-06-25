@@ -51,7 +51,7 @@ Routes handle HTTP concerns only: `preHandler`, `validateBody`, `handleRouteErro
 
 ```
 app/register-routes.ts
-├── registerPublicRoutes      → /health, /ready, /metrics, catalog
+├── registerPublicRoutes      → /health, /ready, catalog
 ├── registerAuthRoutes        → /auth/*
 ├── registerAdminRoutes       → /auth/admin/*
 ├── registerSellerRoutes      → /auth/seller/*
@@ -60,10 +60,8 @@ app/register-routes.ts
 
 Buyer checkout lives in `features/payment/` (not under `features/buyers/`). Routes use `buyerOnly` guards.
 
-## Observability
+## Health
 
-- `x-request-id` on every request (plugin)
-- `GET /metrics` — basic Prometheus-style counters
 - `GET /ready` — Mongo + `outboxPending` count
 
 ## Domain module layout
@@ -109,7 +107,7 @@ Not required for current single Railway deployment.
 
 ## Events (outbox)
 
-Side effects (email, ops alerts) go through `domain/notification/outbox/` — never send mail directly from routes.
+Side effects (email) go through `domain/notification/outbox/` — never send mail directly from routes.
 
 Event names use dot notation: `email.order.confirmation`, `support.ticket.created`.
 

@@ -24,5 +24,4 @@ docs/
 scripts/*
 !scripts/check-imports.mjs
 !scripts/seed-owner.ts
-!scripts/load-test/
-!scripts/load-test/**
+!scripts/tsconfig.json

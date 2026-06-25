@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockSendSellerApprovedEmail = vi.fn();
 const mockSendSellerRejectedEmail = vi.fn();
 const mockSendOrderConfirmationEmail = vi.fn();
-const mockSendOpsAlertEmail = vi.fn();
 const mockClaimPendingOutboxEvent = vi.fn();
 const mockMarkOutboxEventProcessed = vi.fn();
 const mockMarkOutboxEventFailed = vi.fn();
@@ -15,10 +14,6 @@ vi.mock('@/domain/auth/admin/mail/send-seller-notifications', () => ({
 
 vi.mock('@/domain/orders/mail/send-order-confirmation', () => ({
   sendOrderConfirmationEmail: (...args: unknown[]) => mockSendOrderConfirmationEmail(...args),
-}));
-
-vi.mock('@/domain/notification/outbox/send-ops-alert-email', () => ({
-  sendOpsAlertEmail: (...args: unknown[]) => mockSendOpsAlertEmail(...args),
 }));
 
 vi.mock('@/repositories/common/outbox-event.repository', () => ({
@@ -36,12 +31,11 @@ describe('processPendingOutboxEvents', () => {
     mockSendSellerApprovedEmail.mockResolvedValue(undefined);
     mockSendSellerRejectedEmail.mockResolvedValue(undefined);
     mockSendOrderConfirmationEmail.mockResolvedValue(undefined);
-    mockSendOpsAlertEmail.mockResolvedValue(undefined);
     mockMarkOutboxEventProcessed.mockResolvedValue(undefined);
     mockMarkOutboxEventFailed.mockResolvedValue(undefined);
   });
 
-  it('ops payment side effects failed eventinde alert e-postası gönderir', async () => {
+  it('ops payment side effects failed eventini işlenmiş olarak işaretler', async () => {
     mockClaimPendingOutboxEvent
       .mockResolvedValueOnce({
         _id: 'evt-1',
@@ -54,10 +48,6 @@ describe('processPendingOutboxEvents', () => {
     const count = await processPendingOutboxEvents();
 
     expect(count).toBe(1);
-    expect(mockSendOpsAlertEmail).toHaveBeenCalledWith(
-      OUTBOX_EVENT_TYPES.OPS_PAYMENT_SIDE_EFFECTS_FAILED,
-      expect.objectContaining({ orderId: 'order-1' })
-    );
     expect(mockMarkOutboxEventProcessed).toHaveBeenCalledWith('evt-1');
   });
 
