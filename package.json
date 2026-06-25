@@ -17,19 +17,11 @@
     "check:imports": "node scripts/check-imports.mjs",
     "seed:owner": "ts-node --project tsconfig.scripts.json -r tsconfig-paths/register scripts/seed-owner.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ARK322/e-commerce-be.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "packageManager": "npm@11.12.1",
-  "bugs": {
-    "url": "https://github.com/ARK322/e-commerce-be/issues"
-  },
-  "homepage": "https://github.com/ARK322/e-commerce-be#readme",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@fastify/formbody": "^8.0.2",

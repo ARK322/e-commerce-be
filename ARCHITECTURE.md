@@ -115,7 +115,9 @@ Event names use dot notation: `email.order.confirmation`, `support.ticket.create
 
 ## Tests
 
-- Unit tests for `domain/` logic
-- Integration tests for `features/` routes (HTTP inject)
-- E2E for full flows
-- Run `npm run check:imports` to enforce layer import boundaries
+CI pipeline yok — Railway deploy test koşmaz. Lokal:
+
+- `npm test` — unit + integration (mock, hızlı)
+- `npm run test:e2e` — gerçek MongoDB (`E2E_MONGO_URI` veya `MONGO_URI`; yoksa skip)
+- `npm run check:imports` — katman import sınırları
+- `npm run typecheck` — TypeScript
